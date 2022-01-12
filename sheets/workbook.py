@@ -1,75 +1,6 @@
-#==============================================================================
-# Caltech CS130 - Winter 2022
-#
-# This file specifies the API that we expect your implementation to conform to.
-# You will likely want to move these classes into various files, but the tests
-# will expect these to be available when the "sheets" module is imported.
-
-# If you are unfamiliar with Python 3 type annotations, see the Python standard
-# library documentation for the typing module here:
-#
-#     https://docs.python.org/3/library/typing.html
-
-
-class CellErrorType(enum.Enum):
-    '''
-    This enum specifies the kinds of errors that spreadsheet cells can hold.
-    '''
-
-    # A formula doesn't parse successfully ("#ERROR!")
-    PARSE_ERROR = 1
-
-    # A cell is part of a circular reference ("#CIRCREF!")
-    CIRCULAR_REFERENCE = 2
-
-    # A cell-reference is invalid in some way ("#REF!")
-    BAD_REFERENCE = 3
-
-    # Unrecognized function name ("#NAME?")
-    BAD_NAME = 4
-
-    # A value of the wrong type was encountered during evaluation ("#VALUE!")
-    TYPE_ERROR = 5
-
-    # A divide-by-zero was encountered during evaluation ("#DIV/0!")
-    DIVIDE_BY_ZERO = 6
-
-
-class CellError:
-    '''
-    This class represents an error value from user input, cell parsing, or
-    evaluation.
-    '''
-
-    def __init__(self, error_type: CellErrorType, detail: str,
-                 exception: Optional[Exception] = None):
-        self._error_type = error_type
-        self._detail = detail
-        self._exception = exception
-
-    def get_type(self) -> CellErrorType:
-        ''' The category of the cell error. '''
-        return self._error_type
-
-    def get_detail(self) -> str:
-        ''' More detail about the cell error. '''
-        return self._detail
-
-    def get_exception(self) -> Optional[Exception]:
-        '''
-        If the cell error was generated from a raised exception, this is the
-        exception that was raised.  Otherwise this will be None.
-        '''
-        return self._exception
-
-    def __str__(self) -> str:
-        return f'ERROR[{self._error_type}, "{self._detail}"]'
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
-
+from .sheet import Sheet
 class Workbook:
+
     # A workbook containing zero or more named spreadsheets.
     #
     # Any and all operations on a workbook that may affect calculated cell
@@ -77,13 +8,16 @@ class Workbook:
 
     def __init__(self):
         # Initialize a new empty workbook.
-        pass
+        self.sheets = []
+        self.num_sheets = 0
+        
 
     def num_sheets(self) -> int:
         # Return the number of spreadsheets in the workbook.
-        pass
+        return self.num_sheets
+       
 
-    def list_sheets(self) -> List[str]:
+    def list_sheets(self): # list
         # Return a list of the spreadsheet names in the workbook, with the
         # capitalization specified at creation, and in the order that the sheets
         # appear within the workbook.
@@ -95,9 +29,12 @@ class Workbook:
         #
         # A user should be able to mutate the return-value without affecting the
         # workbook's internal state.
-        pass
+        # name_list = []
 
-    def new_sheet(self, sheet_name: Optional[str] = None) -> Tuple[int, str]:
+        # for i in 
+         pass
+
+    def new_sheet(self, sheet_name: str = None):
         # Add a new sheet to the workbook.  If the sheet name is specified, it
         # must be unique.  If the sheet name is None, a unique sheet name is
         # generated.  "Uniqueness" is determined in a case-insensitive manner,
@@ -109,18 +46,37 @@ class Workbook:
         #
         # If the spreadsheet name is an empty string (not None), or it is
         # otherwise invalid, a ValueError is raised.
-        pass
 
-    def del_sheet(self, sheet_name: str) -> None:
+
+        new_sheet = Sheet(sheet_name, self)
+        self.num_sheets += 1 #what if we have 5 and delete the third one, we are 
+        self.sheets.append(new_sheet)
+
+        return (self.num_sheets, sheet_name)
+
+        # TODO value error thing?
+        
+
+    def del_sheet(self, sheet_name: str):
         # Delete the spreadsheet with the specified name.
         #
         # The sheet name match is case-insensitive; the text must match but the
         # case does not have to.
         #
         # If the specified sheet name is not found, a KeyError is raised.
+        self.num_sheets -= 1
+
+        for i in self.sheets:
+            #remove the sheet with sheet_name
+            if i.sheet_name == sheet_name:
+                self.sheet.pop(i)
+                break
+       
+
+        # TODO shift all the indexes over ( do we need to do this if we have already deleted the sheet??)
         pass
 
-    def get_sheet_extent(self, sheet_name: str) -> Tuple[int, int]:
+    def get_sheet_extent(self, sheet_name: str):
         # Return a tuple (num-cols, num-rows) indicating the current extent of
         # the specified spreadsheet.
         #
@@ -131,7 +87,7 @@ class Workbook:
         pass
 
     def set_cell_contents(self, sheet_name: str, location: str,
-                          contents: Optional[str]) -> None:
+                          contents: 'None'):
         # Set the contents of the specified cell on the specified sheet.
         #
         # The sheet name match is case-insensitive; the text must match but the
@@ -152,9 +108,16 @@ class Workbook:
         # invalid for some reason, this method does not raise an exception;
         # rather, the cell's value will be a CellError object indicating the
         # naure of the issue.
-        pass
 
-    def get_cell_contents(self, sheet_name: str, location: str) -> Optional[str]:
+        for i in self.sheets:
+            #edit cell content of specified sheet
+            if i.sheet_name == sheet_name:
+                i.set_cell_contents(location, contents)
+                break
+        
+        
+
+    def get_cell_contents(self, sheet_name: str, location: str):
         # Return the contents of the specified cell on the specified sheet.
         #
         # The sheet name match is case-insensitive; the text must match but the
@@ -170,9 +133,14 @@ class Workbook:
         #
         # This method will never return a zero-length string; instead, empty
         # cells are indicated by a value of None.
-        pass
 
-    def get_cell_value(self, sheet_name: str, location: str) -> Any:
+        for i in self.sheets:
+            if i.sheet_name == sheet_name:
+                return i.get_cell_contents(location)
+            
+      
+
+    def get_cell_value(self, sheet_name: str, location: str):
         # Return the evaluated value of the specified cell on the specified
         # sheet.
         #

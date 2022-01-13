@@ -1,3 +1,5 @@
+from .cell import Cell
+
 # Object class for individual spreadsheet
 class Sheet:
     # Sheet object constructor taking in name and workbook
@@ -36,16 +38,23 @@ class Sheet:
 
         return row, col
 
-    def set_cell_contents(self, location, value):
-
+    def set_cell_contents(self, location, contents):
+        
+        # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location)
         
+        # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row
         if(col > self.extent[1]):
             self.extent[1] = col
-            
-        self.cells[(row,col)] = value
+        
+        if not self.cells.has_key((row,col)):
+            self.cells[(row,col)] = Cell(contents, self)
+        else:
+            self.cells[(row,col)].contents = contents
+
+        # self.cells[(row,col)] = contents
 
     def get_cell_contents(self, location):
 

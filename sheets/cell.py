@@ -1,7 +1,7 @@
 # Object class for individual cell
 
 import lark
-from cell_error import CellErrorType, CellError
+from .cell_error import CellErrorType, CellError
 
 class Cell:
     def __init__ (self, contents, curr_sheet):
@@ -9,9 +9,8 @@ class Cell:
         # self.contents = contents
 
         if contents[0] == '=':
+            ''' this is probably not useful
             #check to make sure no obvious errors
-            
-
             
             # if an error is encountered
             if contents.find('/0'):
@@ -19,8 +18,10 @@ class Cell:
                 self.value = error
                 
             else:
-                self.type = "FORMULA"
-                self.value = self.get_value_from_contents(contents)
+            '''
+
+            self.type = "FORMULA"
+            self.value = self.get_value_from_contents(contents)
 
         elif contents[0] == "'":
             self.type = "STRING"
@@ -31,11 +32,12 @@ class Cell:
 
 
     def get_value_from_contents(self, contents): # assume that contents is '=a1'  '=aa234 + 4 - b1'
-        
-        
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         formula = parser.parse(contents).pretty()
 
+        return 0 # temporary
+
+        ''' old code for formula evaluation
         #Parsing formula and pushing operations onto stack inside out
         stack = []
         for i in formula.splitlines(): 
@@ -58,6 +60,13 @@ class Cell:
                 pass
             elif i == 'string':
                 pass
+            elif i == 'parens':
+                pass
+            elif i == 'unary_op':
+                pass
+            
+            # TODO binary operators
+
             else:
                 print('houston, we have a problem')
                 pass
@@ -67,15 +76,15 @@ class Cell:
             pass
                 
 
-# add_expr
-#   cell  A1
-#   +
-#   mul_expr
-#     number      3
-#     *
-#     cell
-#       test
-#       A2
+        # add_expr
+        #   cell  A1
+        #   +
+        #   mul_expr
+        #     number      3
+        #     *
+        #     cell
+        #       test
+        #       A2
 
 
         for i in contents:
@@ -96,3 +105,4 @@ class Cell:
         
 
         # balances!a3
+        '''

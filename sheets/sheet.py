@@ -3,14 +3,8 @@ from .cell import Cell
 # Object class for individual spreadsheet
 class Sheet:
     # Sheet object constructor taking in name and workbook
-    def __init__(self, sheet_name, curr_workbook):
-        # print(curr_workbook.num_sheets())
-        # auto_name = "Sheet" + str(curr_workbook.num_sheets()) # TODO optimize it so that it chooses the smallest number
-        auto_name = "somthing"
-        if sheet_name == "None":
-            self.sheet_name = auto_name
-        else:
-            self.sheet_name = sheet_name
+    def __init__(self, sheet_name, curr_workbook):         
+        self.sheet_name = sheet_name
         self.extent = [0,0]
         self.cells = {}
     

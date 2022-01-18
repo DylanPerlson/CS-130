@@ -25,12 +25,28 @@ class Cell:
     def get_value_from_contents(self, contents):
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 
+        # trying to parse
         try:
             formula = parser.parse(contents)
         except:
-            print('error') # TODO error
+            print('parse error') # TODO PARSE_ERROR
             exit()
 
-        evaluation = EvalExpressions().transform(formula)
-        
+        # trying to evaluate
+        try: 
+            evaluation = EvalExpressions().transform(formula)
+        except lark.exceptions.VisitError as e:
+
+            if isinstance(e.__context__, ZeroDivisionError):
+                print('zero error') # TODO DIVIDE_BY_ZERO 
+                exit()
+
+            elif isinstance(e.__context__, NameError):
+                print('type error') # TODO TYPE_ERROR 
+                exit()
+
+            else:
+                print('other error')
+                exit()
+
         return evaluation

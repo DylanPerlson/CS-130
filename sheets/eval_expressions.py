@@ -2,6 +2,7 @@
 
 import lark
 from lark import Transformer
+# from exceptions import VisitError
 
 # used to evaluate an expression from the parsed formula
 class EvalExpressions(Transformer):
@@ -43,12 +44,16 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                pass # TODO error
+                pass # TODO BAD_REFERENCE
             cell = args[1]
         else:
-            pass # TODO error
+            pass # TODO BAD_REFERENCE
 
-        cell_value = 1 # TODO get_cell_value(sheet_name, cell) here
+        try:
+            cell_value = 1 # TODO get_cell_value(sheet_name, cell) here
+        except:
+            # TODO BAD_REFERENCE 
+            exit()
 
         if cell_value == 'None':
             cell_value = 0 # TODO "" for string
@@ -56,10 +61,14 @@ class EvalExpressions(Transformer):
         return cell_value
 
 """ 
-import os; clear = lambda: os.system('cls'); clear() # clear the command window
+# import os; clear = lambda: os.system('cls'); clear() # clear the command window
 
 # testing options
-contents = "=5+4*(6+5)/5*-1-4"
+# contents = "=5++4*(6+5)/5*-1-4"
+# contents = '="hello" & 5 + "test"'
+# contents = '=5 & 3'
+contents = '=3/0'
+# contents = '=3 * "abc"'
 # contents = '="hello" & "world" & "test" & 6 & 4+3'
 # contents = '="test"'
 # contents = "='test_ 9'!aa33+3"
@@ -73,12 +82,21 @@ parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 try:
     formula = parser.parse(contents)
 except:
-    print('error') # TODO error
+    print('parse error') # TODO PARSE_ERROR 
     exit()
 
-evaluation = EvalExpressions().transform( formula )
+try: 
+    evaluation = EvalExpressions().transform( formula )
+except lark.exceptions.VisitError as e:
+    if isinstance(e.__context__, ZeroDivisionError):
+        print('zero error') # TODO DIVIDE_BY_ZERO 
+    elif isinstance(e.__context__, NameError):
+        # print(e)
+        print('name error')
+    else:
+        print('other error')
 
-print(formula.pretty())
-print('evaluation should be:\t', eval(contents[1:]))
-print('evaluation gives:\t', evaluation)
-"""
+# print(formula.pretty())
+# print('evaluation should be:\t', eval(contents[1:]))
+# print('evaluation gives:\t', evaluation)
+ """

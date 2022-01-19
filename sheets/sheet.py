@@ -13,6 +13,7 @@ class Sheet:
             self.sheet_name = sheet_name
         self.extent = [0,0]
         self.cells = {}
+        self.parent_workbook = curr_workbook
     
     #Helper function to get absolute row/col of inputted location
     def get_row_and_col(self,location):

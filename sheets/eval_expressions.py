@@ -2,6 +2,8 @@
 
 import lark
 from lark import Transformer
+from sheets.cell import Cell
+from sheets.cell_error import CellError, CellErrorType
 # from exceptions import VisitError
 
 # used to evaluate an expression from the parsed formula
@@ -44,14 +46,17 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
+                bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
                 pass # TODO BAD_REFERENCE
             cell = args[1]
         else:
+            bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             pass # TODO BAD_REFERENCE
 
         try:
             cell_value = 1 # TODO get_cell_value(sheet_name, cell) here
         except:
+            bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             # TODO BAD_REFERENCE 
             exit()
 

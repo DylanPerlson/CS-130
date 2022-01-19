@@ -15,8 +15,9 @@ class Sheet:
         self.parent_workbook = curr_workbook
     
      # function to add an edge to graph
+     # Need to call this if formula is updated to reference another cell
     def add_cell_dependency(self,u,v):
-        self.cells[u].append(v)
+        (self.cells[u]).append(v)
 
     # A function used by DFS
     def DFSUtil(self,v,visited):
@@ -33,9 +34,9 @@ class Sheet:
         # Mark the current node as visited 
         visited[v]= True
         #Recur for all the vertices adjacent to this vertex
-        for i in self.graph[v]:
+        for i in self.cell_graph[v]:
             if visited[i]==False:
-                self.fillOrder(i, visited, stack)
+                self.fill_order(i, visited, stack)
         stack = stack.append(v)
     
     # Function that returns reverse (or transpose) of this graph
@@ -56,14 +57,13 @@ class Sheet:
         stack = []
         # Mark all the vertices as not visited (For first DFS)
         visited =[False] * (self.num_cells)
-        # Fill vertices in stack according to their finishing
-        # times
+        # Fill vertices in stack according to their finishing times
         for i in range(self.cells):
             if visited[i]==False:
-                self.fillOrder(i, visited, stack)
+                self.fill_order(i, visited, stack)
 
         # Create a reversed graph
-        gr = self.getTranspose()
+        gr = self.get_transpose()
          
         # Mark all the vertices as not visited (For second DFS)
         visited = [False] * (self.num_cells)
@@ -120,7 +120,6 @@ class Sheet:
         self.printSCCs()
 
     def get_cell_contents(self, location):
-
         row, col = self.get_row_and_col(location)
         return self.cells[(row,col)].get_cell_contents() # TODO has this function been made?
 

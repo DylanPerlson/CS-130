@@ -3,14 +3,8 @@ from .cell import Cell
 # Object class for individual spreadsheet
 class Sheet:
     # Sheet object constructor taking in name and workbook
-    def __init__(self, sheet_name, curr_workbook):
-        # print(curr_workbook.num_sheets())
-        # auto_name = "Sheet" + str(curr_workbook.num_sheets()) # TODO optimize it so that it chooses the smallest number
-        auto_name = "somthing"
-        if sheet_name == "None":
-            self.sheet_name = auto_name
-        else:
-            self.sheet_name = sheet_name
+    def __init__(self, sheet_name, curr_workbook):         
+        self.sheet_name = sheet_name
         self.extent = [0,0]
         self.cells = {}
     
@@ -41,7 +35,7 @@ class Sheet:
     def set_cell_contents(self, location, contents):
         
         # extract the row and col numbers from the letter-number location
-        row, col = self.get_row_and_col(location)
+        row, col = self.get_row_and_col(location) # TODO is this correct?
         
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
@@ -54,12 +48,18 @@ class Sheet:
         else:
             self.cells[(row,col)].contents = contents
 
-        # self.cells[(row,col)] = contents
+        # TODO has incorrect locations etc. been taken care of? I think it has been
 
     def get_cell_contents(self, location):
 
         row, col = self.get_row_and_col(location)
-        return self.cells[(row,col)]
+        return self.cells[(row,col)].get_cell_contents() # TODO has this function been made?
+
+    def get_cell_value(self, location):
+    
+        row, col = self.get_row_and_col(location)
+        return self.cells[(row,col)].get_cell_value() # TODO has this function been made?
+
 
 
    

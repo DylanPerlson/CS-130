@@ -1,25 +1,28 @@
 # Object class for individual cell
 
 import lark
-from eval_expressions import EvalExpressions
+from .eval_expressions import EvalExpressions
 from .cell_error import CellErrorType, CellError
 
 class Cell:
     def __init__ (self, contents, curr_sheet):
         # Determine Cell Type
-        # self.contents = contents
+        self.contents = contents
 
         if contents[0] == '=':
             self.type = "FORMULA"
-            self.value = self.get_value_from_contents(contents)
+            self.value = self.get_value_from_contents(contents) # TODO curr_sheet needed
 
         elif contents[0] == "'":
             self.type = "STRING"
-            #self.value = str(contents)
+            self.value = str(contents)
 
-        else:
+        elif (contents[0]).isdigit():
             self.type = "LITERAL"
-            #self.value = contents
+            self.value = contents
+        else:
+            self.type = "NONE"
+            self.value = None
 
 
     def get_value_from_contents(self, contents):
@@ -29,8 +32,8 @@ class Cell:
         try:
             formula = parser.parse(contents)
         except:
-            print('parse error') # TODO PARSE_ERROR
-            exit()
+            return CellError(CellErrorType.PARSE_ERROR,'#ERROR!','Parse Error')
+            
 
         # trying to evaluate
         try: 

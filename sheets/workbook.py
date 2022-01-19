@@ -1,4 +1,5 @@
 import this
+import decimal # TODO do we need these
 
 from sheets.cell_error import CellError
 from .sheet import Sheet
@@ -53,20 +54,25 @@ class Workbook:
         # If the spreadsheet name is an empty string (not None), or it is
         # otherwise invalid, a ValueError is raised.
 
+        name_given = False
         #check for invalid strings
+       
         if (sheet_name == ""): 
-            raise ValueError
-        # TODO any other invalid strings?
-        #cannot already be taken
-        for i in self.sheets:
-            if i.sheet_name.lower() == sheet_name.lower():
-                raise ValueError
+            raise ValueError       
         #if no name given
-        if sheet_name == 'None':
+        if sheet_name == None:
+            
+            name_given = True
             auto_name = self.create_name()
             new_sheet = Sheet(auto_name, self)
-        else:
-            new_sheet = Sheet(sheet_name, self)
+        # TODO any other invalid strings?
+        #cannot already be taken
+        if name_given == False:
+            for i in self.sheets:
+                if i.sheet_name.lower() == sheet_name.lower():
+                    raise ValueError
+            else:
+                new_sheet = Sheet(sheet_name, self)
 
         self.num_sheets += 1 
         self.sheets.append(new_sheet)
@@ -142,14 +148,14 @@ class Workbook:
         for i in self.sheets:
             #edit cell content of specified sheet
             if i.sheet_name.lower() == sheet_name.lower():
-                
                 self.check_valid_cell(location)
-        
                 #if want to set cell contents to empty
-                if contents.strip() == 'None' or contents.strip() == '':
-                    i.set_cell_contents(location, 'None')
+                if contents == None or contents.strip() == '':
+                    i.set_cell_contents(location, None)
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
+                #completed task
+                return
                
         #no sheet found
         raise KeyError
@@ -215,6 +221,7 @@ class Workbook:
         #Check if the cell location is valid              
         if not location.isalnum():
             raise CellError
+            
 
         digits = False
         for c in location:

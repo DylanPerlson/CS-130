@@ -1,6 +1,6 @@
 # object class for evaluating expressions
 
-import lark
+
 from lark import Transformer
 # from exceptions import VisitError
 

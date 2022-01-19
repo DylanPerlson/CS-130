@@ -10,26 +10,19 @@ class Sheet:
     
     #Helper function to get absolute row/col of inputted location
     def get_row_and_col(self,location):
-        print(location)
+        
         for e,i in enumerate(location):
-            # print(i)
             if i.isdigit():
-                row = location[:e]
-                
-                #convert column letters to its column number
+                row = location[:e]          
+                #convert row letters to its row number
                 temp = 0
-                for j in range(1, len(row)):
-                    print(j   )
-                    temp += (ord(row[-j].lower()) - 96)#**j
-                    print(temp)
+                for j in range(1, len(row)+1):                            
+                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+                   
                 row = temp
-
-                col = int(location[e:])
-                print(row)
-                print(col)
+                col = int(location[e:])                
                 break
                 
-
         return row, col
 
     def set_cell_contents(self, location, contents):
@@ -43,7 +36,7 @@ class Sheet:
         if(col > self.extent[1]):
             self.extent[1] = col
         
-        if not self.cells.has_key((row,col)):
+        if not (row,col) in self.cells.keys():
             self.cells[(row,col)] = Cell(contents, self)
         else:
             self.cells[(row,col)].contents = contents
@@ -53,12 +46,11 @@ class Sheet:
     def get_cell_contents(self, location):
 
         row, col = self.get_row_and_col(location)
-        return self.cells[(row,col)].get_cell_contents() # TODO has this function been made?
+        return self.cells[(row,col)].contents 
 
     def get_cell_value(self, location):
-    
         row, col = self.get_row_and_col(location)
-        return self.cells[(row,col)].get_cell_value() # TODO has this function been made?
+        return self.cells[(row,col)].value # TODO has this function been made?
 
 
 

@@ -2,7 +2,6 @@
 
 from asyncio.windows_events import NULL
 from collections import defaultdict
-from importlib.resources import contents
 import lark
 from .sheet import Sheet
 from cell_error import CellErrorType, CellError
@@ -20,10 +19,9 @@ class Cell:
             self.type = "STRING"
             self.value = str(contents)
         else:
-            self.type = "LITERAL"
-            self.value = contents
+            self.type = None
+            self.value = None
         self.parent_sheet = curr_sheet
-        self.connected_cell_graph = defaultdict(list)
     
     def check_errors(self):
         #Check for Parse Error

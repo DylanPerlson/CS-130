@@ -1,7 +1,7 @@
 # object class for evaluating expressions
 
+import lark
 from lark import Transformer, Visitor
-
 
 class RetrieveReferences(Visitor):
     def __init__(self):
@@ -71,7 +71,7 @@ class EvalExpressions(Transformer):
             cell = args[0]
         elif len(args) == 2:    # if using a different sheet
             # in case of quotes around sheet name
-            if args[0][0] == "'" and args[0][-1] == "'":
+            if args[0][0] == "'" and args[0][-1] == "'": # TODO fix this
                 sheet_name = args[0][1:-1]
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]

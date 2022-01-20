@@ -32,11 +32,9 @@ class Cell():
 
         #digit case
         if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
-            print('Just a literal')
             return self.contents
         #string case
         elif self.contents[0] == "'":
-            print('This is a string')
             return self.contents[1:]
         # trying to parse
         try:

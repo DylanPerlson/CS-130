@@ -1,6 +1,7 @@
 # object class for evaluating expressions
 
 from ast import arg
+import decimal
 import lark
 from lark import Transformer, Visitor
 from .cell_error import CellError, CellErrorType
@@ -93,19 +94,15 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-                pass # TODO BAD_REFERENCE
+                return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
             cell = args[1]
         else:
-            cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-            pass # TODO BAD_REFERENCE
+            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
         except:
-            cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-            # TODO BAD_REFERENCE 
-            exit()
+            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
 
         #if cell_value == None:
         #    cell_value = 0 # TODO "" for string

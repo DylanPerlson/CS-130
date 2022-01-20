@@ -31,7 +31,7 @@ class Sheet:
     def set_cell_contents(self, location, contents):
         
         # extract the row and col numbers from the letter-number location
-        row, col = self.get_row_and_col(location) # TODO is this correct?
+        row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError
         
@@ -42,11 +42,9 @@ class Sheet:
             self.extent[1] = col
         
         if not (row,col) in self.cells.keys():
-            self.cells[(row,col)] = Cell(contents)# TODO why are we sending in self to CELL?
+            self.cells[(row,col)] = Cell(contents)
         else:
             self.cells[(row,col)].contents = contents
-
-        # TODO has incorrect locations etc. been taken care of? I think it has been
 
     def get_cell_contents(self, location):
 
@@ -57,7 +55,7 @@ class Sheet:
         row, col = self.get_row_and_col(location)
         sheet_instance = self
         return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
-        # TODO has this function been made?
+        
 
 
 

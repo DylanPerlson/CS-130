@@ -36,7 +36,6 @@ class Cell():
             return self.contents[1:]
         # trying to parse
         try:
-            
             formula = parser.parse(self.contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR,'#ERROR!','Parse Error')

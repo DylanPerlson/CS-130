@@ -1,7 +1,7 @@
 # object class for evaluating expressions
 
+import lark
 from lark import Transformer, Visitor
-
 
 class RetrieveReferences(Visitor):
     def __init__(self):

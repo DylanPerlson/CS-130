@@ -5,6 +5,15 @@ from sheets.cell_error import CellError, CellErrorType
 import unittest
 
 class TestWorkbook(unittest.TestCase):
+
+    def test_empty_cells(self):
+        wb = sheets.Workbook()
+        (_, name) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name,'B4','=A2+3')
+        self.assertEqual(wb.get_cell_value(name,'B4'),3)
+        wb.set_cell_contents(name,'B7','=A6&"hi"')
+        self.assertEqual(wb.get_cell_value(name,'B7'),'hi')
+
     def test_naming_sheets_and_workbooks(self):
         wb1 = sheets.Workbook()
         wb2 = sheets.Workbook()
@@ -155,11 +164,13 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name, 'AA20', 'something')
         self.assertEqual((27,20),wb.get_sheet_extent(name))
         # TODO add update to extent if cells are cleared
+        # TODO add tets on when input into a cell is over bounds > ZZZZ
         
 
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
         
+   
 
     def delete_sheets(self):
         wb = sheets.Workbook()
@@ -194,4 +205,4 @@ class TestWorkbook(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=3)
+    unittest.main(verbosity=0)

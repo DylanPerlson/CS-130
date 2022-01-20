@@ -4,6 +4,7 @@ from collections import defaultdict
 import lark
 from .eval_expressions import EvalExpressions
 from .cell_error import CellErrorType, CellError
+from decimal import *
 
 class Cell():
     def __init__ (self, contents):

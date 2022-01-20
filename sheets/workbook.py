@@ -10,6 +10,7 @@ class Workbook:
     # Any and all operations on a workbook that may affect calculated cell
     # values should cause the workbook's contents to be updated properly.
 
+    #decimal, error code
     def __init__(self):
         # Initialize a new empty workbook.
         self.sheets = []

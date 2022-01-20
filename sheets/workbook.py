@@ -75,7 +75,7 @@ class Workbook:
                 if i.sheet_name.lower() == sheet_name.lower():
                     raise ValueError
             else:
-                new_sheet = Sheet(sheet_name, self)
+                new_sheet = Sheet(sheet_name)
 
         self.num_sheets += 1 
         self.sheets.append(new_sheet)
@@ -150,11 +150,16 @@ class Workbook:
 
         for i in self.sheets:
             #edit cell content of specified sheet
+            if (i.sheet_name == None):
+                continue
+      
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 #if want to set cell contents to empty
-                if contents == None or contents.strip() == '':
+                if contents == None or (not str(contents).isdigit() and contents.strip() == ''):
                     i.set_cell_contents(location, None)
+                elif str(contents).isdigit():
+                    i.set_cell_contents(location, contents)
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
                 #completed task
@@ -213,7 +218,8 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_value(location) # TODO make sure get value is correct
+                workbook_instance = self
+                return i.get_cell_value(workbook_instance,location) # TODO make sure get value is correct
             
         raise KeyError
 

@@ -10,37 +10,43 @@ test_workbook.new_sheet('FirstSheet') # the name is FirstSheet
 '''
 
 ############### CODE FROM THE ASSIGNMENT: ###############
-print(f'Using sheets engine version 1.0')
+
 import sheets
 
-print('ssssssssssssssssssssssssssss')
-
-# Should print the version number of your sheets library,
-# which should be 1.0 for the first project.
-#print(f'Using sheets engine version 1.0')
-
+print(f'Using sheets engine version 1.0')
 # Make a new empty workbook
 wb = sheets.Workbook()
+
+# TODO why is empty new sheet not working???????
 (index, name) = wb.new_sheet("test")
-sheet = []
-(id2,name2) = wb.new_sheet()
-# sheet name testing
-
-# Should print:  New spreadsheet "Sheet1" at index 0
-print(f'New spreadsheet "{name}" at index {index}')
-
-wb.set_cell_contents(name, 'AA57', '12')
-wb.set_cell_contents("Sheet0", 'AA57', '10' )
+(id2,name2) = wb.new_sheet("ABC")
 
 
-# wb.set_cell_contents(name, 'b1', '34')
-# wb.set_cell_contents(name, 'c1', '=a1+b1')
+
+\
+
+i,n = wb.new_sheet()
+print(n)
+
+
+
+
+
+
+
+
+print('setting val')
+wb.set_cell_contents(name, 'A1',10 )
+#print(list(wb.sheets[1].cells.values())[0].value)
+print("A1 val:",wb.get_cell_value(name, 'A1'))
+print("A2 val:",wb.get_cell_value(name, 'A2'))
+wb.set_cell_contents(name, 'A3',"=A2+A1" )
+
 
 # value should be a decimal.Decimal('46')
-value = wb.get_cell_contents("test", 'AA57')
-value2 = wb.get_cell_value("Sheet0", 'AA57')
-print("should be 12:", value)
-print("should be 10:", value2)
-wb.get_sheet_extent(name)
+val = wb.get_cell_value(name, 'A3')
+cont = wb.get_cell_contents(name, 'A3')
+print("value:", val)
+print("contents:", cont)
 
 print('extent:',wb.get_sheet_extent(name))

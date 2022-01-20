@@ -1,5 +1,6 @@
 # Object class for individual cell
-
+from asyncio.windows_events import NULL
+from collections import defaultdict
 import lark
 import decimal
 from .eval_expressions import EvalExpressions
@@ -46,7 +47,7 @@ class Cell():
         try:
             formula = parser.parse(self.contents)
         except:
-            return CellError(CellErrorType.PARSE_ERROR,'#ERROR!','Parse Error')
+            return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
         # print(formula.pretty())
         # trying to evaluate
@@ -54,17 +55,26 @@ class Cell():
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
             # print('\n\n',type(evaluation))
         except lark.exceptions.VisitError as e:
-
             if isinstance(e.__context__, ZeroDivisionError):
-                print('zero error') # TODO DIVIDE_BY_ZERO 
+                # Value you set is the cell error OBJECT
+                # String is what the user sees/inputs 
+                # if get_cell_value evaluates to error, return value will be cell error object
+                # Can manually set cell error via #DIV/0! and so on
+                # set cell contents should only take strings
+                evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
+                # return the above error
+                # evaluation = '#DIV/0!'
+                #print('zero error') # TODO DIVIDE_BY_ZERO 
                 exit()
 
             elif isinstance(e.__context__, NameError):
-                print('type error') # TODO TYPE_ERROR 
+                evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
+                #print('type error') # TODO TYPE_ERROR 
                 exit()
 
             else:
-                print('other error')
+                evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+                #print('other error')
                 exit()
         
         # if isinstance(evaluation,decimal.Decimal):

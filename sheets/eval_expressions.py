@@ -1,8 +1,11 @@
 # object class for evaluating expressions
 
+from ast import arg
+import decimal
 import lark
 import decimal
 from lark import Transformer, Visitor
+from .cell_error import CellError, CellErrorType
 
 class RetrieveReferences(Visitor):
     def __init__(self):
@@ -22,14 +25,17 @@ class RetrieveReferences(Visitor):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
+                cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
                 print('error1') # TODO BAD_REFERENCE
             cell = args[1].value
         else:
+            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             print('error2') # TODO BAD_REFERENCE
 
         try:
-            cell_value = 1 # TODO get_cell_value(sheet_name, cell) here
+            cell = 1 # TODO get_cell_value(sheet_name, cell) here
         except:
+            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             # TODO BAD_REFERENCE 
             exit()
 
@@ -42,7 +48,6 @@ class EvalExpressions(Transformer):
     def __init__(self, workbook_instance, sheet_instance):
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
-
 
     def number(self, args):
         return decimal.Decimal(args[0])
@@ -84,12 +89,16 @@ class EvalExpressions(Transformer):
         # return decimal.Decimal(args[0])
 
     def mul_expr(self, args):
+        if args[1] == '/' and str(args[2]) == '0':
+            return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
         if args[1] == '*':
             return decimal.Decimal(decimal.Decimal(args[0])*decimal.Decimal(args[2]))
         elif args[1] == '/':
             return decimal.Decimal(decimal.Decimal(args[0])/decimal.Decimal(args[2]))
         else:
             raise Exception
+        t = str(args[0])+args[1]+str(args[2])
+        return eval(t)
         # t = str(args[0])+args[1]+str(args[2])
 
         # return eval(t)
@@ -115,16 +124,15 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                pass # TODO BAD_REFERENCE
+                return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
             cell = args[1]
         else:
-            pass # TODO BAD_REFERENCE
+            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
         except:
-            # TODO BAD_REFERENCE 
-            exit()
+            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
 
         #if cell_value == None:
         #    cell_value = 0 # TODO "" for string

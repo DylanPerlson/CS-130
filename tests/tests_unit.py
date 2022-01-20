@@ -1,5 +1,5 @@
 import os; os.system('cls')
-
+import context
 import sheets
 import unittest
 
@@ -52,15 +52,15 @@ class TestWorkbook(unittest.TestCase):
 
         content = '=12+3-5'
         wb.set_cell_contents(name1, 'AA57', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'aa57'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'aa57'))
 
         content = '=12+3*(4+5)/4'
         wb.set_cell_contents(name1, 'ba43', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'ba43'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'ba43'))
 
         content = '=42*-4*-1'
         wb.set_cell_contents(name1, 'eee3', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'eee3'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
 
 
 

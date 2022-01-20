@@ -246,6 +246,8 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AA58', "'123")
         wb.set_cell_contents(name1, 'AA59', "=aa57+aa58")
 
+        # print(wb.get_cell_value(name1, 'AA57'))
+
         self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
 
     def test_string_concat(self):
@@ -256,6 +258,14 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
 
         self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
+
+
+    # def test_decimal_trailing_zeros(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name1, 'AA57', '12.0')
+
+    #     self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
 
 
 if __name__ == '__main__':

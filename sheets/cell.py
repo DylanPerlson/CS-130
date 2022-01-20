@@ -66,5 +66,12 @@ class Cell():
             else:
                 print('other error')
                 exit()
+        
+        # if isinstance(evaluation,decimal.Decimal):
+        #     print('###')
+        #     print(evaluation)
+            
+        #     evaluation = decimal.Decimal(str(evaluation).strip('0'))
+        #     print(evaluation)
 
         return evaluation

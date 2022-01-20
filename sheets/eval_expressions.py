@@ -65,6 +65,11 @@ class EvalExpressions(Transformer):
     def add_expr(self, args):
         # print(args[0])
         # print('\n\n\n\n\nargs2',args[2])
+        if (args[0] == None):
+            args[0] = 0
+        if (args[2] == None):
+            args[2] = 0
+
         if args[1] == '+':
             return decimal.Decimal(decimal.Decimal(args[0])+decimal.Decimal(args[2]))
         elif args[1] == '-':
@@ -90,6 +95,11 @@ class EvalExpressions(Transformer):
         # return eval(t)
 
     def concat_expr(self, args):
+        if(args[0] == None):
+            args[0] = ''
+        if(args[1] == None):
+            args[1] = ''   
+
         return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
@@ -116,7 +126,7 @@ class EvalExpressions(Transformer):
             # TODO BAD_REFERENCE 
             exit()
 
-        if cell_value == None:
-            cell_value = 0 # TODO "" for string
+        #if cell_value == None:
+        #    cell_value = 0 # TODO "" for string
 
         return cell_value

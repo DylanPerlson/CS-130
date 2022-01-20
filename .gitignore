@@ -1,3 +1,5 @@
 **/*__pycache__
 *.zip
 workspace.code-workspace
+.vscode
+**/*launch.json

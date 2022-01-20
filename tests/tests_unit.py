@@ -247,14 +247,12 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AA59', "=aa57+aa58")
 
         self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
-        # print('/n/n#####################',wb.get_cell_value(name1, 'aa59'))
 
     def test_string_concat(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name1, 'AA57', 'hello')
         wb.set_cell_contents(name1, 'AA58', "' world")
-        # wb.set_cell_contents(name1, 'aa59', "=aa57 & aa58 & '!'")
         wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
 
         self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))

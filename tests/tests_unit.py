@@ -52,11 +52,15 @@ class TestWorkbook(unittest.TestCase):
 
         wb.set_cell_contents(name1, 'AA57', '12')
         wb.set_cell_contents("second_sheet", 'ba4', '=10' )
+        wb.set_cell_contents("second_sheet", 'ba5', "'string" )
 
-        value1 = wb.get_cell_contents("first_sheet", 'AA57')
-        value2 = wb.get_cell_contents(name2, 'ba4')
-        self.assertEqual(value1, '12') # TODO not sure whether this must be a string or decimal.Decimal
-        self.assertEqual(value2, '=10')
+        content1 = wb.get_cell_contents("first_sheet", 'AA57')
+        content2 = wb.get_cell_contents(name2, 'ba4')
+        content3 = wb.get_cell_contents(name2, 'ba5')
+
+        self.assertEqual(content1, '12') # TODO not sure whether this must be a string or decimal.Decimal
+        self.assertEqual(content2, '=10')
+        self.assertEqual(content3, "'string")
 
 
     def test_simple_formula(self):
@@ -86,7 +90,23 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'c4', '=aa57')
         self.assertEqual(5,wb.get_cell_value(name1, 'c4')) # TODO decimal.Decimal """
 
-        # def test_
+
+    def test_extent(self):
+        wb = sheets.Workbook()
+        (_, name) = wb.new_sheet("first_sheet")
+        self.assertEqual((0,0),wb.get_sheet_extent(name))
+        wb.set_cell_contents(name, 'D14', 'something')
+        self.assertEqual((4,14),wb.get_sheet_extent(name))
+        wb.set_cell_contents(name, 'Z3', 'something')
+        self.assertEqual((26,14),wb.get_sheet_extent(name))
+        wb.set_cell_contents(name, 'AA20', 'something')
+        self.assertEqual((27,20),wb.get_sheet_extent(name))
+        # TODO add update to extent if cells are cleared
+        
+
+    # def test_contents_always_string(self):
+
+        
 
 
 

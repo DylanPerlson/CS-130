@@ -62,6 +62,25 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
 
+    def test_leading_trailing_whitespace_cell_contents(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+
+        wb.set_cell_contents(name1, 'AA57', 'Lots of space in the back      ')
+        wb.set_cell_contents(name1, 'ba4', '        =54' )
+        wb.set_cell_contents(name1, 'ba5', "      " )
+        wb.set_cell_contents(name1, 'C23', "")
+
+        content1 = wb.get_cell_contents("first_sheet", 'AA57')
+        content2 = wb.get_cell_contents(name1, 'ba4')
+        content3 = wb.get_cell_contents(name1, 'ba5')
+        content4 = wb.get_cell_contents(name1, 'C23')
+
+        self.assertEqual(content1, 'Lots of space in the back') # TODO not sure whether this must be a string or decimal.Decimal
+        self.assertEqual(content2, '=54')
+        self.assertEqual(content3, None)
+        self.assertEqual(content4, None)
+
     def test_simple_formula(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
@@ -113,14 +132,22 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name, 'AA20', 'something')
         self.assertEqual((27,20),wb.get_sheet_extent(name))
         # TODO add update to extent if cells are cleared
-        
 
-    # def test_contents_always_string(self):
+    def delete_sheets(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        (_, name2) = wb.new_sheet("sheet_to_delete")
+        (_, name3) = wb.new_sheet("third_sheet")
 
-        
+        with self.assertRaises(KeyError):
+            wb.del_sheet("invalid_sheet_name")
 
-
-
+        wb.del_sheet("sheet_to_delete")
+        self.assertEqual(wb.num_sheets, 2)
+        wb.del_sheet("first_sheet")
+        self.assertEqual(wb.num_sheets, 1)
+        wb.del_sheet("third_sheet")
+        self.assertEqual(wb.num_sheets, 0)
 
 if __name__ == '__main__':
     unittest.main()

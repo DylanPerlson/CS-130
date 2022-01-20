@@ -1,4 +1,3 @@
-import this
 import decimal # TODO do we need these
 
 from sheets.cell_error import CellError
@@ -58,14 +57,15 @@ class Workbook:
         #check for invalid strings
        
         if (sheet_name == ""): 
-            raise ValueError       
+            raise ValueError   
+
         #if no name given
         if sheet_name == None:
-            
             name_given = True
-            auto_name = self.create_name()
-            new_sheet = Sheet(auto_name, self)
+            sheet_name = self.create_name()
+            new_sheet = Sheet(sheet_name, self)
         # TODO any other invalid strings?
+        
         #cannot already be taken
         if name_given == False:
             for i in self.sheets:
@@ -77,7 +77,7 @@ class Workbook:
         self.num_sheets += 1 
         self.sheets.append(new_sheet)
 
-        return (self.num_sheets, sheet_name)
+        return (self.num_sheets-1, sheet_name) # '-1' is because index should start at 0
 
       
         
@@ -234,12 +234,12 @@ class Workbook:
             else: 
                 raise CellError
 
-    def create_name(self,num = 0):
+    def create_name(self,num = 1):
         #finds an unused name
         auto_name = "Sheet"
         
         for i in self.sheets:
-            if i == auto_name + str(num):
+            if i.sheet_name == auto_name + str(num):
                 self.create_name(num+1)
                 break
 

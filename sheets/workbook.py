@@ -62,8 +62,9 @@ class Workbook:
         #if no name given
         if sheet_name == None:
             name_given = True
-            sheet_name = self.create_name()
-            new_sheet = Sheet(sheet_name, self)
+            auto_name = "Sheet"
+            sheet_name = auto_name + str(self.create_name())
+            new_sheet = Sheet(sheet_name)
         # TODO any other invalid strings?
         
         if sheet_name[0] == " " or sheet_name[-1] == " ": 
@@ -248,8 +249,8 @@ class Workbook:
         auto_name = "Sheet"
         
         for i in self.sheets:
-            if i.sheet_name == auto_name + str(num):
-                self.create_name(num+1)
-                break
+            if i.sheet_name == auto_name + str(num):              
+                return self.create_name(num + 1)
+                
 
-        return auto_name + str(num)
+        return num

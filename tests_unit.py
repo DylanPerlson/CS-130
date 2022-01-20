@@ -28,6 +28,23 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(index3,2)
 
 
+    def test_white_space_in_sheet_name(self):
+        wb = sheets.Workbook()
+        with self.assertRaises(ValueError):
+            (_,_) = wb.new_sheet(" first_sheet")
+        with self.assertRaises(ValueError):
+            (_,_) = wb.new_sheet("first_sheet ")
+
+
+    def test_sheet_name_uniqueness(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        with self.assertRaises(ValueError):
+            (_, name2) = wb.new_sheet("first_sheet")
+        with self.assertRaises(ValueError):
+            (_, name2) = wb.new_sheet("First_Sheet")
+        
+
     def test_set_and_get_cell_contents(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
@@ -36,14 +53,11 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AA57', '12')
         wb.set_cell_contents("second_sheet", 'ba4', '=10' )
 
-
-
-
-        # value should be a decimal.Decimal('46')
         value1 = wb.get_cell_contents("first_sheet", 'AA57')
         value2 = wb.get_cell_contents(name2, 'ba4')
-        self.assertEqual(value1, '12') # TODO not sure whether this must be a string or decimal
+        self.assertEqual(value1, '12') # TODO not sure whether this must be a string or decimal.Decimal
         self.assertEqual(value2, '=10')
+
 
     def test_simple_formula(self):
         wb = sheets.Workbook()
@@ -52,15 +66,28 @@ class TestWorkbook(unittest.TestCase):
 
         content = '=12+3-5'
         wb.set_cell_contents(name1, 'AA57', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'aa57'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'aa57')) # TODO decimal.Decimal
 
         content = '=12+3*(4+5)/4'
         wb.set_cell_contents(name1, 'ba43', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'ba43'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'ba43'))
 
         content = '=42*-4*-1'
         wb.set_cell_contents(name1, 'eee3', content)
-        self.assertEqual(eval(content),wb.get_cell_value(name1, 'eee3'))
+        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
+
+
+    """ def test_simple_cell_reference(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        # (_, name2) = wb.new_sheet("second_sheet")
+
+        wb.set_cell_contents(name1, 'AA57', '5')
+        wb.set_cell_contents(name1, 'c4', '=aa57')
+        self.assertEqual(5,wb.get_cell_value(name1, 'c4')) # TODO decimal.Decimal """
+
+        # def test_
+
 
 
 

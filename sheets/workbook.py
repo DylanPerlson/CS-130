@@ -58,7 +58,7 @@ class Workbook:
        
         if (sheet_name == ""): 
             raise ValueError   
-
+        
         #if no name given
         if sheet_name == None:
             name_given = True
@@ -66,6 +66,9 @@ class Workbook:
             new_sheet = Sheet(sheet_name, self)
         # TODO any other invalid strings?
         
+        if sheet_name[0] == " " or sheet_name[-1] == " ": 
+            raise ValueError   
+
         #cannot already be taken
         if name_given == False:
             for i in self.sheets:

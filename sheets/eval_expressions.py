@@ -3,6 +3,7 @@
 from ast import arg
 import decimal
 import lark
+import decimal
 from lark import Transformer, Visitor
 from .cell_error import CellError, CellErrorType
 
@@ -49,37 +50,66 @@ class EvalExpressions(Transformer):
         self.sheet_instance = sheet_instance
 
     def number(self, args):
-        return args[0]
+        return decimal.Decimal(args[0])
 
     def string(self, args):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
-        return str(args[0]+args[1])
+        # return str(args[0]+args[1])
+        if args[0] == '+':
+            return decimal.Decimal(args[1])
+        elif args[0] == '-':
+            return -decimal.Decimal(args[1])
+        else:
+            raise Exception
 
     def parens(self, args):
         return args[0]
 
     def add_expr(self, args):
+        # print(args[0])
+        # print('\n\n\n\n\nargs2',args[2])
         if (args[0] == None):
             args[0] = 0
         if (args[2] == None):
             args[2] = 0
-        t = str(args[0])+args[1]+str(args[2])
-        return eval(t)
+
+        if args[1] == '+':
+            return decimal.Decimal(decimal.Decimal(args[0])+decimal.Decimal(args[2]))
+        elif args[1] == '-':
+            return decimal.Decimal(decimal.Decimal(args[0])-decimal.Decimal(args[2]))
+        else:
+            raise Exception
+        # t = str(args[0])+args[1]+str(args[2])
+        # print('\n\n', type(args[0]))
+        # print(args[0])
+        # return decimal.Decimal(eval(t))
+        # t = 'decimal.Decimal('+str(args[0])+')'+args[1]+'decimal.Decimal('+str(args[2])+')'
+        # return decimal.Decimal(args[0])
 
     def mul_expr(self, args):
         if args[1] == '/' and str(args[2]) == '0':
             return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
+        if args[1] == '*':
+            return decimal.Decimal(decimal.Decimal(args[0])*decimal.Decimal(args[2]))
+        elif args[1] == '/':
+            return decimal.Decimal(decimal.Decimal(args[0])/decimal.Decimal(args[2]))
+        else:
+            raise Exception
         t = str(args[0])+args[1]+str(args[2])
         return eval(t)
+        # t = str(args[0])+args[1]+str(args[2])
+
+        # return eval(t)
 
     def concat_expr(self, args):
         if(args[0] == None):
             args[0] = ''
         if(args[1] == None):
-            args[1] = ''    
-        return str(args[0]+args[1])
+            args[1] = ''   
+
+        return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
         # getting the appropriate sheet name and cell location

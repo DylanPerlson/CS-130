@@ -1,5 +1,4 @@
 # Object class for individual cell
-
 from asyncio.windows_events import NULL
 from collections import defaultdict
 import lark
@@ -45,7 +44,13 @@ class Cell:
             evaluation = EvalExpressions().transform(formula)
         except lark.exceptions.VisitError as e:
             if isinstance(e.__context__, ZeroDivisionError):
+                # Value you set is the cell error OBJECT
+                # String is what the user sees/inputs 
+                # if get_cell_value evaluates to error, return value will be cell error object
+                # Can manually set cell error via #DIV/0! and so on
+                # set cell contents should only take strings
                 div_zero_error = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
+                # return the above error
                 evaluation = '#DIV/0!'
                 #print('zero error') # TODO DIVIDE_BY_ZERO 
                 exit()

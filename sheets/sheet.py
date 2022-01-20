@@ -20,6 +20,9 @@ class Sheet:
         (self.cells[u]).append(v)
 
     # A function used by DFS
+    # Multi phase evaluation phase
+    # Check all dependencies is one step, Update graph afterwards
+    # Start updating cells
     def DFSUtil(self,v,visited):
         # Mark the current node as visited and print it
         visited[v]= True
@@ -45,8 +48,8 @@ class Sheet:
         g.num_cells = self.num_cells
 
         # Recur for all the vertices adjacent to this vertex
-        for i in self.cells:
-            for j in self.cells[i]:
+        for i in self.cell_graph:
+            for j in self.cell_graph[i]:
                 g.add_cell_dependency(j,i)
         return g
 
@@ -56,7 +59,7 @@ class Sheet:
         circ_ref_cells = []
         stack = []
         # Mark all the vertices as not visited (For first DFS)
-        visited =[False] * (self.num_cells)
+        visited = [False] * (self.num_cells)
         # Fill vertices in stack according to their finishing times
         for i in range(self.cells):
             if visited[i]==False:
@@ -74,6 +77,8 @@ class Sheet:
             if visited[i]==False:
                 gr.DFSUtil(i, visited)
                 circ_ref_cells.append(i)
+        
+        self.parent_workbook.del_sheet(self.sheet_name)
         
         for curr_cell in circ_ref_cells:
             self.set_cell_contents(curr_cell, CellError(CellErrorType.CIRCULAR_REFERENCE, "#CIRC_REF!", "None"))
@@ -124,7 +129,6 @@ class Sheet:
         return self.cells[(row,col)].get_cell_contents() # TODO has this function been made?
 
     def get_cell_value(self, location):
-    
         row, col = self.get_row_and_col(location)
         return self.cells[(row,col)].get_cell_value() # TODO has this function been made?
 

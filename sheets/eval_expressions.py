@@ -1,7 +1,9 @@
 # object class for evaluating expressions
 
+from ast import arg
 import lark
 from lark import Transformer, Visitor
+from .cell_error import CellError, CellErrorType
 
 class RetrieveReferences(Visitor):
     def __init__(self):
@@ -21,14 +23,17 @@ class RetrieveReferences(Visitor):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
+                cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
                 print('error1') # TODO BAD_REFERENCE
             cell = args[1].value
         else:
+            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             print('error2') # TODO BAD_REFERENCE
 
         try:
-            cell_value = 1 # TODO get_cell_value(sheet_name, cell) here
+            cell = 1 # TODO get_cell_value(sheet_name, cell) here
         except:
+            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             # TODO BAD_REFERENCE 
             exit()
 
@@ -41,7 +46,6 @@ class EvalExpressions(Transformer):
     def __init__(self, workbook_instance, sheet_instance):
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
-
 
     def number(self, args):
         return args[0]
@@ -61,8 +65,9 @@ class EvalExpressions(Transformer):
         return eval(t)
 
     def mul_expr(self, args):
+        if args[1] == '/' and str(args[2]) == '0':
+            return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
         t = str(args[0])+args[1]+str(args[2])
-
         return eval(t)
 
     def concat_expr(self, args):
@@ -81,17 +86,17 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+                cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
                 pass # TODO BAD_REFERENCE
             cell = args[1]
         else:
-            bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+            cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             pass # TODO BAD_REFERENCE
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
         except:
-            bad_ref_error = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+            cell_value = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
             # TODO BAD_REFERENCE 
             exit()
 

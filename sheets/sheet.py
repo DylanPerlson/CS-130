@@ -15,7 +15,6 @@ class Sheet:
         self.num_cells = 0
         self.cells = {}
         self.cell_graph = defaultdict(list)
-        self.parent_workbook = curr_workbook
     
      # function to add an edge to graph
      # Need to call this if formula is updated to reference another cell
@@ -121,21 +120,14 @@ class Sheet:
             self.cells[(row,col)] = Cell(contents)
         else:
             self.cells[(row,col)].contents = contents
-<<<<<<< HEAD
-        self.cells[(row,col)] = contents
-        self.printSCCs()
-=======
->>>>>>> 09901bd968c93a64c3752088f345d6965a07f6d7
+        # self.cells[(row,col)] = contents
+        # self.printSCCs()
 
     def get_cell_contents(self, location):
         row, col = self.get_row_and_col(location)
         return self.cells[(row,col)].contents 
 
-<<<<<<< HEAD
-    def get_cell_value(self, location):
-=======
     def get_cell_value(self, workbook_instance, location):
->>>>>>> 09901bd968c93a64c3752088f345d6965a07f6d7
         row, col = self.get_row_and_col(location)
         sheet_instance = self
         return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 

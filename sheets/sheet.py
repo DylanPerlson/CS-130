@@ -1,5 +1,8 @@
 from .cell import Cell
 
+MAX_ROW = 475254
+MAX_COL = 9999
+
 # Object class for individual spreadsheet
 class Sheet:
     # Sheet object constructor taking in name and workbook
@@ -29,6 +32,8 @@ class Sheet:
         
         # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location) # TODO is this correct?
+        if row > MAX_ROW or col > MAX_COL:
+            raise ValueError
         
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):

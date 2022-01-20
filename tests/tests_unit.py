@@ -2,6 +2,7 @@ import os; os.system('cls')
 import context
 import sheets
 import unittest
+import decimal
 
 class TestWorkbook(unittest.TestCase):
     def test_naming_sheets_and_workbooks(self):
@@ -102,22 +103,44 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(content3, None)
         self.assertEqual(content4, None)
 
-    def test_simple_formula(self):
+    # def test_simple_formula(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     # (_, name2) = wb.new_sheet("second_sheet")
+
+    #     content = '=12+3-5'
+    #     wb.set_cell_contents(name1, 'AA57', content)
+    #     self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'aa57')) # TODO decimal.Decimal
+
+    #     content = '=12+3*(4+5)/4'
+    #     wb.set_cell_contents(name1, 'ba43', content)
+    #     self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'ba43'))
+
+    #     content = '=42*-4*-1'
+    #     wb.set_cell_contents(name1, 'eee3', content)
+    #     self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
+
+
+    def test_simple_formula_with_decimal(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
         # (_, name2) = wb.new_sheet("second_sheet")
 
         content = '=12+3-5'
         wb.set_cell_contents(name1, 'AA57', content)
-        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'aa57')) # TODO decimal.Decimal
+        # wb.get_cell_value(name1, 'aa57')
+        self.assertEqual(decimal.Decimal(12+3-5),wb.get_cell_value(name1, 'aa57')) # TODO decimal.Decimal
 
         content = '=12+3*(4+5)/4'
         wb.set_cell_contents(name1, 'ba43', content)
-        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'ba43'))
+        # wb.get_cell_value(name1, 'ba43')
+        self.assertEqual(decimal.Decimal(12+3*(4+5)/4),wb.get_cell_value(name1, 'ba43'))
+        # self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'ba43'))
 
         content = '=42*-4*-1'
         wb.set_cell_contents(name1, 'eee3', content)
-        self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
+        self.assertEqual(decimal.Decimal(42*-4*-1),wb.get_cell_value(name1, 'eee3'))
+        # self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
     
 
     def test_max_sheet_size(self):
@@ -136,11 +159,15 @@ class TestWorkbook(unittest.TestCase):
     def test_simple_cell_reference(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
-        # (_, name2) = wb.new_sheet("second_sheet")
+        (_, name2) = wb.new_sheet("second_sheet")
 
         wb.set_cell_contents(name1, 'AA57', '5')
         wb.set_cell_contents(name1, 'c4', '=aa57')
-        self.assertEqual(5, int(wb.get_cell_value(name1, 'c4'))) # TODO decimal.Decimal
+        wb.set_cell_contents(name2, 'c4', '=first_sheet!aa57')
+        wb.set_cell_contents(name2, 'c5', "='first_sheet'!aa57")
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4')) 
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4')) 
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5')) 
 
 
     def test_extent(self):
@@ -175,6 +202,52 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.num_sheets, 1)
         wb.del_sheet("third_sheet")
         self.assertEqual(wb.num_sheets, 0)
+
+
+    def test_decimal(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        (_, name2) = wb.new_sheet("second_sheet")
+
+        wb.set_cell_contents(name1, 'AA57', '12.0')
+        wb.set_cell_contents(name1, 'AA58', '=aa57')
+        wb.set_cell_contents("second_sheet", 'ba4', '=10' )
+        wb.set_cell_contents("second_sheet", 'ba5', "'string" )
+
+        content1 = wb.get_cell_value("first_sheet", 'AA57')
+        content1a = wb.get_cell_value("first_sheet", 'AA58')
+        content2 = wb.get_cell_value(name2, 'ba4')
+        # content3 = wb.get_cell_value(name2, 'ba5')
+
+        # print('\n',content2)
+        # print('\n',content3)
+
+        # print(content1)
+        self.assertEqual(content1, decimal.Decimal(12)) 
+        self.assertEqual(content1a, decimal.Decimal(12)) 
+        self.assertEqual(content2, decimal.Decimal(10))
+        # self.assertEqual(content3, "'string")
+
+    def test_type_conversion(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'AA57', '12.0')
+        wb.set_cell_contents(name1, 'AA58', "'123")
+        wb.set_cell_contents(name1, 'AA59', "=aa57+aa58")
+
+        self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
+        # print('/n/n#####################',wb.get_cell_value(name1, 'aa59'))
+
+    def test_string_concat(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'AA57', 'hello')
+        wb.set_cell_contents(name1, 'AA58', "' world")
+        # wb.set_cell_contents(name1, 'aa59', "=aa57 & aa58 & '!'")
+        wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
+
+        self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=3)

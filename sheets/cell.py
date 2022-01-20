@@ -1,6 +1,7 @@
 # Object class for individual cell
 
 import lark
+import decimal
 from .eval_expressions import EvalExpressions
 from .cell_error import CellErrorType, CellError
 
@@ -19,10 +20,14 @@ class Cell():
             # TODO bring back if there is an error here
         elif str(contents)[0].isdigit():
             self.type = "LITERAL"
-            self.value = contents
-        else:
+            self.value = decimal.Decimal(contents)
+        elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
+            self.content = None
             self.value = None
+        else:
+            self.type = "LITERAL"
+            self.value = str(contents)
 
 
     def get_cell_value(self, workbook_instance, sheet_instance):
@@ -30,20 +35,23 @@ class Cell():
 
         #digit case
         if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
-            return self.contents
+            return self.value
         #string case
         elif self.contents[0] == "'":
-            return self.contents[1:]
+            # return self.contents[1:]
+            return self.value
+        # print(self.contents)
         # trying to parse
         try:
             formula = parser.parse(self.contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR,'#ERROR!','Parse Error')
             
-
+        # print(formula.pretty())
         # trying to evaluate
         try: 
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
+            # print('\n\n',type(evaluation))
         except lark.exceptions.VisitError as e:
 
             if isinstance(e.__context__, ZeroDivisionError):

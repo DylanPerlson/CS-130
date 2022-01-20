@@ -3,7 +3,7 @@ from .cell import Cell
 # Object class for individual spreadsheet
 class Sheet:
     # Sheet object constructor taking in name and workbook
-    def __init__(self, sheet_name, curr_workbook):         
+    def __init__(self, sheet_name):         
         self.sheet_name = sheet_name
         self.extent = [0,0]
         self.cells = {}
@@ -37,7 +37,7 @@ class Sheet:
             self.extent[1] = col
         
         if not (row,col) in self.cells.keys():
-            self.cells[(row,col)] = Cell(contents, self)
+            self.cells[(row,col)] = Cell(contents)# TODO why are we sending in self to CELL?
         else:
             self.cells[(row,col)].contents = contents
 
@@ -48,9 +48,11 @@ class Sheet:
         row, col = self.get_row_and_col(location)
         return self.cells[(row,col)].contents 
 
-    def get_cell_value(self, location):
+    def get_cell_value(self, workbook_instance, location):
         row, col = self.get_row_and_col(location)
-        return self.cells[(row,col)].value # TODO has this function been made?
+        sheet_instance = self
+        return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
+        # TODO has this function been made?
 
 
 

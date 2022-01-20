@@ -4,20 +4,20 @@ import lark
 from .eval_expressions import EvalExpressions
 from .cell_error import CellErrorType, CellError
 
-class Cell:
-    def __init__ (self, contents, curr_sheet):
+class Cell():
+    def __init__ (self, contents):
         # Determine Cell Type
         self.contents = contents
 
-        if contents[0] == '=':
+        if str(contents)[0] == '=':
             self.type = "FORMULA"
-            self.value = self.get_value_from_contents(contents) # TODO curr_sheet needed
+            #self.value = self.get_cell_value(contents) # TODO curr_sheet needed
 
-        elif contents[0] == "'":
+        elif str(contents)[0] == "'":
             self.type = "STRING"
-            self.value = str(contents)
-
-        elif (contents[0]).isdigit():
+            self.value = str(contents[1:]) 
+            # TODO bring back if there is an error here
+        elif str(contents)[0].isdigit():
             self.type = "LITERAL"
             self.value = contents
         else:
@@ -25,19 +25,26 @@ class Cell:
             self.value = None
 
 
-    def get_value_from_contents(self, contents):
+    def get_cell_value(self, workbook_instance, sheet_instance):
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 
+        #digit case
+        if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
+            return self.contents
+        #string case
+        elif self.contents[0] == "'":
+            return self.contents[1:]
         # trying to parse
         try:
-            formula = parser.parse(contents)
+            
+            formula = parser.parse(self.contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR,'#ERROR!','Parse Error')
             
 
         # trying to evaluate
         try: 
-            evaluation = EvalExpressions().transform(formula)
+            evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
         except lark.exceptions.VisitError as e:
 
             if isinstance(e.__context__, ZeroDivisionError):

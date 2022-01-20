@@ -1,4 +1,4 @@
-import this
+import decimal # TODO do we need these
 
 from sheets.cell_error import CellError
 from .sheet import Sheet
@@ -14,6 +14,7 @@ class Workbook:
         # Initialize a new empty workbook.
         self.sheets = []
         self.num_sheets = 0
+        self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         
 
     def num_sheets(self) -> int:
@@ -53,25 +54,41 @@ class Workbook:
         # If the spreadsheet name is an empty string (not None), or it is
         # otherwise invalid, a ValueError is raised.
 
+        name_given = False
         #check for invalid strings
+       
         if (sheet_name == ""): 
-            raise ValueError
-        # TODO any other invalid strings?
-        #cannot already be taken
-        for i in self.sheets:
-            if i.sheet_name.lower() == sheet_name.lower():
-                raise ValueError
+            raise ValueError   
+        
         #if no name given
-        if sheet_name == 'None':
-            auto_name = self.create_name()
-            new_sheet = Sheet(auto_name, self)
-        else:
-            new_sheet = Sheet(sheet_name, self)
+        if sheet_name == None:
+            name_given = True
+            auto_name = "Sheet"
+            sheet_name = auto_name + str(self.create_name())
+            new_sheet = Sheet(sheet_name)
+        # TODO any other invalid strings?
+        
+        # no leading or trailing white space allowed
+        if sheet_name[0] == " " or sheet_name[-1] == " ": 
+            raise ValueError   
+
+        for i in sheet_name:
+            if not i.isalnum() and not i in self.allowed_characters:
+                raise ValueError
+
+
+        #cannot already be taken
+        if name_given == False:
+            for i in self.sheets:
+                if i.sheet_name.lower() == sheet_name.lower():
+                    raise ValueError
+            else:
+                new_sheet = Sheet(sheet_name)
 
         self.num_sheets += 1 
         self.sheets.append(new_sheet)
 
-        return (self.num_sheets, sheet_name)
+        return (self.num_sheets-1, sheet_name) # '-1' is because index should start at 0
 
       
         
@@ -141,15 +158,20 @@ class Workbook:
 
         for i in self.sheets:
             #edit cell content of specified sheet
+            if (i.sheet_name == None):
+                continue
+      
             if i.sheet_name.lower() == sheet_name.lower():
-                
                 self.check_valid_cell(location)
-        
                 #if want to set cell contents to empty
-                if contents.strip() == 'None' or contents.strip() == '':
-                    i.set_cell_contents(location, 'None')
+                if contents == None or (not str(contents).isdigit() and contents.strip() == ''):
+                    i.set_cell_contents(location, None)
+                elif str(contents).isdigit():
+                    i.set_cell_contents(location, contents)
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
+                #completed task
+                return
                
         #no sheet found
         raise KeyError
@@ -204,7 +226,8 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_value(location) # TODO make sure get value is correct
+                workbook_instance = self
+                return i.get_cell_value(workbook_instance,location) # TODO make sure get value is correct
             
         raise KeyError
 
@@ -214,7 +237,8 @@ class Workbook:
     def check_valid_cell (self, location):
         #Check if the cell location is valid              
         if not location.isalnum():
-            raise CellError
+            raise ValueError
+            
 
         digits = False
         for c in location:
@@ -225,15 +249,15 @@ class Workbook:
             elif c.isdigit() and digits == True:
                 continue
             else: 
-                raise CellError
+                raise ValueError
 
-    def create_name(self,num = 0):
+    def create_name(self,num = 1):
         #finds an unused name
         auto_name = "Sheet"
         
         for i in self.sheets:
-            if i == auto_name + str(num):
-                self.create_name(num+1)
-                break
+            if i.sheet_name == auto_name + str(num):              
+                return self.create_name(num + 1)
+                
 
-        return auto_name + str(num)
+        return num

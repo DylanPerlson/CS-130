@@ -54,7 +54,10 @@ class Sheet:
     def get_cell_value(self, workbook_instance, location):
         row, col = self.get_row_and_col(location)
         sheet_instance = self
-        return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
+        if (row,col) not in self.cells.keys(): #empty cell case
+            return None
+        else:
+            return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
         
 
 

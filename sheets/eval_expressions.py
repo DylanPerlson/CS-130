@@ -56,8 +56,11 @@ class EvalExpressions(Transformer):
         return args[0]
 
     def add_expr(self, args):
+        if (args[0] == None):
+            args[0] = 0
+        if (args[2] == None):
+            args[2] = 0
         t = str(args[0])+args[1]+str(args[2])
-
         return eval(t)
 
     def mul_expr(self, args):
@@ -66,6 +69,10 @@ class EvalExpressions(Transformer):
         return eval(t)
 
     def concat_expr(self, args):
+        if(args[0] == None):
+            args[0] = ''
+        if(args[1] == None):
+            args[1] = ''    
         return str(args[0]+args[1])
 
     def cell(self, args):
@@ -92,7 +99,7 @@ class EvalExpressions(Transformer):
             # TODO BAD_REFERENCE 
             exit()
 
-        if cell_value == None:
-            cell_value = 0 # TODO "" for string
+        #if cell_value == None:
+        #    cell_value = 0 # TODO "" for string
 
         return cell_value

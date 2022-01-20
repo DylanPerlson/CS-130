@@ -62,7 +62,6 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
 
-
     def test_simple_formula(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
@@ -79,6 +78,18 @@ class TestWorkbook(unittest.TestCase):
         content = '=42*-4*-1'
         wb.set_cell_contents(name1, 'eee3', content)
         self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
+    
+    def test_max_sheet_size(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'ZZZZ9999', 'maximum')
+        value1 = wb.get_cell_contents("first_sheet", 'ZZZZ9999')
+        self.assertEqual(value1, 'maximum')
+
+        with self.assertRaises(ValueError):
+            wb.set_cell_contents(name1, 'ZZZZ10000', 'too many columns')
+        with self.assertRaises(ValueError):
+            wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
 
 
     """ def test_simple_cell_reference(self):

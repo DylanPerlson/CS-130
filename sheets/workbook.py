@@ -14,6 +14,7 @@ class Workbook:
         # Initialize a new empty workbook.
         self.sheets = []
         self.num_sheets = 0
+        self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         
 
     def num_sheets(self) -> int:
@@ -66,8 +67,14 @@ class Workbook:
             new_sheet = Sheet(sheet_name, self)
         # TODO any other invalid strings?
         
+        # no leading or trailing white space allowed
         if sheet_name[0] == " " or sheet_name[-1] == " ": 
             raise ValueError   
+
+        for i in sheet_name:
+            if not i.isalnum() and not i in self.allowed_characters:
+                raise ValueError
+
 
         #cannot already be taken
         if name_given == False:
@@ -229,7 +236,7 @@ class Workbook:
     def check_valid_cell (self, location):
         #Check if the cell location is valid              
         if not location.isalnum():
-            raise CellError
+            raise ValueError
             
 
         digits = False
@@ -241,7 +248,7 @@ class Workbook:
             elif c.isdigit() and digits == True:
                 continue
             else: 
-                raise CellError
+                raise ValueError
 
     def create_name(self,num = 1):
         #finds an unused name

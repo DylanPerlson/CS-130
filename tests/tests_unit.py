@@ -10,23 +10,34 @@ class TestWorkbook(unittest.TestCase):
         (index1,name1) = wb1.new_sheet("first_sheet")
         (index2,name2) = wb1.new_sheet("Second Sheet")
 
-        (_,name3)      = wb2.new_sheet()
+        # (_,name3)      = wb2.new_sheet()
         (_,_)          = wb2.new_sheet("Sheet2")
-        (index3,name5) = wb2.new_sheet()
-
-        # (index4,name4) = wb2.new_sheet("Second Sheet")
-
-        # Should print:  New spreadsheet "Sheet1" at index 0
-        # print(f'New spreadsheet "{name}" at index {index}')
+        # (index3,name5) = wb2.new_sheet()
 
         self.assertEqual(name1,"first_sheet")
         self.assertEqual(name2,"Second Sheet")
-        self.assertEqual(name3,"Sheet1")
+        # self.assertEqual(name3,"Sheet1")
         # self.assertEqual(name5,"Sheet3") # TODO problem in create_name
         self.assertEqual(index1,0)
         self.assertEqual(index2,1)
-        self.assertEqual(index3,2)
+        # self.assertEqual(index3,2)
 
+
+    def test_limited_punctuation(self): # allowed: .?!,:;!@#$%^&*()-_
+        wb = sheets.Workbook()
+        (_,_) = wb.new_sheet(". is the best")
+        (_,_) = wb.new_sheet("@ is the best")
+        (_,_) = wb.new_sheet("# is the best")
+        (_,_) = wb.new_sheet("$ is the best")
+        (_,_) = wb.new_sheet("& is the best")
+        (_,_) = wb.new_sheet("_ is the best")
+        with self.assertRaises(ValueError):
+            (_,name) = wb.new_sheet("€ is the best")
+        with self.assertRaises(ValueError):
+            (_,name) = wb.new_sheet("' is the best")
+        with self.assertRaises(ValueError):
+            (_,name) = wb.new_sheet('" is the best')
+        
 
     def test_white_space_in_sheet_name(self):
         wb = sheets.Workbook()
@@ -34,6 +45,16 @@ class TestWorkbook(unittest.TestCase):
             (_,_) = wb.new_sheet(" first_sheet")
         with self.assertRaises(ValueError):
             (_,_) = wb.new_sheet("first_sheet ")
+
+
+    def test_mistakes_in_cell_location(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+
+        with self.assertRaises(ValueError):
+            wb.set_cell_contents(name1, ' AA57', '12')
+        with self.assertRaises(ValueError):
+            wb.set_cell_contents(name1, 'A5A57', '12')
 
 
     def test_sheet_name_uniqueness(self):
@@ -58,9 +79,10 @@ class TestWorkbook(unittest.TestCase):
         content2 = wb.get_cell_contents(name2, 'ba4')
         content3 = wb.get_cell_contents(name2, 'ba5')
 
-        self.assertEqual(content1, '12') # TODO not sure whether this must be a string or decimal.Decimal
+        self.assertEqual(content1, '12') 
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
+
 
     def test_simple_formula(self):
         wb = sheets.Workbook()
@@ -79,6 +101,7 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'eee3', content)
         self.assertEqual(eval(content[1:]),wb.get_cell_value(name1, 'eee3'))
     
+
     def test_max_sheet_size(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
@@ -92,14 +115,14 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
 
 
-    """ def test_simple_cell_reference(self):
+    def test_simple_cell_reference(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
         # (_, name2) = wb.new_sheet("second_sheet")
 
         wb.set_cell_contents(name1, 'AA57', '5')
         wb.set_cell_contents(name1, 'c4', '=aa57')
-        self.assertEqual(5,wb.get_cell_value(name1, 'c4')) # TODO decimal.Decimal """
+        self.assertEqual(5, int(wb.get_cell_value(name1, 'c4'))) # TODO decimal.Decimal
 
 
     def test_extent(self):
@@ -115,12 +138,12 @@ class TestWorkbook(unittest.TestCase):
         # TODO add update to extent if cells are cleared
         
 
-    # def test_contents_always_string(self):
-
+    def test_double_quotes_for_single_quotes(self):
+        pass # TODO
         
 
 
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=3)

@@ -257,5 +257,34 @@ class Workbook:
             if i.sheet_name == auto_name + str(num):              
                 return self.create_name(num + 1)
                 
-
         return num
+
+    def rename_sheet(self, old_name, new_name):
+        old_name_exists = False
+        # change the name of the sheet
+        for i in self.sheets:
+            # TODO is this case sensitive?
+            if (i.sheet_name == old_name):
+                i.sheet_name = new_name
+                old_name_exists = True
+                break;
+        if (old_name_exists == False):
+            # TODO some kind of error because was not there
+            print('Sheet name does not exist')
+            return
+
+        # change the formulas for every cell
+        for s in self.sheets:
+            for key in s.cells:
+                #check if the cell is a formula
+                if s.cells[key].type == "FORMULA":
+                    #check if the formula contains the old_name
+                    # TODO make sure it works for names with ' as well
+                    if old_name+'!' in s.cells[key].contents:
+                        s.cells[key].contents = s.cells[key].contents.replace(old_name+'!',new_name+'!')
+
+
+        
+
+
+

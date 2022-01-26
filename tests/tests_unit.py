@@ -6,7 +6,17 @@ import unittest
 import decimal
 
 class TestWorkbook(unittest.TestCase):
+    def test_rename(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
+        wb.set_cell_contents(name2,'A1','=s1!A1+3')
+        wb.rename_sheet('s1','new_name')
+        self.assertEqual('new_name',wb.sheets[0].sheet_name)
+        self.assertEqual('=new_name!A1+3',wb.sheets[1].cells[1,1].contents)
 
+
+    '''
     def test_empty_cells(self):
         wb = sheets.Workbook()
         (_, name) = wb.new_sheet("first_sheet")
@@ -283,6 +293,7 @@ class TestWorkbook(unittest.TestCase):
     #     wb.set_cell_contents(name1, 'AA57', '12.0')
 
     #     self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
+    '''
 
 
 if __name__ == '__main__':

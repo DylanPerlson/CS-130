@@ -275,5 +275,42 @@ class Workbook:
             if i.sheet_name == auto_name + str(num):              
                 return self.create_name(num + 1)
                 
-
         return num
+
+    @staticmethod
+    def load_workbook(fp: TextIO) -> Workbook:
+        """
+        This is a static method (not an instance method) to load a workbook
+        from a text file or file-like object in JSON format, and return the
+        new Workbook instance.  Note that the _caller_ of this function is
+        expected to have opened the file; this function merely reads the file.
+        
+        If the contents of the input cannot be parsed by the Python json
+        module then a json.JSONDecodeError should be raised by the method.
+        (Just let the json module's exceptions propagate through.)  Similarly,
+        if an IO read error occurs (unlikely but possible), let any raised
+        exception propagate through.
+        
+        If any expected value in the input JSON is missing (e.g. a sheet
+        object doesn't have the "cell-contents" key), raise a KeyError with
+        a suitably descriptive message.
+        
+        If any expected value in the input JSON is not of the proper type
+        (e.g. an object instead of a list, or a number instead of a string),
+        raise a TypeError with a suitably descriptive message.
+        """
+
+        pass
+
+    def save_workbook(self, fp: TextIO) -> None:
+        """
+        Instance method (not a static/class method) to save a workbook to a
+        text file or file-like object in JSON format.  Note that the _caller_
+        of this function is expected to have opened the file; this function
+        merely writes the file.
+        
+        If an IO write error occurs (unlikely but possible), let any raised
+        exception propagate through.
+        """
+
+        pass

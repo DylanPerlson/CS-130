@@ -16,16 +16,22 @@ class Sheet:
         self.cells = {}
         self.cell_graph = defaultdict(list)
     
-     # function to add an edge to graph
-     # Need to call this if formula is updated to reference another cell
     def add_cell_dependency(self,u,v):
+        """
+        function to add an edge to graph
+        Need to call this if formula is updated to reference another cell
+        """
+
         (self.cells[u]).append(v)
 
-    # A function used by DFS
-    # Multi phase evaluation phase
-    # Check all dependencies is one step, Update graph afterwards
-    # Start updating cells
     def DFSUtil(self,v,visited):
+        """
+        A function used by DFS
+        Multi phase evaluation phase
+        Check all dependencies is one step, Update graph afterwards
+        Start updating cells
+        """
+
         # Mark the current node as visited and print it
         visited[v]= True
 
@@ -36,7 +42,8 @@ class Sheet:
 
 
     def fill_order(self,v,visited, stack):
-        # Mark the current node as visited 
+        """ Mark the current node as visited """ 
+
         visited[v]= True
         #Recur for all the vertices adjacent to this vertex
         for i in self.cell_graph[v]:
@@ -44,8 +51,9 @@ class Sheet:
                 self.fill_order(i, visited, stack)
         stack = stack.append(v)
     
-    # Function that returns reverse (or transpose) of this graph
     def get_transpose(self):
+        """ Function that returns reverse (or transpose) of this graph """
+
         g = Sheet(self.sheet_name, self.parent_workbook)
         g.num_cells = self.num_cells
 
@@ -55,9 +63,12 @@ class Sheet:
                 g.add_cell_dependency(j,i)
         return g
 
-    # The main function that finds and prints all strongly
-    # connected components whilst performing topological sort
     def print_sccs(self):
+        """
+        The main function that finds and prints all strongly
+        connected components whilst performing topological sort
+        """
+        
         circ_ref_cells = []
         stack = []
         # Mark all the vertices as not visited (For first DFS)
@@ -87,8 +98,8 @@ class Sheet:
         for curr_cell in self.cells:
             self[curr_cell].get_value_from_contents(self[curr_cell].contents)
 
-    #Helper function to get absolute row/col of inputted location
     def get_row_and_col(self,location):
+        """ Helper function to get absolute row/col of inputted location """
         
         for e,i in enumerate(location):
             if i.isdigit():

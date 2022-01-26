@@ -3,3 +3,4 @@
 workspace.code-workspace
 .vscode
 **/*launch.json
+**/*.mypy_cache

@@ -43,8 +43,9 @@ class RetrieveReferences(Visitor):
         self.references.append(str(sheet_name) + '!' + str(cell))
 
 
-# used to evaluate an expression from the parsed formula
 class EvalExpressions(Transformer):
+    """ used to evaluate an expression from the parsed formula: """
+    
     def __init__(self, workbook_instance, sheet_instance):
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
@@ -56,7 +57,6 @@ class EvalExpressions(Transformer):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
-        # return str(args[0]+args[1])
         if args[0] == '+':
             return decimal.Decimal(args[1])
         elif args[0] == '-':
@@ -68,8 +68,6 @@ class EvalExpressions(Transformer):
         return args[0]
 
     def add_expr(self, args):
-        # print(args[0])
-        # print('\n\n\n\n\nargs2',args[2])
         if (args[0] == None):
             args[0] = 0
         if (args[2] == None):
@@ -81,12 +79,6 @@ class EvalExpressions(Transformer):
             return decimal.Decimal(decimal.Decimal(args[0])-decimal.Decimal(args[2]))
         else:
             raise Exception
-        # t = str(args[0])+args[1]+str(args[2])
-        # print('\n\n', type(args[0]))
-        # print(args[0])
-        # return decimal.Decimal(eval(t))
-        # t = 'decimal.Decimal('+str(args[0])+')'+args[1]+'decimal.Decimal('+str(args[2])+')'
-        # return decimal.Decimal(args[0])
 
     def mul_expr(self, args):
         if args[1] == '/' and str(args[2]) == '0':
@@ -97,11 +89,6 @@ class EvalExpressions(Transformer):
             return decimal.Decimal(decimal.Decimal(args[0])/decimal.Decimal(args[2]))
         else:
             raise Exception
-        t = str(args[0])+args[1]+str(args[2])
-        return eval(t)
-        # t = str(args[0])+args[1]+str(args[2])
-
-        # return eval(t)
 
     def concat_expr(self, args):
         if(args[0] == None):
@@ -112,14 +99,14 @@ class EvalExpressions(Transformer):
         return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
-        # getting the appropriate sheet name and cell location
-        if len(args) == 1:      # if using the current sheet
-            sheet_name = self.sheet_instance.sheet_name # TODO fix
+        # if using the current sheet
+        if len(args) == 1:      
+            sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
-        elif len(args) == 2:    # if using a different sheet
+        # if using a different sheet
+        elif len(args) == 2:    
             # in case of quotes around sheet name
             if args[0][0] == "'" and args[0][-1] == "'":
-                # TODO fix here
                 sheet_name = args[0][1:-1]
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
@@ -134,7 +121,7 @@ class EvalExpressions(Transformer):
         except:
             return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
 
-        #if cell_value == None:
+        # if cell_value == None:
         #    cell_value = 0 # TODO "" for string
 
         return cell_value

@@ -7,12 +7,12 @@ from decimal import *
 
 class Cell():
     def __init__ (self, contents):
-        # Determine Cell Type
         self.contents = contents
 
+        # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
-            #self.value = self.get_cell_value(contents) # TODO curr_sheet needed
+            # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
 
         elif str(contents)[0] == "'":
             self.type = "STRING"
@@ -38,20 +38,17 @@ class Cell():
             return self.value
         #string case
         elif self.contents[0] == "'":
-            # return self.contents[1:]
             return self.value
-        # print(self.contents)
+
         # trying to parse
         try:
             formula = parser.parse(self.contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
-        # print(formula.pretty())
         # trying to evaluate
         try: 
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
-            # print('\n\n',type(evaluation))
         except lark.exceptions.VisitError as e:
             if isinstance(e.__context__, ZeroDivisionError):
                 # Value you set is the cell error OBJECT
@@ -61,25 +58,19 @@ class Cell():
                 # set cell contents should only take strings
                 evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
                 # return the above error
-                # evaluation = '#DIV/0!'
-                #print('zero error') # TODO DIVIDE_BY_ZERO 
-                exit()
 
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
-                #print('type error') # TODO TYPE_ERROR 
-                exit()
 
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-                #print('other error')
-                exit()
         
-        # if isinstance(evaluation,decimal.Decimal):
-        #     print('###')
-        #     print(evaluation)
+        """ trying to strip trailing zeros of decimal objects
+        if isinstance(evaluation,decimal.Decimal):
+            print('###')
+            print(evaluation)
             
-        #     evaluation = decimal.Decimal(str(evaluation).strip('0'))
-        #     print(evaluation)
+            evaluation = decimal.Decimal(str(evaluation).strip('0'))
+            print(evaluation) """
 
         return evaluation

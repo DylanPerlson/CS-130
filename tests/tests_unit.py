@@ -205,13 +205,22 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()
         (_, name) = wb.new_sheet("first_sheet")
         self.assertEqual((0,0),wb.get_sheet_extent(name))
+
         wb.set_cell_contents(name, 'D14', 'something')
         self.assertEqual((4,14),wb.get_sheet_extent(name))
+
         wb.set_cell_contents(name, 'Z3', 'something')
         self.assertEqual((26,14),wb.get_sheet_extent(name))
+
         wb.set_cell_contents(name, 'AA20', 'something')
         self.assertEqual((27,20),wb.get_sheet_extent(name))
-        # TODO add update to extent if cells are cleared
+
+        wb.set_cell_contents(name, 'AA20', None)
+        self.assertEqual((26,14),wb.get_sheet_extent(name))
+
+        wb.set_cell_contents(name, 'Z3', None)
+        self.assertEqual((4,14),wb.get_sheet_extent(name))
+
         # TODO add tets on when input into a cell is over bounds > ZZZZ
 
 
@@ -229,10 +238,18 @@ class TestWorkbook(unittest.TestCase):
 
         wb.del_sheet("sheet_to_delete")
         self.assertEqual(wb.num_sheets, 2)
+        self.assertEqual(wb.list_sheets(),['first_sheet', 'third_sheet'])
         wb.del_sheet("first_sheet")
         self.assertEqual(wb.num_sheets, 1)
+        self.assertEqual(wb.list_sheets(),['third_sheet'])
+
+        (_,_) = wb.new_sheet("one_last_sheet")
+        self.assertEqual(wb.list_sheets(),['third_sheet',"one_last_sheet"])
+
+        wb.del_sheet("one_last_sheet")
         wb.del_sheet("third_sheet")
         self.assertEqual(wb.num_sheets, 0)
+        self.assertEqual(wb.list_sheets(),[])
     
 
     def test_cell_errors(self):
@@ -290,6 +307,14 @@ class TestWorkbook(unittest.TestCase):
     #     self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
 
     
+    """ implementing a test for 'from sheets import *'
+    def test_from_import(self):
+        import sys
+        from sheets import *
+        
+        self.assertTrue('Workbook' in sys.modules) """
+
+
     """ implementing a test for trailing zeros with the decimals
     def test_decimal_trailing_zeros(self):
         wb = sheets.Workbook()

@@ -33,9 +33,6 @@ class Cell():
             self.type = "NONE"
             self.content = None
             self.value = None
-        else:
-            self.type = "LITERAL"
-            self.value = str(contents)
 
     
 

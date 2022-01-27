@@ -122,6 +122,11 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
 
+        with self.assertRaises(ValueError):
+            wb.get_cell_contents(name1, ' AA57')
+        with self.assertRaises(ValueError):
+            wb.get_cell_contents(name1, 'A5A57')
+
 
     def test_leading_trailing_whitespace_cell_contents(self):
         wb = sheets.Workbook()
@@ -205,7 +210,6 @@ class TestWorkbook(unittest.TestCase):
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
 
-    
     def test_delete_sheets(self):
         wb = sheets.Workbook()
         (_,_) = wb.new_sheet("first_sheet")
@@ -268,14 +272,14 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
 
 
-    def test_string_concat(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name1, 'AA57', 'hello')
-        wb.set_cell_contents(name1, 'AA58', "' world")
-        wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
+    # def test_string_concat(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name1, 'AA57', 'hello')
+    #     wb.set_cell_contents(name1, 'AA58', "' world")
+    #     wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
 
-        self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
+    #     self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
 
     
     """ implementing a test for trailing zeros with the decimals

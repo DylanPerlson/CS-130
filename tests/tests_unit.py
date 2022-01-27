@@ -48,7 +48,7 @@ class TestWorkbook(unittest.TestCase):
         (index1,name1) = wb1.new_sheet("first_sheet")
         (index2,name2) = wb1.new_sheet("Second Sheet")
         (_,_) = wb1.new_sheet("first_sheett")
-        (_,_) = wb1.new_sheet("first_sheett")
+        # (_,_) = wb1.new_sheet("first_sheett")
         (_,_) = wb1.new_sheet()
         (_,_) = wb1.new_sheet()
         (_,_) = wb1.new_sheet()

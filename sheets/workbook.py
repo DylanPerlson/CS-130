@@ -1,4 +1,5 @@
-import decimal # TODO do we need these
+import decimal
+from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError
 from .sheet import Sheet
@@ -108,15 +109,22 @@ class Workbook:
         
         If the specified sheet name is not found, a KeyError is raised.
         """
-        
+        all_sheet_names = []
         for i in range(len(self.sheets)):
-            #remove the sheet with sheet_name
-            if self.sheets.sheet_name.lower() == sheet_name.lower():
-                self.sheet.pop(i)
-                self.num_sheets -= 1
-                return
-        #else keyError
-        raise KeyError
+            all_sheet_names.append(self.sheets[i].sheet_name.lower())
+        
+        if sheet_name not in all_sheet_names:
+            raise KeyError
+        try:
+            for i in range(len(self.sheets)):
+                #remove the sheet with sheet_name
+                curr_sheet = self.sheets[i]
+                if curr_sheet.sheet_name.lower() == sheet_name.lower():
+                    self.sheets.remove(curr_sheet)
+                    self.num_sheets -= 1
+                    return
+        except KeyError as e:
+            raise
        
 
     
@@ -172,9 +180,11 @@ class Workbook:
             #edit cell content of specified sheet
             if (i.sheet_name == None):
                 continue
-      
+            if not self.check_valid_cell(location):
+                raise ValueError
+            
             if i.sheet_name.lower() == sheet_name.lower():
-                self.check_valid_cell(location)
+                #self.check_valid_cell(location)
                 #if want to set cell contents to empty
                 if contents == None or (not str(contents).isdigit() and contents.strip() == ''):
                     i.set_cell_contents(location, None)
@@ -207,13 +217,15 @@ class Workbook:
         This method will never return a zero-length string; instead, empty
         cells are indicated by a value of None.
         """
+        if not self.check_valid_cell(location):
+            raise ValueError
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 return i.get_cell_contents(location) # TODO make sure get contents is correct
             
-        raise KeyError
+        raise ValueError
 
 
     def get_cell_value(self, sheet_name: str, location: str):
@@ -250,11 +262,10 @@ class Workbook:
 
     def check_valid_cell (self, location):
         """ Check if the cell location is valid """    
-
         if not location.isalnum():
-            raise ValueError
+            return False
+            # raise ValueError
             
-
         digits = False
         for c in location:
             if not c.isdigit() and digits == False: 
@@ -263,8 +274,17 @@ class Workbook:
                 digits = True
             elif c.isdigit() and digits == True:
                 continue
-            else: 
-                raise ValueError
+            elif c == ' ':
+                return False
+            else:
+                return False 
+                # raise ValueError
+        
+        for c in range(len(location)-1):
+            if not location[c+1].isdigit() and location[c].isdigit():
+                return False
+
+        return True
 
     def create_name(self,num = 1):
         """ finds an unused name """

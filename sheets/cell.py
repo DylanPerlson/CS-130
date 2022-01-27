@@ -12,13 +12,21 @@ class Cell():
         # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
+            
             # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
 
         elif str(contents)[0] == "'":
-            self.type = "STRING"
-            self.value = str(contents[1:]) 
-            # TODO bring back if there is an error here
-        elif str(contents)[0].isdigit():
+            #if string is a number,
+            if self.is_float(str(contents[1:])):
+                self.type = "LITERAL"
+                self.value = decimal.Decimal(contents[1:])
+                
+
+            else:
+                self.type = "STRING"
+                self.value = str(contents[1:]) 
+            
+        elif self.is_float(str(contents)):
             self.type = "LITERAL"
             self.value = decimal.Decimal(contents)
         elif str(contents) == "" or str(contents).isspace():
@@ -29,6 +37,7 @@ class Cell():
             self.type = "LITERAL"
             self.value = str(contents)
 
+    
 
     def get_cell_value(self, workbook_instance, sheet_instance):
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
@@ -74,3 +83,12 @@ class Cell():
             print(evaluation) """
 
         return evaluation
+  
+    #helper fuction to determine if a value is a float
+    def is_float(self, element):
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False

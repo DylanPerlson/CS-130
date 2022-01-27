@@ -5,9 +5,33 @@ from sheets.cell_error import CellError, CellErrorType
 import unittest
 import decimal
 
+
 class TestWorkbook(unittest.TestCase):
     """ Performing unit tests on the sheets module. """
 
+
+    def test_string_comes_back_as_decimal(self): 
+        wb = sheets.Workbook()    
+        (_, name) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name,'A1',"'100")
+        wb.set_cell_contents(name,'A2',13.4)
+        
+        self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal(100))
+        self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
+        
+        wb.set_cell_contents(name,'A1',"'100")
+
+        #wb.set_cell_contents(name,"'-13",'A2')
+        #wb.set_cell_contents(name,"'12.2",'A3')
+        #print(wb.get_cell_value(name,'A1'),"hi")
+    
+    def test_unset_cells_return_None(self): 
+        wb = sheets.Workbook()    
+        (_, name) = wb.new_sheet("first_sheet")
+        self.assertEqual(wb.get_cell_value(name,'A1'),None)
+        self.assertEqual(wb.get_cell_contents(name,'A1'),None)
+        
+         
     def test_empty_cells(self):
         """ Testing whether empty cells return 0 or ''. """   
         wb = sheets.Workbook()
@@ -181,8 +205,8 @@ class TestWorkbook(unittest.TestCase):
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
 
-
-    def delete_sheets(self):
+    
+    def test_delete_sheets(self):
         wb = sheets.Workbook()
         (_,_) = wb.new_sheet("first_sheet")
         (_,_) = wb.new_sheet("sheet_to_delete")
@@ -197,7 +221,7 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.num_sheets, 1)
         wb.del_sheet("third_sheet")
         self.assertEqual(wb.num_sheets, 0)
-
+    
 
     def test_cell_errors(self):
         wb = sheets.Workbook()
@@ -261,7 +285,8 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AA57', '12.0')
 
         self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57'))) """
-
-
+    
+    
 if __name__ == '__main__':
+    print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=0)

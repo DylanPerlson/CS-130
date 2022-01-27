@@ -176,9 +176,9 @@ class Workbook:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 #if want to set cell contents to empty
-                if contents == None or (not str(contents).isdigit() and contents.strip() == ''):
+                if contents == None or (not self.is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(location, None)
-                elif str(contents).isdigit():
+                elif self.is_float(contents):
                     i.set_cell_contents(location, contents)
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
@@ -252,6 +252,7 @@ class Workbook:
         """ Check if the cell location is valid """    
 
         if not location.isalnum():
+            print('hii')
             raise ValueError
             
 
@@ -270,10 +271,19 @@ class Workbook:
         """ finds an unused name """
 
         auto_name = "Sheet"
-        
+       
         for i in self.sheets:
             if i.sheet_name == auto_name + str(num):              
                 return self.create_name(num + 1)
                 
 
         return num
+
+    #helper fuction to determine if a value is a float
+    def is_float(self, element):
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False

@@ -14,8 +14,9 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name,'A1',"'100")
-        wb.set_cell_contents(name,'A2',13.4)
-        
+        wb.set_cell_contents(name,'A2',"'13.4")
+       
+        #self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal(13.4))
         self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal(100))
         self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
         

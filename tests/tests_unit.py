@@ -23,10 +23,18 @@ class TestWorkbook(unittest.TestCase):
         wb2 = sheets.Workbook()
         (index1,name1) = wb1.new_sheet("first_sheet")
         (index2,name2) = wb1.new_sheet("Second Sheet")
+        (_,_) = wb1.new_sheet("first_sheett")
+        (_,_) = wb1.new_sheet("first_sheett")
+        (_,_) = wb1.new_sheet()
+        (_,_) = wb1.new_sheet()
+        (_,_) = wb1.new_sheet()
+        (_,_) = wb1.new_sheet("Second Sheett")
 
         (_,name3)      = wb2.new_sheet()
         (_,_)          = wb2.new_sheet("Sheet2")
         (index3,name5) = wb2.new_sheet()
+
+        print(wb1.list_sheets())
 
         self.assertEqual(name1,"first_sheet")
         self.assertEqual(name2,"Second Sheet")

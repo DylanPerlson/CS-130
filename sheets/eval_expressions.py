@@ -7,6 +7,7 @@ import decimal
 from lark import Transformer, Visitor
 from .cell_error import CellError, CellErrorType
 
+error_literals = ['#REF!', '#ERROR!', '#CIRREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 class RetrieveReferences(Visitor):
     def __init__(self):
         self.references = []
@@ -73,6 +74,9 @@ class EvalExpressions(Transformer):
         if (args[2] == None):
             args[2] = 0
 
+        # if (args[0] in error_literals or args[2] in error_literals):
+        #     return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+
         if args[1] == '+':
             return decimal.Decimal(decimal.Decimal(args[0])+decimal.Decimal(args[2]))
         elif args[1] == '-':
@@ -83,6 +87,8 @@ class EvalExpressions(Transformer):
     def mul_expr(self, args):
         if args[1] == '/' and str(args[2]) == '0':
             return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
+        # if (args[0] in error_literals or args[2] in error_literals):
+        #     return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
         if args[1] == '*':
             return decimal.Decimal(decimal.Decimal(args[0])*decimal.Decimal(args[2]))
         elif args[1] == '/':

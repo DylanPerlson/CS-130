@@ -136,6 +136,8 @@ class Sheet:
 
     def get_cell_contents(self, location):
         row, col = self.get_row_and_col(location)
+        if (row,col) not in self.cells.keys():
+            return None;
         return self.cells[(row,col)].contents 
 
     def get_cell_value(self, workbook_instance, location):

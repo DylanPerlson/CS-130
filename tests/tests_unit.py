@@ -58,7 +58,7 @@ class TestWorkbook(unittest.TestCase):
         (_,_)          = wb2.new_sheet("Sheet2")
         (index3,name5) = wb2.new_sheet()
 
-        print(wb1.list_sheets())
+        # print(wb1.list_sheets())
 
         self.assertEqual(name1,"first_sheet")
         self.assertEqual(name2,"Second Sheet")
@@ -301,4 +301,4 @@ class TestWorkbook(unittest.TestCase):
     
 if __name__ == '__main__':
     print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=0)
+    unittest.main(verbosity=1)

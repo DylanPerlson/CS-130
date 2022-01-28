@@ -1,10 +1,9 @@
 # __init__.py
-# import decimal
 
-__all__ = ["workbook", "cell_error"]
 
-# import sheets.workbook
+#__all__ = ["workbook", "cell_error"]
+import decimal
+import sheets
 from .workbook import Workbook
 from .sheet import Sheet
-from .cell_error import CellError
-from .cell_error import CellErrorType
+from .cell_error import *

@@ -1,4 +1,4 @@
-import decimal
+
 from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
@@ -6,7 +6,7 @@ from .sheet import Sheet
 MAX_ROW = 475254
 MAX_COL = 9999
 class Workbook:
-
+    import decimal
     # A workbook containing zero or more named spreadsheets.
     #
     # Any and all operations on a workbook that may affect calculated cell

@@ -1,10 +1,7 @@
 import os; os.system('cls')
 import context
 from sheets import *
-import sheets
-from sheets.cell_error import CellError, CellErrorType
 import unittest
-import decimal
 
 
 class TestWorkbook(unittest.TestCase):

@@ -35,10 +35,10 @@ class Cell():
 
         #digit case
         if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
-            return self.value
+            return self.remove_trailing_zeros(self.value)
         #string case
         elif self.contents[0] == "'":
-            return self.value
+            return self.remove_trailing_zeros(self.value)
 
         # trying to parse
         try:
@@ -51,11 +51,12 @@ class Cell():
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
         except lark.exceptions.VisitError as e:
             if isinstance(e.__context__, ZeroDivisionError):
-                # Value you set is the cell error OBJECT
-                # String is what the user sees/inputs 
-                # if get_cell_value evaluates to error, return value will be cell error object
-                # Can manually set cell error via #DIV/0! and so on
-                # set cell contents should only take strings
+                """ Value you set is the cell error OBJECT
+                String is what the user sees/inputs 
+                if get_cell_value evaluates to error, return value will be cell error object
+                Can manually set cell error via #DIV/0! and so on
+                set cell contents should only take strings """
+
                 evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
                 # return the above error
 
@@ -65,6 +66,7 @@ class Cell():
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
         
+<<<<<<< HEAD
         """ trying to strip trailing zeros of decimal objects
         if isinstance(evaluation,decimal.Decimal):
             print('###')
@@ -74,3 +76,32 @@ class Cell():
             print(evaluation) """
 
         return evaluation
+=======
+        # trying to strip trailing zeros of decimal objects
+        # if isinstance(evaluation,decimal.Decimal):
+        #     print(str(evaluation))
+        #     evaluation = self.remove_trailing_zeros(evaluation)
+        #     print(str(evaluation))
+        
+        # print('here')
+        return self.remove_trailing_zeros(evaluation)
+  
+    def is_float(self, element):
+        """ helper fuction to determine if a value is a float """
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
+    def remove_trailing_zeros(self, d):
+        """ 
+        helper function to remove trailing zeros from decimal.Decimal() 
+        from: https://docs.python.org/3/library/decimal.html#decimal-faq
+        """
+        if isinstance(d,decimal.Decimal):
+            return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
+        else:
+            return d
+>>>>>>> 993bc359c396309baba3d0ca9f2659b91795f148

@@ -52,7 +52,8 @@ class EvalExpressions(Transformer):
         self.sheet_instance = sheet_instance
 
     def number(self, args):
-        return decimal.Decimal(args[0])
+        d = decimal.Decimal(args[0])
+        return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
 
     def string(self, args):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes

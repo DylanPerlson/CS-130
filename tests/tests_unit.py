@@ -86,7 +86,7 @@ class TestWorkbook(unittest.TestCase):
             (_,name) = wb.new_sheet('" is the best')
 
 
-    def test_white_space_in_sheet_name(self):
+    def test_whitespace_in_sheet_name(self):
         wb = sheets.Workbook()
         with self.assertRaises(ValueError):
             (_,_) = wb.new_sheet(" first_sheet")
@@ -136,7 +136,8 @@ class TestWorkbook(unittest.TestCase):
             wb.get_cell_contents(name1, 'A5A57')
 
 
-    def test_leading_trailing_whitespace_cell_contents(self):
+    def test_whitespace_cell_contents(self):
+        """ test that leading and trailing whitespace is removed from contents """
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
 
@@ -220,6 +221,9 @@ class TestWorkbook(unittest.TestCase):
 
         wb.set_cell_contents(name, 'Z3', None)
         self.assertEqual((4,14),wb.get_sheet_extent(name))
+
+        wb.set_cell_contents(name, 'D14', None)
+        self.assertEqual((0,0),wb.get_sheet_extent(name))
 
         # TODO add tets on when input into a cell is over bounds > ZZZZ
 
@@ -306,6 +310,15 @@ class TestWorkbook(unittest.TestCase):
 
     #     self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
 
+
+    # test based on the acceptance tests, but I don't fully understand
+    def test_trailing_zeros_with_concat(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+
+        wb.set_cell_contents(name1, 'A3', '=5.0 & " should become 5"')
+        self.assertEqual('5 should become 5', wb.get_cell_value(name1, 'A3'))
+
     
     """ implementing a test for 'from sheets import *'
     def test_from_import(self):
@@ -315,15 +328,24 @@ class TestWorkbook(unittest.TestCase):
         self.assertTrue('Workbook' in sys.modules) """
 
 
-    """ implementing a test for trailing zeros with the decimals
     def test_decimal_trailing_zeros(self):
+        """ implementing a test for trailing zeros with the decimals """
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name1, 'AA57', '12.0')
 
-        self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57'))) """
+        wb.set_cell_contents(name1, 'AA57', '12.0')
+        self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
+    
+        wb.set_cell_contents(name1, 'A1', '100')
+        self.assertEqual('100', str(wb.get_cell_value(name1, 'A1')))
+    
+        wb.set_cell_contents(name1, 'A2', '1000.50')
+        self.assertEqual('1000.5', str(wb.get_cell_value(name1, 'A2')))
+    
+        wb.set_cell_contents(name1, 'A3', '=12.0+1.00')
+        self.assertEqual('13', str(wb.get_cell_value(name1, 'A3')))
     
     
 if __name__ == '__main__':
     print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=1)
+    unittest.main(verbosity=2)

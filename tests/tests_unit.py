@@ -15,6 +15,11 @@ class TestWorkbook(unittest.TestCase):
         (_, name) = wb.new_sheet("sheet")
         a = CellError(CellErrorType.)
     '''
+
+    #def test_bad_ref(self):
+        #wb = sheets.Workbook()    
+        #(_, name) = wb.new_sheet("sheet")
+        #print(wb.get_cell_value('name','A1'))
     def test_divide_by_zero(self):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("sheet")
@@ -255,7 +260,8 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name, 'D14', None)
         self.assertEqual((0,0),wb.get_sheet_extent(name))
 
-        # TODO add tets on when input into a cell is over bounds > ZZZZ
+        self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
+
 
 
     def test_double_quotes_for_single_quotes(self):

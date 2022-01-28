@@ -1,9 +1,10 @@
 import decimal
 from multiprocessing.sharedctypes import Value # TODO do we need these
 
-from sheets.cell_error import CellError
+from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
-
+MAX_ROW = 475254
+MAX_COL = 9999
 class Workbook:
 
     # A workbook containing zero or more named spreadsheets.
@@ -141,10 +142,7 @@ class Workbook:
         If the specified sheet name is not found, a KeyError is raised.
         """
         
-        """ old code for getting the extent
-        for i in self.sheets:
-            if i.sheet_name.lower() == sheet_name.lower():
-                return (i.extent[0],i.extent[1]) """
+      
         
         # new code for getting the extent
         for i in self.sheets:
@@ -189,7 +187,7 @@ class Workbook:
         rather, the cell's value will be a CellError object indicating the
         naure of the issue.
         """
-
+        
         for i in self.sheets:
             #edit cell content of specified sheet
             if (i.sheet_name == None):
@@ -262,12 +260,15 @@ class Workbook:
         whole number.  For example, this function would not return
         Decimal('1.000'); rather it would return Decimal('1').
         """
+        row,col = self.get_row_and_col(location)
+        if row > MAX_ROW or col > MAX_COL:
+            return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 workbook_instance = self
-                return i.get_cell_value(workbook_instance,location) # TODO make sure get value is correct
+                return i.get_cell_value(workbook_instance,location) 
             
         raise KeyError
 
@@ -320,3 +321,19 @@ class Workbook:
             return True
         except ValueError:
             return False
+
+    def get_row_and_col(self,location):
+        # Helper function to get absolute row/col of inputted location 
+        for e,i in enumerate(location):
+            if i.isdigit():
+                row = location[:e]          
+                #convert row letters to its row number
+                temp = 0
+                for j in range(1, len(row)+1):                            
+                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+                    
+                row = temp
+                col = int(location[e:])                
+                break
+                
+        return row, col

@@ -131,13 +131,13 @@ class Sheet:
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError
-        
+        #if row <= MAX_ROW and col <= MAX_COL:
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row
         if(col > self.extent[1]):
             self.extent[1] = col
-        
+    
         if not (row,col) in self.cells.keys():
             self.cells[(row,col)] = Cell(contents)
         else:
@@ -154,6 +154,9 @@ class Sheet:
 
     def get_cell_value(self, workbook_instance, location):
         row, col = self.get_row_and_col(location)
+        if row > MAX_ROW or col > MAX_COL:
+            return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
+
         sheet_instance = self
         if (row,col) not in self.cells.keys(): #empty cell case
             return None

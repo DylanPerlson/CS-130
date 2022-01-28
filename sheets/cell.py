@@ -14,7 +14,7 @@ class Cell():
             self.type = "FORMULA"
             
             # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
-
+        # TODO if a number is given for contents an error should be raised
         elif str(contents)[0] == "'":
             #if string is a number,
             if self.is_float(str(contents[1:])):
@@ -72,13 +72,8 @@ class Cell():
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
         
-        # trying to strip trailing zeros of decimal objects
-        # if isinstance(evaluation,decimal.Decimal):
-        #     print(str(evaluation))
-        #     evaluation = self.remove_trailing_zeros(evaluation)
-        #     print(str(evaluation))
-        
-        # print('here')
+
+
         return self.remove_trailing_zeros(evaluation)
   
     def is_float(self, element):

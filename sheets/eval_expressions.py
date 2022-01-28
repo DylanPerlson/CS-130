@@ -9,16 +9,18 @@ from .cell_error import CellError, CellErrorType
 
 error_literals = ['#REF!', '#ERROR!', '#CIRREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 class RetrieveReferences(Visitor):
-    def __init__(self):
+    def __init__(self, sheet_instance):
         self.references = []
+        self.sheet_instance = sheet_instance
+        self.error_occurred = False
 
     def cell(self, args):
         args = args.children
 
         # getting the appropriate sheet name and cell location
         if len(args) == 1:      # if using the current sheet
-            sheet_name = 'current' # TODO fix
-            cell = args[0].value
+            sheet_name = self.sheet_instance.sheet_name
+            cell_location = args[0].value
         elif len(args) == 2:    # if using a different sheet
             # in case of quotes around sheet name
             if args[0][0] == "'" and args[0][-1] == "'":
@@ -26,22 +28,15 @@ class RetrieveReferences(Visitor):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-                print('error1') # TODO BAD_REFERENCE
-            cell = args[1].value
+                self.error_occurred = True
+                sheet_name = ''
+            cell_location = args[1].value
         else:
-            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-            print('error2') # TODO BAD_REFERENCE
+            self.error_occurred = True
+            sheet_name = ''
+            cell_location = ''
 
-        try:
-            cell = 1 # TODO get_cell_value(sheet_name, cell) here
-        except:
-            cell = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-            # TODO BAD_REFERENCE 
-            exit()
-
-        # self.references.append([sheet_name, cell])
-        self.references.append(str(sheet_name) + '!' + str(cell))
+        self.references.append(str(sheet_name) + '!' + str(cell_location))
 
 
 class EvalExpressions(Transformer):

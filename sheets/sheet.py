@@ -1,5 +1,7 @@
 from collections import defaultdict
 from sheets.cell_error import CellError
+import lark
+from .eval_expressions import RetrieveReferences
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
 
@@ -130,9 +132,15 @@ class Sheet:
         if not (row,col) in self.cells.keys():
             self.cells[(row,col)] = Cell(contents)
         else:
-            self.cells[(row,col)].contents = contents
+            self.cells[(row,col)].contents = contents # TODO maybe make a new Cell object here
         # self.cells[(row,col)] = contents
         # self.printSCCs()
+
+        # these if functions prevent problems with non-formulas
+        if contents != None:
+            if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
+                # example: print(self.retrieve_cell_references(contents))
+                pass
 
     def get_cell_contents(self, location):
         row, col = self.get_row_and_col(location)
@@ -147,6 +155,14 @@ class Sheet:
             return None
         else:
             return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
+
+    def retrieve_cell_references(self, contents):
+        """ helper function that returns the references in a cell's formula """
+        parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        formula = parser.parse(contents)
+        ref = RetrieveReferences(self)
+        ref.visit(formula)
+        return ref.references
         
 
 

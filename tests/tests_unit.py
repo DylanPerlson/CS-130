@@ -1,5 +1,6 @@
 import os; os.system('cls')
 import context
+#from sheets import *
 import sheets
 from sheets.cell_error import CellError, CellErrorType
 import unittest
@@ -8,24 +9,52 @@ import decimal
 
 class TestWorkbook(unittest.TestCase):
     """ Performing unit tests on the sheets module. """
+    '''
+    def test_set_cell_as_error(self):
+        wb = sheets.Workbook()    
+        (_, name) = wb.new_sheet("sheet")
+        a = CellError(CellErrorType.)
+    '''
+    def test_divide_by_zero(self):
+        wb = sheets.Workbook()    
+        (_, name) = wb.new_sheet("sheet")
+        wb.set_cell_contents(name,'A1','=3/0')   
+        wb.set_cell_contents(name,'A4','=-A1')
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.DIVIDE_BY_ZERO)  
+        self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.DIVIDE_BY_ZERO)
+        wb.set_cell_contents(name,'A2','=3/A3')
+        wb.set_cell_contents(name,'A3','0')
+        wb.set_cell_contents(name,'A5','=2+A1')
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.DIVIDE_BY_ZERO)
+       
+        self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.DIVIDE_BY_ZERO)
+        
+        #print(wb.get_cell_value(name,'A1') is CellError(CellErrorType.DIVIDE_BY_ZERO, "division by zero", ZeroDivisionError))
+    # def test_string_errors(self):
+    #     wb = sheets.Workbook()    
+    #     (_, name) = wb.new_sheet("sheet")
+    #     wb.set_cell_contents(name,'A1',3/0)
+    #     print(wb.get_cell_contents(name,'A1'))
+        
 
-
+        #with self.assertRaises(CellErrorType.PARSE_ERROR):
+            #wb.set_cell_contents(name,'A1',"='hi'+3")
+            
+ 
     def test_string_comes_back_as_decimal(self): 
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name,'A1',"'100")
         wb.set_cell_contents(name,'A2',"'13.4")
-       
-        #self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal(13.4))
-        self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal(100))
-        self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
         
-        wb.set_cell_contents(name,'A1',"'100")
+        self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal('13.4'))
+        self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal('100'))
+        self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
 
-        #wb.set_cell_contents(name,"'-13",'A2')
-        #wb.set_cell_contents(name,"'12.2",'A3')
-        #print(wb.get_cell_value(name,'A1'),"hi")
-    
+        wb.set_cell_contents(name,'A3',"'-13.3")
+        self.assertEqual(wb.get_cell_value(name,'A3'),decimal.Decimal('-13.3'))
+
+        
     def test_unset_cells_return_None(self): 
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
@@ -236,14 +265,10 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.num_sheets, 0)
     
 
-    def test_cell_errors(self):
+    def test_cell_errors(self): #make this a better parse error
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name1, 'A4', '=9/0')
-        value1 = wb.get_cell_value("first_sheet", 'A4')
-        # print(list(wb.sheets[0].cells.values())[0].contents)
-        # print("Expect divide by 0 error")
-        # print(value1)
+     
 
         wb.set_cell_contents(name1, 'B4', '=??????')
         value2 = wb.get_cell_value("first_sheet", 'B4')
@@ -302,4 +327,4 @@ class TestWorkbook(unittest.TestCase):
     
 if __name__ == '__main__':
     print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=1)
+    unittest.main(verbosity=0)

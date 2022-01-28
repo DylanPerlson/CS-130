@@ -58,6 +58,9 @@ class EvalExpressions(Transformer):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
+        
+        if(type(args[1]) is CellError):
+            return args[1]
         if args[0] == '+':
             return decimal.Decimal(args[1])
         elif args[0] == '-':
@@ -66,9 +69,16 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def parens(self, args):
+        #if reference a cell error
         return args[0]
 
     def add_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[2]) is CellError:
+            return args[2]
+
         if (args[0] == None):
             args[0] = 0
         if (args[2] == None):
@@ -85,6 +95,12 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def mul_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[2]) is CellError:
+            return args[2]
+
         if args[1] == '/' and str(args[2]) == '0':
             return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
         # if (args[0] in error_literals or args[2] in error_literals):
@@ -97,6 +113,11 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def concat_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[1]) is CellError:
+            return args[2]
         if(args[0] == None):
             args[0] = ''
         if(args[1] == None):
@@ -106,6 +127,7 @@ class EvalExpressions(Transformer):
 
     def cell(self, args):
         # if using the current sheet
+        
         if len(args) == 1:      
             sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
@@ -129,5 +151,4 @@ class EvalExpressions(Transformer):
 
         # if cell_value == None:
         #    cell_value = 0 # TODO "" for string
-
         return cell_value

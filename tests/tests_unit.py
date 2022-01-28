@@ -10,26 +10,26 @@ class TestWorkbook(unittest.TestCase):
     """ Performing unit tests on the sheets module. """
 
 
-    def test_string_comes_back_as_decimal(self): 
-        wb = sheets.Workbook()    
-        (_, name) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name,'A1',"'100")
-        wb.set_cell_contents(name,'A2',13.4)
+    # def test_string_comes_back_as_decimal(self): 
+    #     wb = sheets.Workbook()    
+    #     (_, name) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name,'A1',"'100")
+    #     wb.set_cell_contents(name,'A2',13.4)
         
-        self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal(100))
-        self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
+    #     self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal('100'))
+    #     self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
         
-        wb.set_cell_contents(name,'A1',"'100")
+    #     wb.set_cell_contents(name,'A1',"'100")
 
-        #wb.set_cell_contents(name,"'-13",'A2')
-        #wb.set_cell_contents(name,"'12.2",'A3')
-        #print(wb.get_cell_value(name,'A1'),"hi")
+    #     #wb.set_cell_contents(name,"'-13",'A2')
+    #     #wb.set_cell_contents(name,"'12.2",'A3')
+    #     #print(wb.get_cell_value(name,'A1'),"hi")
     
-    def test_unset_cells_return_None(self): 
-        wb = sheets.Workbook()    
-        (_, name) = wb.new_sheet("first_sheet")
-        self.assertEqual(wb.get_cell_value(name,'A1'),None)
-        self.assertEqual(wb.get_cell_contents(name,'A1'),None)
+    # def test_unset_cells_return_None(self): 
+    #     wb = sheets.Workbook()    
+    #     (_, name) = wb.new_sheet("first_sheet")
+    #     self.assertEqual(wb.get_cell_value(name,'A1'),None)
+    #     self.assertEqual(wb.get_cell_contents(name,'A1'),None)
         
          
     def test_empty_cells(self):
@@ -94,46 +94,46 @@ class TestWorkbook(unittest.TestCase):
             (_,_) = wb.new_sheet("first_sheet ")
 
 
-    def test_mistakes_in_cell_location(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
+    # def test_mistakes_in_cell_location(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
 
-        with self.assertRaises(ValueError):
-            wb.set_cell_contents(name1, ' AA57', '12')
-        with self.assertRaises(ValueError):
-            wb.set_cell_contents(name1, 'A5A57', '12')
-
-
-    def test_sheet_name_uniqueness(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-        with self.assertRaises(ValueError):
-            (_, name2) = wb.new_sheet("first_sheet")
-        with self.assertRaises(ValueError):
-            (_, name2) = wb.new_sheet("First_Sheet")
+    #     with self.assertRaises(ValueError):
+    #         wb.set_cell_contents(name1, ' AA57', '12')
+    #     with self.assertRaises(ValueError):
+    #         wb.set_cell_contents(name1, 'A5A57', '12')
 
 
-    def test_set_and_get_cell_contents(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-        (_, name2) = wb.new_sheet("second_sheet")
+    # def test_sheet_name_uniqueness(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     with self.assertRaises(ValueError):
+    #         (_, name2) = wb.new_sheet("first_sheet")
+    #     with self.assertRaises(ValueError):
+    #         (_, name2) = wb.new_sheet("First_Sheet")
 
-        wb.set_cell_contents(name1, 'AA57', '12')
-        wb.set_cell_contents("second_sheet", 'ba4', '=10' )
-        wb.set_cell_contents("second_sheet", 'ba5', "'string" )
 
-        content1 = wb.get_cell_contents("first_sheet", 'AA57')
-        content2 = wb.get_cell_contents(name2, 'ba4')
-        content3 = wb.get_cell_contents(name2, 'ba5')
+    # def test_set_and_get_cell_contents(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     (_, name2) = wb.new_sheet("second_sheet")
 
-        self.assertEqual(content1, '12') 
-        self.assertEqual(content2, '=10')
-        self.assertEqual(content3, "'string")
+    #     wb.set_cell_contents(name1, 'AA57', '12')
+    #     wb.set_cell_contents("second_sheet", 'ba4', '=10' )
+    #     wb.set_cell_contents("second_sheet", 'ba5', "'string" )
 
-        with self.assertRaises(ValueError):
-            wb.get_cell_contents(name1, ' AA57')
-        with self.assertRaises(ValueError):
-            wb.get_cell_contents(name1, 'A5A57')
+    #     content1 = wb.get_cell_contents("first_sheet", 'AA57')
+    #     content2 = wb.get_cell_contents(name2, 'ba4')
+    #     content3 = wb.get_cell_contents(name2, 'ba5')
+
+    #     self.assertEqual(content1, '12') 
+    #     self.assertEqual(content2, '=10')
+    #     self.assertEqual(content3, "'string")
+
+    #     with self.assertRaises(ValueError):
+    #         wb.get_cell_contents(name1, ' AA57')
+    #     with self.assertRaises(ValueError):
+    #         wb.get_cell_contents(name1, 'A5A57')
 
 
     def test_whitespace_cell_contents(self):
@@ -141,65 +141,65 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
 
-        wb.set_cell_contents(name1, 'AA57', 'Lots of space in the back      ')
-        wb.set_cell_contents(name1, 'ba4', '        =54' )
-        wb.set_cell_contents(name1, 'ba5', "      " )
-        wb.set_cell_contents(name1, 'C23', "")
+    #     wb.set_cell_contents(name1, 'AA57', 'Lots of space in the back      ')
+    #     wb.set_cell_contents(name1, 'ba4', '        =54' )
+    #     wb.set_cell_contents(name1, 'ba5', "      " )
+    #     wb.set_cell_contents(name1, 'C23', "")
 
-        content1 = wb.get_cell_contents("first_sheet", 'AA57')
-        content2 = wb.get_cell_contents(name1, 'ba4')
-        content3 = wb.get_cell_contents(name1, 'ba5')
-        content4 = wb.get_cell_contents(name1, 'C23')
+    #     content1 = wb.get_cell_contents("first_sheet", 'AA57')
+    #     content2 = wb.get_cell_contents(name1, 'ba4')
+    #     content3 = wb.get_cell_contents(name1, 'ba5')
+    #     content4 = wb.get_cell_contents(name1, 'C23')
 
-        self.assertEqual(content1, 'Lots of space in the back') 
-        # TODO ^ not sure whether this must be a string or decimal.Decimal
-        self.assertEqual(content2, '=54')
-        self.assertEqual(content3, None)
-        self.assertEqual(content4, None)
-
-
-    def test_simple_formula_with_decimal(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-
-        content = '=12+3-5'
-        wb.set_cell_contents(name1, 'AA57', content)
-        self.assertEqual(decimal.Decimal(12+3-5),wb.get_cell_value(name1, 'aa57'))
-
-        content = '=12+3*(4+5)/4'
-        wb.set_cell_contents(name1, 'ba43', content)
-        self.assertEqual(decimal.Decimal(12+3*(4+5)/4),wb.get_cell_value(name1, 'ba43'))
-
-        content = '=42*-4*-1'
-        wb.set_cell_contents(name1, 'eee3', content)
-        self.assertEqual(decimal.Decimal(42*-4*-1),wb.get_cell_value(name1, 'eee3'))
+    #     self.assertEqual(content1, 'Lots of space in the back') 
+    #     # TODO ^ not sure whether this must be a string or decimal.Decimal
+    #     self.assertEqual(content2, '=54')
+    #     self.assertEqual(content3, None)
+    #     self.assertEqual(content4, None)
 
 
-    def test_max_sheet_size(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name1, 'ZZZZ9999', 'maximum')
-        value1 = wb.get_cell_contents("first_sheet", 'ZZZZ9999')
-        self.assertEqual(value1, 'maximum')
+    # def test_simple_formula_with_decimal(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
 
-        with self.assertRaises(ValueError):
-            wb.set_cell_contents(name1, 'ZZZZ10000', 'too many columns')
-        with self.assertRaises(ValueError):
-            wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
+    #     content = '=12+3-5'
+    #     wb.set_cell_contents(name1, 'AA57', content)
+    #     self.assertEqual(decimal.Decimal(12+3-5),wb.get_cell_value(name1, 'aa57'))
+
+    #     content = '=12+3*(4+5)/4'
+    #     wb.set_cell_contents(name1, 'ba43', content)
+    #     self.assertEqual(decimal.Decimal(12+3*(4+5)/4),wb.get_cell_value(name1, 'ba43'))
+
+    #     content = '=42*-4*-1'
+    #     wb.set_cell_contents(name1, 'eee3', content)
+    #     self.assertEqual(decimal.Decimal(42*-4*-1),wb.get_cell_value(name1, 'eee3'))
 
 
-    def test_simple_cell_reference(self):
-        wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
-        (_, name2) = wb.new_sheet("second_sheet")
+    # def test_max_sheet_size(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name1, 'ZZZZ9999', 'maximum')
+    #     value1 = wb.get_cell_contents("first_sheet", 'ZZZZ9999')
+    #     self.assertEqual(value1, 'maximum')
 
-        wb.set_cell_contents(name1, 'AA57', '5')
-        wb.set_cell_contents(name1, 'c4', '=aa57')
-        wb.set_cell_contents(name2, 'c4', '=first_sheet!aa57')
-        wb.set_cell_contents(name2, 'c5', "='first_sheet'!aa57")
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4')) 
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4')) 
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5')) 
+    #     with self.assertRaises(ValueError):
+    #         wb.set_cell_contents(name1, 'ZZZZ10000', 'too many columns')
+    #     with self.assertRaises(ValueError):
+    #         wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
+
+
+    # def test_simple_cell_reference(self):
+    #     wb = sheets.Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     (_, name2) = wb.new_sheet("second_sheet")
+
+    #     wb.set_cell_contents(name1, 'AA57', '5')
+    #     wb.set_cell_contents(name1, 'c4', '=aa57')
+    #     wb.set_cell_contents(name2, 'c4', '=first_sheet!aa57')
+    #     wb.set_cell_contents(name2, 'c5', "='first_sheet'!aa57")
+    #     self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4')) 
+    #     self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4')) 
+    #     self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5')) 
 
 
     def test_extent(self):
@@ -259,17 +259,41 @@ class TestWorkbook(unittest.TestCase):
     def test_cell_errors(self):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name1, 'A4', '=9/0')
-        value1 = wb.get_cell_value("first_sheet", 'A4')
+        # wb.set_cell_contents(name1, 'A4', '=9/0')
+        # wb.set_cell_contents(name1, 'A5', '=A4/1')
+        # value1 = wb.get_cell_value("first_sheet", 'A4')
+        # value2 = wb.get_cell_value("first_sheet", 'A5')
         # print(list(wb.sheets[0].cells.values())[0].contents)
-        # print("Expect divide by 0 error")
-        # print(value1)
-
-        wb.set_cell_contents(name1, 'B4', '=??????')
-        value2 = wb.get_cell_value("first_sheet", 'B4')
         # print(list(wb.sheets[0].cells.values())[1].contents)
-        # print("Expect parse error")
+        # print("Expect divide by 0 errors")
+        # print(value1)
         # print(value2)
+
+        # wb.set_cell_contents(name1, 'B4', '=5+')
+        # value3 = wb.get_cell_value("first_sheet", 'B4')
+        # print(list(wb.sheets[0].cells.values())[2].contents)
+        # print("Expect parse error")
+        # print(value3)
+
+        # wb.set_cell_contents(name1, 'C4', '=second_sheet!A4 + 1')
+        # value4 = wb.get_cell_value("first_sheet", 'C4')
+        # print(list(wb.sheets[0].cells.values())[3].contents)
+        # print("Expect bad reference error")
+        # print(value4)
+
+        wb.set_cell_contents(name1, 'D4', '="Hello"+1')
+        value5 = wb.get_cell_value("first_sheet", 'D4')
+        print(list(wb.sheets[0].cells.values())[0].contents)
+        print("Expect type error")
+        print(value5)
+
+        # wb.set_cell_contents(name1, 'B4', '=5>3')
+        # value6 = wb.get_cell_value("first_sheet", 'B4')
+        # print(list(wb.sheets[0].cells.values())[5].contents)
+        # print("Expect name error")
+        # print(value6)
+
+        #Edge case that has to prioritize errors
 
 
     def test_decimal(self):

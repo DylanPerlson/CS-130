@@ -13,7 +13,6 @@ class Cell():
         if str(contents)[0] == '=':
             self.type = "FORMULA"
             # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
-
         elif str(contents)[0] == "'":
             self.type = "STRING"
             self.value = str(contents[1:]) 
@@ -25,6 +24,8 @@ class Cell():
             self.type = "NONE"
             self.content = None
             self.value = None
+        #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
+        #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
         else:
             self.type = "LITERAL"
             self.value = str(contents)
@@ -62,9 +63,12 @@ class Cell():
 
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
+            
+            elif isinstance(e.__context__, TypeError):
+                evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
-                evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+                evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)
         
         # trying to strip trailing zeros of decimal objects
         # if isinstance(evaluation,decimal.Decimal):

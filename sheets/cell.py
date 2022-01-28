@@ -9,17 +9,17 @@ class Cell():
     def __init__ (self, contents):
         self.contents = contents
 
+        # TODO if a number is given for contents an error should be raised
         # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
-            
             # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
-        # TODO if a number is given for contents an error should be raised
         elif str(contents)[0] == "'":
             #if string is a number,
             if self.is_float(str(contents[1:])):
                 self.type = "LITERAL"
-                self.value = decimal.Decimal(contents[1:])
+               
+                self.value = decimal.Decimal(str(contents[1:]))
                 
 
             else:
@@ -28,13 +28,17 @@ class Cell():
             
         elif self.is_float(str(contents)):
             self.type = "LITERAL"
-            self.value = decimal.Decimal(contents)
+            self.value = decimal.Decimal(str(contents))
         elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
             self.content = None
             self.value = None
+        #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
+        #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
+        else:
+            self.type = "LITERAL"
+            self.value = str(contents)
 
-    
 
     def get_cell_value(self, workbook_instance, sheet_instance):
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
@@ -49,13 +53,17 @@ class Cell():
         # trying to parse
         try:
             formula = parser.parse(self.contents)
+            
         except:
             return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
         # trying to evaluate
         try: 
+            
+
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
         except lark.exceptions.VisitError as e:
+            
             if isinstance(e.__context__, ZeroDivisionError):
                 """ Value you set is the cell error OBJECT
                 String is what the user sees/inputs 
@@ -68,9 +76,12 @@ class Cell():
 
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
+            
+            elif isinstance(e.__context__, TypeError):
+                evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
-                evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
+                evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)
         
 
 

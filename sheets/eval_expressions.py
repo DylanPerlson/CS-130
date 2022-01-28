@@ -2,12 +2,35 @@
 
 from ast import arg
 import decimal
+from distutils.log import error
 import lark
 import decimal
 from lark import Transformer, Visitor
 from .cell_error import CellError, CellErrorType
 
-error_literals = ['#REF!', '#ERROR!', '#CIRREF!', '#VALUE!', '#DIV/0!', '#NAME?']
+error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
+
+#Helper function to generate error objects when parsing formulas
+#Error literals are strings
+#Might be creating cellerror objects
+def generate_error_object(error_arg):
+    if isinstance(error_arg, CellError):
+        cell_error_obj = error_arg
+    if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")):
+        return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+    elif error_arg == '#ERROR!' or isinstance(cell_error_obj, CellError(CellErrorType.PARSE_ERROR, "Parse Error")):
+        return CellError(CellErrorType.PARSE_ERROR, "Parse Error")
+    elif error_arg == '#CIRCREF!' or isinstance(cell_error_obj, CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")):
+        return CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+    elif error_arg == '#VALUE!' or isinstance(cell_error_obj, CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")):
+        return CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
+    elif error_arg == '#DIV/0!' or isinstance(cell_error_obj, CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")):
+        return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")
+    elif error_arg == '#NAME?' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_NAME, "Unrecognized function name")):
+        return CellError(CellErrorType.BAD_NAME, "Unrecognized function name")
+
+#Use this somewhere
+
 class RetrieveReferences(Visitor):
     def __init__(self, sheet_instance):
         self.references = []
@@ -54,6 +77,9 @@ class EvalExpressions(Transformer):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
+        
+        if(type(args[1]) is CellError):
+            return args[1]
         if args[0] == '+':
             return decimal.Decimal(args[1])
         elif args[0] == '-':
@@ -62,16 +88,36 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def parens(self, args):
+        #if reference a cell error
         return args[0]
 
     def add_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[2]) is CellError:
+            return args[2]
+
         if (args[0] == None):
             args[0] = 0
         if (args[2] == None):
             args[2] = 0
 
-        # if (args[0] in error_literals or args[2] in error_literals):
-        #     return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+        if (str(args[0]).isdigit and not str(args[2]).isdigit): 
+            newError = generate_error_object("#VALUE!")
+            return newError
+        if (str(args[2]).isdigit and not str(args[0]).isdigit): 
+            newError = generate_error_object("#VALUE!")
+            return newError
+
+        #Error_literals only consider strings, not CellError object
+        # Make sure to account for both
+        if (args[0] in error_literals or isinstance(args[0], CellError)):
+            newError = generate_error_object(args[0])
+            return newError
+        if (args[2] in error_literals or isinstance(args[2], CellError)):
+            newError = generate_error_object(args[2])
+            return newError
 
         if args[1] == '+':
             return decimal.Decimal(decimal.Decimal(args[0])+decimal.Decimal(args[2]))
@@ -81,10 +127,34 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def mul_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[2]) is CellError:
+            return args[2]
+
+        if (args[0] == None):
+            args[0] = 0
+        if (args[2] == None):
+            args[2] = 0
+        
         if args[1] == '/' and str(args[2]) == '0':
-            return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", 'division by zero')
-        # if (args[0] in error_literals or args[2] in error_literals):
-        #     return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+            return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", "division by zero")
+        
+        if (str(args[0]).isdigit and not str(args[2]).isdigit): 
+            newError = generate_error_object("#VALUE!")
+            return newError
+        if (str(args[2]).isdigit and not str(args[0]).isdigit): 
+            newError = generate_error_object("#VALUE!")
+            return newError
+        
+        if (args[0] in error_literals or isinstance(args[0], CellError)):
+            newError = generate_error_object(args[0])
+            return newError
+        if (args[2] in error_literals or isinstance(args[2], CellError)):
+            newError = generate_error_object(args[2])
+            return newError
+        
         if args[1] == '*':
             return decimal.Decimal(decimal.Decimal(args[0])*decimal.Decimal(args[2]))
         elif args[1] == '/':
@@ -93,15 +163,28 @@ class EvalExpressions(Transformer):
             raise Exception
 
     def concat_expr(self, args):
+        #if reference a cell error
+        if type(args[0]) is CellError:
+            return args[0]
+        if type(args[1]) is CellError:
+            return args[2]
         if(args[0] == None):
             args[0] = ''
         if(args[1] == None):
-            args[1] = ''   
+            args[1] = ''
+
+        if (args[0] in error_literals or isinstance(args[0], CellError)):
+            newError = generate_error_object(args[0])
+            return newError
+        if (args[1] in error_literals or isinstance(args[1], CellError)):
+            newError = generate_error_object(args[1])
+            return newError   
 
         return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
         # if using the current sheet
+        
         if len(args) == 1:      
             sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
@@ -113,10 +196,10 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
+                return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
             cell = args[1]
         else:
-            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
+            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
@@ -125,5 +208,4 @@ class EvalExpressions(Transformer):
 
         # if cell_value == None:
         #    cell_value = 0 # TODO "" for string
-
         return cell_value

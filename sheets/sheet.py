@@ -92,9 +92,20 @@ class Sheet:
             if visited[i]==False:
                 gr.DFSUtil(i, visited)
                 circ_ref_cells.append(i)
-        
+        # Want to find all cycles,
+        # When you update a single cell, only that single cell's dependencies changes
+        # Topological order starting at A1
+        # At any given time, graph updates based around one location
+        # Suppose A1 =A2 A3 =A2
+        # user inputs something for A2
+        # lame way: loop through all cells to determine loop
+        # Better way: Have edge from A2 to A1, A3
+        # If A2 updates, you know what cells need to be updated
+        # Every Cell store edges of cells that rely on it
+        # Propogate changes out from that node
+
         self.parent_workbook.del_sheet(self.sheet_name)
-        
+        #If circular reference, only update cell VALUE to CIRCREF! error, not update contents
         for curr_cell in circ_ref_cells:
             self.set_cell_contents(curr_cell, CellError(CellErrorType.CIRCULAR_REFERENCE, "#CIRC_REF!", "None"))
         for curr_cell in self.cells:

@@ -66,17 +66,6 @@ class Cell():
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
         
-<<<<<<< HEAD
-        """ trying to strip trailing zeros of decimal objects
-        if isinstance(evaluation,decimal.Decimal):
-            print('###')
-            print(evaluation)
-            
-            evaluation = decimal.Decimal(str(evaluation).strip('0'))
-            print(evaluation) """
-
-        return evaluation
-=======
         # trying to strip trailing zeros of decimal objects
         # if isinstance(evaluation,decimal.Decimal):
         #     print(str(evaluation))
@@ -104,4 +93,3 @@ class Cell():
             return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
         else:
             return d
->>>>>>> 993bc359c396309baba3d0ca9f2659b91795f148

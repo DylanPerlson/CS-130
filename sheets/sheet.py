@@ -1,5 +1,7 @@
 from collections import defaultdict
 from sheets.cell_error import CellError
+import lark
+from .eval_expressions import RetrieveReferences
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
 
@@ -131,20 +133,25 @@ class Sheet:
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError
-        
+        #if row <= MAX_ROW and col <= MAX_COL:
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row
         if(col > self.extent[1]):
             self.extent[1] = col
-        
+    
         if not (row,col) in self.cells.keys():
             self.cells[(row,col)] = Cell(contents)
         else:
-            self.cells[(row,col)].contents = contents
-        # One approach is update all dependencies after setting contents
+            self.cells[(row,col)].contents = contents # TODO maybe make a new Cell object here
         # self.cells[(row,col)] = contents
         # self.printSCCs()
+
+        # these if functions prevent problems with non-formulas
+        if contents != None:
+            if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
+                # example: print(self.retrieve_cell_references(contents))
+                pass
 
     def get_cell_contents(self, location):
         row, col = self.get_row_and_col(location)
@@ -154,11 +161,22 @@ class Sheet:
 
     def get_cell_value(self, workbook_instance, location):
         row, col = self.get_row_and_col(location)
+        if row > MAX_ROW or col > MAX_COL:
+            return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
+
         sheet_instance = self
         if (row,col) not in self.cells.keys(): #empty cell case
             return None
         else:
             return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance) 
+
+    def retrieve_cell_references(self, contents):
+        """ helper function that returns the references in a cell's formula """
+        parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        formula = parser.parse(contents)
+        ref = RetrieveReferences(self)
+        ref.visit(formula)
+        return ref.references
         
 
 

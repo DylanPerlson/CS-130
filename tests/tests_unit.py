@@ -15,12 +15,17 @@ class TestWorkbook(unittest.TestCase):
         (_, name) = wb.new_sheet("sheet")
         a = CellError(CellErrorType.)
     '''
+
+    #def test_bad_ref(self):
+        #wb = sheets.Workbook()    
+        #(_, name) = wb.new_sheet("sheet")
+        #print(wb.get_cell_value('name','A1'))
     def test_divide_by_zero(self):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("sheet")
         wb.set_cell_contents(name,'A1','=3/0')   
         wb.set_cell_contents(name,'A4','=-A1')
-        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.DIVIDE_BY_ZERO)  
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(), CellErrorType.DIVIDE_BY_ZERO)  
         self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.DIVIDE_BY_ZERO)
         wb.set_cell_contents(name,'A2','=3/A3')
         wb.set_cell_contents(name,'A3','0')
@@ -81,7 +86,7 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name,'A1',"'100")
-        wb.set_cell_contents(name,'A2',"'13.4")
+        wb.set_cell_contents(name,'A2','13.4')
         
         self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal('13.4'))
         self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal('100'))
@@ -291,7 +296,8 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name, 'D14', None)
         self.assertEqual((0,0),wb.get_sheet_extent(name))
 
-        # TODO add tets on when input into a cell is over bounds > ZZZZ
+        self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
+
 
 
     def test_double_quotes_for_single_quotes(self):
@@ -325,8 +331,7 @@ class TestWorkbook(unittest.TestCase):
     # def test_cell_errors(self): #make this a better parse error
     #     wb = sheets.Workbook()
     #     (_, name1) = wb.new_sheet("first_sheet")
-     
-
+    
     #     wb.set_cell_contents(name1, 'B4', '=9/0')
     #     value1 = wb.get_cell_value("first_sheet", 'B4')
     #     print(list(wb.sheets[0].cells.values())[0].contents)
@@ -388,14 +393,14 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
 
 
-    # def test_string_concat(self):
-    #     wb = sheets.Workbook()
-    #     (_, name1) = wb.new_sheet("first_sheet")
-    #     wb.set_cell_contents(name1, 'AA57', 'hello')
-    #     wb.set_cell_contents(name1, 'AA58', "' world")
-    #     wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
+    def test_string_concat(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'AA57', 'hello')
+        wb.set_cell_contents(name1, 'AA58', "' world")
+        wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
 
-    #     self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
+        self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
 
 
     # test based on the acceptance tests, but I don't fully understand

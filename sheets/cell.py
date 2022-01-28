@@ -9,6 +9,7 @@ class Cell():
     def __init__ (self, contents):
         self.contents = contents
 
+        # TODO if a number is given for contents an error should be raised
         # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
@@ -82,13 +83,8 @@ class Cell():
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)
         
-        # trying to strip trailing zeros of decimal objects
-        # if isinstance(evaluation,decimal.Decimal):
-        #     print(str(evaluation))
-        #     evaluation = self.remove_trailing_zeros(evaluation)
-        #     print(str(evaluation))
-        
-        # print('here')
+
+
         return self.remove_trailing_zeros(evaluation)
   
     def is_float(self, element):

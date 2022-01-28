@@ -1,7 +1,7 @@
 # Object class for individual cell
 import lark
 import decimal
-from .eval_expressions import EvalExpressions
+from .eval_expressions import EvalExpressions, generate_error_object
 from .cell_error import CellErrorType, CellError
 from decimal import *
 
@@ -17,14 +17,10 @@ class Cell():
             #if string is a number,
             if self.is_float(str(contents[1:])):
                 self.type = "LITERAL"
-               
                 self.value = decimal.Decimal(str(contents[1:]))
-                
-
             else:
                 self.type = "STRING"
                 self.value = str(contents[1:]) 
-            
         elif self.is_float(str(contents)):
             self.type = "LITERAL"
             self.value = decimal.Decimal(str(contents))
@@ -48,18 +44,15 @@ class Cell():
         #string case
         elif self.contents[0] == "'":
             return self.remove_trailing_zeros(self.value)
-
+        
         # trying to parse
         try:
             formula = parser.parse(self.contents)
-            
         except:
             return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
         # trying to evaluate
         try: 
-            
-
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
         except lark.exceptions.VisitError as e:
             
@@ -76,8 +69,8 @@ class Cell():
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
             
-            elif isinstance(e.__context__, TypeError):
-                evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
+            # elif isinstance(e.__context__, TypeError):
+            #     evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)

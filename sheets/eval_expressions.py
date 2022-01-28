@@ -73,6 +73,9 @@ class EvalExpressions(Transformer):
     def __init__(self, workbook_instance, sheet_instance):
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
+    
+    def error(self, args):
+        return generate_error_object(args[0])
 
     def number(self, args):
         d = decimal.Decimal(args[0])
@@ -82,7 +85,6 @@ class EvalExpressions(Transformer):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
-        
         if(type(args[1]) is CellError):
             return args[1]
         if args[0] == '+':
@@ -108,12 +110,12 @@ class EvalExpressions(Transformer):
         if (args[2] == None):
             args[2] = 0
 
-        if (str(args[0]).isdigit and not str(args[2]).isdigit): 
-            newError = generate_error_object("#VALUE!")
-            return newError
-        if (str(args[2]).isdigit and not str(args[0]).isdigit): 
-            newError = generate_error_object("#VALUE!")
-            return newError
+        # if (str(args[0]).isdigit and not str(args[2]).isdigit): 
+        #     newError = generate_error_object("#VALUE!")
+        #     return newError
+        # if (str(args[2]).isdigit and not str(args[0]).isdigit): 
+        #     newError = generate_error_object("#VALUE!")
+        #     return newError
 
         #Error_literals only consider strings, not CellError object
         # Make sure to account for both

@@ -1,30 +1,36 @@
 # Object class for individual cell
 import lark
 import decimal
-from .eval_expressions import EvalExpressions
+from .eval_expressions import EvalExpressions, generate_error_object
 from .cell_error import CellErrorType, CellError
 from decimal import *
 
 class Cell():
     def __init__ (self, contents):
-        # Determine Cell Type
         self.contents = contents
 
+        # TODO if a number is given for contents an error should be raised
+        # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
-            #self.value = self.get_cell_value(contents) # TODO curr_sheet needed
-
+            # self.value = self.get_cell_value(contents) # TODO curr_sheet needed
         elif str(contents)[0] == "'":
-            self.type = "STRING"
-            self.value = str(contents[1:]) 
-            # TODO bring back if there is an error here
-        elif str(contents)[0].isdigit():
+            #if string is a number,
+            if self.is_float(str(contents[1:])):
+                self.type = "LITERAL"
+                self.value = decimal.Decimal(str(contents[1:]))
+            else:
+                self.type = "STRING"
+                self.value = str(contents[1:]) 
+        elif self.is_float(str(contents)):
             self.type = "LITERAL"
-            self.value = decimal.Decimal(contents)
+            self.value = decimal.Decimal(str(contents))
         elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
             self.content = None
             self.value = None
+        #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
+        #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
         else:
             self.type = "LITERAL"
             self.value = str(contents)
@@ -35,51 +41,60 @@ class Cell():
 
         #digit case
         if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
-            return self.value
+            return self.remove_trailing_zeros(self.value)
         #string case
         elif self.contents[0] == "'":
-            # return self.contents[1:]
-            return self.value
-        # print(self.contents)
+            return self.remove_trailing_zeros(self.value)
+        
         # trying to parse
         try:
             formula = parser.parse(self.contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
-        # print(formula.pretty())
         # trying to evaluate
         try: 
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
-            # print('\n\n',type(evaluation))
         except lark.exceptions.VisitError as e:
+            
             if isinstance(e.__context__, ZeroDivisionError):
-                # Value you set is the cell error OBJECT
-                # String is what the user sees/inputs 
-                # if get_cell_value evaluates to error, return value will be cell error object
-                # Can manually set cell error via #DIV/0! and so on
-                # set cell contents should only take strings
+                """ Value you set is the cell error OBJECT
+                String is what the user sees/inputs 
+                if get_cell_value evaluates to error, return value will be cell error object
+                Can manually set cell error via #DIV/0! and so on
+                set cell contents should only take strings """
+
                 evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
                 # return the above error
-                # evaluation = '#DIV/0!'
-                #print('zero error') # TODO DIVIDE_BY_ZERO 
-                exit()
 
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
-                #print('type error') # TODO TYPE_ERROR 
-                exit()
+            
+            # elif isinstance(e.__context__, TypeError):
+            #     evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
-                evaluation = CellError(CellErrorType.BAD_REFERENCE, "#BAD_REF!", None)
-                #print('other error')
-                exit()
+                evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)
         
-        # if isinstance(evaluation,decimal.Decimal):
-        #     print('###')
-        #     print(evaluation)
-            
-        #     evaluation = decimal.Decimal(str(evaluation).strip('0'))
-        #     print(evaluation)
 
-        return evaluation
+
+        return self.remove_trailing_zeros(evaluation)
+  
+    def is_float(self, element):
+        """ helper fuction to determine if a value is a float """
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
+    def remove_trailing_zeros(self, d):
+        """ 
+        helper function to remove trailing zeros from decimal.Decimal() 
+        from: https://docs.python.org/3/library/decimal.html#decimal-faq
+        """
+        if isinstance(d,decimal.Decimal):
+            return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
+        else:
+            return d

@@ -457,6 +457,13 @@ class TestWorkbook(unittest.TestCase):
 
         with open('json_data3.json', 'w') as fp:
             wb.save_workbook(fp)
+
+    def test_load_workbook(self):
+        with open('json_data.json') as fp:
+            test = sheets.Workbook.load_workbook(fp)
+            # print(test)
+        
+
     
     
 if __name__ == '__main__':

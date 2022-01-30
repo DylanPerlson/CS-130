@@ -1,10 +1,12 @@
-import decimal # TODO do we need these
 
-from sheets.cell_error import CellError
+from multiprocessing.sharedctypes import Value # TODO do we need these
+
+from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
-
+MAX_ROW = 475254
+MAX_COL = 9999
 class Workbook:
-
+    import decimal
     # A workbook containing zero or more named spreadsheets.
     #
     # Any and all operations on a workbook that may affect calculated cell
@@ -109,14 +111,22 @@ class Workbook:
         If the specified sheet name is not found, a KeyError is raised.
         """
         
+        all_sheet_names = []
         for i in range(len(self.sheets)):
-            #remove the sheet with sheet_name
-            if self.sheets.sheet_name.lower() == sheet_name.lower():
-                self.sheet.pop(i)
-                self.num_sheets -= 1
-                return
-        #else keyError
-        raise KeyError
+            all_sheet_names.append(self.sheets[i].sheet_name.lower())
+        
+        if sheet_name not in all_sheet_names:
+            raise KeyError
+        try:
+            for i in range(len(self.sheets)):
+                #remove the sheet with sheet_name
+                curr_sheet = self.sheets[i]
+                if curr_sheet.sheet_name.lower() == sheet_name.lower():
+                    self.sheets.remove(curr_sheet)
+                    self.num_sheets -= 1
+                    return
+        except KeyError as e:
+            raise
        
 
     
@@ -132,9 +142,19 @@ class Workbook:
         If the specified sheet name is not found, a KeyError is raised.
         """
         
+      
+        
+        # new code for getting the extent
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
+                i.extent = [0,0]
+                for key in i.cells:
+                    if i.cells[key].contents is not None and key[0] > i.extent[0]:
+                        i.extent[0] = key[0]
+                    if i.cells[key].contents is not None and key[1] > i.extent[1]:
+                        i.extent[1] = key[1]
                 return (i.extent[0],i.extent[1])
+
 
         #if sheet name not found, raise key error
         raise KeyError
@@ -167,18 +187,20 @@ class Workbook:
         rather, the cell's value will be a CellError object indicating the
         naure of the issue.
         """
-
+        
         for i in self.sheets:
             #edit cell content of specified sheet
             if (i.sheet_name == None):
                 continue
-      
+            if not self.check_valid_cell(location):
+                raise ValueError
+            
             if i.sheet_name.lower() == sheet_name.lower():
-                self.check_valid_cell(location)
+                #self.check_valid_cell(location)
                 #if want to set cell contents to empty
-                if contents == None or (not str(contents).isdigit() and contents.strip() == ''):
+                if contents == None or (not self.is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(location, None)
-                elif str(contents).isdigit():
+                elif self.is_float(contents):
                     i.set_cell_contents(location, contents)
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
@@ -207,13 +229,15 @@ class Workbook:
         This method will never return a zero-length string; instead, empty
         cells are indicated by a value of None.
         """
+        if not self.check_valid_cell(location):
+            raise ValueError
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 return i.get_cell_contents(location) # TODO make sure get contents is correct
             
-        raise KeyError
+        raise ValueError
 
 
     def get_cell_value(self, sheet_name: str, location: str):
@@ -236,12 +260,15 @@ class Workbook:
         whole number.  For example, this function would not return
         Decimal('1.000'); rather it would return Decimal('1').
         """
+        row,col = self.get_row_and_col(location)
+        if row > MAX_ROW or col > MAX_COL:
+            return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
                 workbook_instance = self
-                return i.get_cell_value(workbook_instance,location) # TODO make sure get value is correct
+                return i.get_cell_value(workbook_instance,location) 
             
         raise KeyError
 
@@ -250,11 +277,10 @@ class Workbook:
 
     def check_valid_cell (self, location):
         """ Check if the cell location is valid """    
-
         if not location.isalnum():
-            raise ValueError
+            return False
+            # raise ValueError
             
-
         digits = False
         for c in location:
             if not c.isdigit() and digits == False: 
@@ -263,14 +289,23 @@ class Workbook:
                 digits = True
             elif c.isdigit() and digits == True:
                 continue
-            else: 
-                raise ValueError
+            elif c == ' ':
+                return False
+            else:
+                return False 
+                # raise ValueError
+        
+        for c in range(len(location)-1):
+            if not location[c+1].isdigit() and location[c].isdigit():
+                return False
+
+        return True
 
     def create_name(self,num = 1):
         """ finds an unused name """
 
         auto_name = "Sheet"
-        
+       
         for i in self.sheets:
             if i.sheet_name == auto_name + str(num):              
                 return self.create_name(num + 1)
@@ -314,3 +349,29 @@ class Workbook:
         """
 
         pass
+        # return num
+
+    #helper fuction to determine if a value is a float
+    def is_float(self, element):
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
+    def get_row_and_col(self,location):
+        # Helper function to get absolute row/col of inputted location 
+        for e,i in enumerate(location):
+            if i.isdigit():
+                row = location[:e]          
+                #convert row letters to its row number
+                temp = 0
+                for j in range(1, len(row)+1):                            
+                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+                    
+                row = temp
+                col = int(location[e:])                
+                break
+                
+        return row, col

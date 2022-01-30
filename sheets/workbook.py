@@ -342,7 +342,7 @@ class Workbook:
 
         # pass
 
-    def save_workbook(self): #, fp: TextIO) -> None:
+    def save_workbook(self, fp): #, fp: TextIO) -> None:
         """
         Instance method (not a static/class method) to save a workbook to a
         text file or file-like object in JSON format.  Note that the _caller_
@@ -363,14 +363,13 @@ class Workbook:
             sheet = {"name": i.sheet_name, "cell_contents": cells}
 
             file["sheets"].append(sheet)
-            json_string = json.dumps(file)
 
             # print(json.dumps(file, sort_keys=True, indent=4))
             # print(type(json_string))
             # print(file)
 
-            with open('json_data.json', 'w') as outfile:
-                outfile.write(json_string)
+        json_string = json.dumps(file)
+        fp.write(json_string)
         pass
 
     #helper fuction to determine if a value is a float

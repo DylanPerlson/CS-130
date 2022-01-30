@@ -455,7 +455,8 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
         wb.set_cell_contents(name1, 'JNE41', '100')
 
-        wb.save_workbook()
+        with open('json_data3.json', 'w') as fp:
+            wb.save_workbook(fp)
     
     
 if __name__ == '__main__':

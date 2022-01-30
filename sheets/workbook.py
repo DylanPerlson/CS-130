@@ -3,8 +3,13 @@ from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
+import json
+
 MAX_ROW = 475254
 MAX_COL = 9999
+A_UPPERCASE = ord('A')
+ALPHABET_SIZE = 26
+
 class Workbook:
     import decimal
     # A workbook containing zero or more named spreadsheets.
@@ -312,32 +317,32 @@ class Workbook:
                 
         return num
 
-    @staticmethod
-    def load_workbook(fp: TextIO) -> Workbook:
-        """
-        This is a static method (not an instance method) to load a workbook
-        from a text file or file-like object in JSON format, and return the
-        new Workbook instance.  Note that the _caller_ of this function is
-        expected to have opened the file; this function merely reads the file.
+    # @staticmethod
+    # def load_workbook(fp: TextIO) -> Workbook:
+        # """
+        # This is a static method (not an instance method) to load a workbook
+        # from a text file or file-like object in JSON format, and return the
+        # new Workbook instance.  Note that the _caller_ of this function is
+        # expected to have opened the file; this function merely reads the file.
         
-        If the contents of the input cannot be parsed by the Python json
-        module then a json.JSONDecodeError should be raised by the method.
-        (Just let the json module's exceptions propagate through.)  Similarly,
-        if an IO read error occurs (unlikely but possible), let any raised
-        exception propagate through.
+        # If the contents of the input cannot be parsed by the Python json
+        # module then a json.JSONDecodeError should be raised by the method.
+        # (Just let the json module's exceptions propagate through.)  Similarly,
+        # if an IO read error occurs (unlikely but possible), let any raised
+        # exception propagate through.
         
-        If any expected value in the input JSON is missing (e.g. a sheet
-        object doesn't have the "cell-contents" key), raise a KeyError with
-        a suitably descriptive message.
+        # If any expected value in the input JSON is missing (e.g. a sheet
+        # object doesn't have the "cell-contents" key), raise a KeyError with
+        # a suitably descriptive message.
         
-        If any expected value in the input JSON is not of the proper type
-        (e.g. an object instead of a list, or a number instead of a string),
-        raise a TypeError with a suitably descriptive message.
-        """
+        # If any expected value in the input JSON is not of the proper type
+        # (e.g. an object instead of a list, or a number instead of a string),
+        # raise a TypeError with a suitably descriptive message.
+        # """
 
-        pass
+        # pass
 
-    def save_workbook(self, fp: TextIO) -> None:
+    def save_workbook(self): #, fp: TextIO) -> None:
         """
         Instance method (not a static/class method) to save a workbook to a
         text file or file-like object in JSON format.  Note that the _caller_
@@ -348,8 +353,25 @@ class Workbook:
         exception propagate through.
         """
 
+        file = {"sheets":[]}
+
+        for i in self.sheets: # TODO they have to be in the right order !!!
+            cells = {}
+            for key, value in i.cells.items():
+                cells[(self.base_10_to_alphabet(key[0])+str(key[1]))] = value.contents
+
+            sheet = {"name": i.sheet_name, "cell_contents": cells}
+
+            file["sheets"].append(sheet)
+            json_string = json.dumps(file)
+
+            # print(json.dumps(file, sort_keys=True, indent=4))
+            # print(type(json_string))
+            # print(file)
+
+            with open('json_data.json', 'w') as outfile:
+                outfile.write(json_string)
         pass
-        # return num
 
     #helper fuction to determine if a value is a float
     def is_float(self, element):
@@ -375,3 +397,30 @@ class Workbook:
                 break
                 
         return row, col
+
+    def base_10_to_alphabet(self, number):
+        """ Helper function: base 10 to alphabet
+        Convert a decimal number to its base alphabet representation
+        from: https://codereview.stackexchange.com/a/182757
+        """
+
+
+
+        return ''.join(
+                chr(A_UPPERCASE + part)
+                for part in self._decompose(number)
+        )[::-1]
+
+    def _decompose(self, number):
+        """Generate digits from `number` in base alphabet, least significants
+        bits first.
+
+        Since A is 1 rather than 0 in base alphabet, we are dealing with
+        `number - 1` at each iteration to be able to extract the proper digits.
+
+        from: https://codereview.stackexchange.com/a/182757
+        """
+
+        while number:
+            number, remainder = divmod(number - 1, ALPHABET_SIZE)
+            yield remainder

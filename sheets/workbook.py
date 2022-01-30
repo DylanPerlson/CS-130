@@ -1,5 +1,7 @@
 
-from multiprocessing.sharedctypes import Value # TODO do we need these
+from multiprocessing.sharedctypes import Value
+
+from anyio import WouldBlock # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
@@ -23,7 +25,7 @@ class Workbook:
         self.sheets = []
         self.num_sheets = 0
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
-        
+
 
     def num_sheets(self) -> int:
         # Return the number of spreadsheets in the workbook.
@@ -163,10 +165,6 @@ class Workbook:
 
         #if sheet name not found, raise key error
         raise KeyError
-
-
-
-
 
     def set_cell_contents(self, sheet_name: str, location: str,
                           contents: 'None'):
@@ -341,10 +339,16 @@ class Workbook:
         """
 
         data = json.load(fp)
-        # print(data)
+        wb = Workbook()
 
-        new_workbook = "code in progress"
-        return new_workbook
+        for sheet in data['sheets']: # TODO check for empty stuff
+            sheet_name = sheet['name']
+            (_,_) = wb.new_sheet(sheet_name)
+
+            for location, content in sheet['cell_contents'].items():
+                wb.set_cell_contents(sheet_name, location, content)
+
+        return wb
 
     def save_workbook(self, fp): #, fp: TextIO) -> None:
         """
@@ -368,13 +372,8 @@ class Workbook:
 
             file["sheets"].append(sheet)
 
-            # print(json.dumps(file, sort_keys=True, indent=4))
-            # print(type(json_string))
-            # print(file)
-
         json_string = json.dumps(file)
         fp.write(json_string)
-        pass
 
     #helper fuction to determine if a value is a float
     def is_float(self, element):

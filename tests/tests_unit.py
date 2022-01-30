@@ -451,17 +451,26 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
 
+        wb.set_cell_contents(name1, 'AA57', 'words')
+        wb.set_cell_contents(name1, 'AAA3', '=12+4')
+        wb.set_cell_contents(name1, 'JNE41', 'more words')
+
+        (_, name1) = wb.new_sheet("2nd_sheet")
+
         wb.set_cell_contents(name1, 'AA57', '12.0')
         wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
         wb.set_cell_contents(name1, 'JNE41', '100')
 
-        with open('json_data3.json', 'w') as fp:
+        with open('save_testfile.json', 'w') as fp:
             wb.save_workbook(fp)
 
+
     def test_load_workbook(self):
-        with open('json_data.json') as fp:
-            test = sheets.Workbook.load_workbook(fp)
+        with open('load_testfile.json') as fp:
+            wb = sheets.Workbook.load_workbook(fp)
             # print(test)
+
+        self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
         
 
     

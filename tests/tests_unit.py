@@ -9,10 +9,23 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("s1")
         (_, name2) = wb.new_sheet("s2")
-        wb.set_cell_contents(name2,'A1','=s1!A1+3')
+        wb.set_cell_contents(name2,'A1',"=s1!A1+3")
         wb.rename_sheet('s1','new_name')
         self.assertEqual('new_name',wb.sheets[0].sheet_name)
-        self.assertEqual('=new_name!A1+3',wb.sheets[1].cells[1,1].contents)
+        self.assertEqual('=new_name!A1+3',wb.get_cell_contents(name2,'A1'))
+        
+        wb.set_cell_contents(name2,'A1',"='new_name'!A1+3")
+        wb.rename_sheet('new_name','new_name2')
+        self.assertEqual('=new_name2!A1+3',wb.get_cell_contents(name2,'A1'))
+       
+        (_, name2) = wb.new_sheet("s3")
+        wb.set_cell_contents(name2,'A1',"='new_name2'!A1 + 's3'!A1")
+        wb.rename_sheet('new_name2','new name')
+        self.assertEqual("='new name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
+        
+        # normal replace and uneccesary '' works no, do errors and other req work now?
+        
+     
 
 
     

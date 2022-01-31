@@ -1,4 +1,5 @@
 
+from logging import exception
 from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
@@ -312,20 +313,52 @@ class Workbook:
                 
         return num
 
-    def rename_sheet(self, old_name, new_name):
+    def rename_sheet(self, sheet_name, new_sheet_name):
+        old_name = sheet_name
+        new_name = new_sheet_name
+        # Rename the specified sheet to the new sheet name.  Additionally, all
+        # cell formulas that referenced the original sheet name are updated to
+        # reference the new sheet name (using the same case as the new sheet
+        # name, and single-quotes iff [if and only if] necessary).
+        #
+        # The sheet_name match is case-insensitive; the text must match but the
+        # case does not have to.
+        #
+        # As with new_sheet(), the case of the new_sheet_name is preserved by
+        # the workbook.
+        #
+        # If the sheet_name is not found, a KeyError is raised.
+        #
+        # If the new_sheet_name is an empty string or is otherwise invalid, a
+        # ValueError is raised.
+         #As usual, the new sheet name must be both valid and unique in the workbook; if it is not, an exception is raised. 
+         #Also as usual, the case of the new name is preserved by the workbook.
+        
         old_name_exists = False
+        
+        #check if the workbook name is a valid name
+        if (new_name == ""): 
+            raise ValueError   
+        for i in new_name:
+            if not i.isalnum() and not i in self.allowed_characters:
+                raise ValueError
+        # no leading or trailing white space allowed
+        if new_name[0] == " " or new_name[-1] == " ": 
+            raise ValueError   
+ 
+       
         # change the name of the sheet
         for i in self.sheets:
-            # TODO is this case sensitive?
-            if (i.sheet_name == old_name):
+            #old name is case insensitive
+            if (i.sheet_name.lower() == old_name.lower()):
                 i.sheet_name = new_name
                 old_name_exists = True
                 break;
-        if (old_name_exists == False):
-            # TODO some kind of error because was not there
-            print('Sheet name does not exist')
-            return
 
+        # old name not found
+        if (old_name_exists == False):
+            raise KeyError
+            
         # change the formulas for every cell
         for s in self.sheets:
             for key in s.cells:
@@ -333,8 +366,32 @@ class Workbook:
                 if s.cells[key].type == "FORMULA":
                     #check if the formula contains the old_name
                     # TODO make sure it works for names with ' as well
-                    if old_name+'!' in s.cells[key].contents:
+                    if old_name+'!' in s.cells[key].contents:                                  
                         s.cells[key].contents = s.cells[key].contents.replace(old_name+'!',new_name+'!')
+                    elif "'"+old_name+"'!" in s.cells[key].contents:
+                        # TODO when is a ' necessary??? odd characters like ! or a space
+                        # if necessary
+                        if " " in new_name:
+                            s.cells[key].contents = s.cells[key].contents.replace("'"+old_name+"'!","'"+new_name+"'!")
+                        else: # not necessary
+                            s.cells[key].contents = s.cells[key].contents.replace("'"+old_name+"'!",new_name+'!')
+
+                        #TODO still need to replace other formulas
+                        #remove other uneccesary '
+                        contents_arr = s.cells[key].contents.split("'")
+                        remove_apostrophe = []
+                        for i in range(len(contents_arr)):
+                            #make sure name doesnt start with a !
+                            #find where there is a name broken by '
+                            if (contents_arr[i][0] == '!' and contents_arr[i-1][0] != '!'):
+                                remove_apostrophe.append(contents_arr[i-1])
+                        for i in remove_apostrophe:
+
+                            if " " in i: #do not change the name then
+                                continue
+                            else: #remove unecessary '
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
+
 
 
         

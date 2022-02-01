@@ -19,6 +19,7 @@ class Workbook:
         self.sheets = []
         self.num_sheets = 0
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
+        self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
 
     def num_sheets(self) -> int:
@@ -75,7 +76,7 @@ class Workbook:
             auto_name = "Sheet"
             sheet_name = auto_name + str(self.create_name())
             new_sheet = Sheet(sheet_name)
-        # TODO any other invalid strings?
+        
         
         # no leading or trailing white space allowed
         if sheet_name[0] == " " or sheet_name[-1] == " ": 
@@ -236,8 +237,8 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_contents(location) # TODO make sure get contents is correct
-            
+                return i.get_cell_contents(location)
+
         raise ValueError
 
 
@@ -335,6 +336,7 @@ class Workbook:
          #Also as usual, the case of the new name is preserved by the workbook.
         
         old_name_exists = False
+        proper_old_name = None
         
         #check if the workbook name is a valid name
         if (new_name == ""): 
@@ -351,6 +353,7 @@ class Workbook:
         for i in self.sheets:
             #old name is case insensitive
             if (i.sheet_name.lower() == old_name.lower()):
+                proper_old_name = i.sheet_name
                 i.sheet_name = new_name
                 old_name_exists = True
                 break;
@@ -365,18 +368,30 @@ class Workbook:
                 #check if the cell is a formula
                 if s.cells[key].type == "FORMULA":
                     #check if the formula contains the old_name
-                    # TODO make sure it works for names with ' as well
-                    if old_name+'!' in s.cells[key].contents:                                  
-                        s.cells[key].contents = s.cells[key].contents.replace(old_name+'!',new_name+'!')
-                    elif "'"+old_name+"'!" in s.cells[key].contents:
-                        # TODO when is a ' necessary??? odd characters like ! or a space
+                    if proper_old_name+'!' in s.cells[key].contents:                                  
+                        s.cells[key].contents = s.cells[key].contents.replace(proper_old_name+'!',new_name+'!')
+                    elif "'"+proper_old_name+"'!" in s.cells[key].contents:
+                       
+                    
+                    #    In fact, if a sheet’s name doesn’t start with an alphabetical 
+                    #    character or underscore, or if a sheet’s name contains spaces or 
+                    #    any other characters besides “A-Z”, “a-z”, “0-9” or the underscore “_”, 
+                    #    it must be quoted to parse correctly. For example: 'Other Totals'!G15
+                       
                         # if necessary
-                        if " " in new_name:
-                            s.cells[key].contents = s.cells[key].contents.replace("'"+old_name+"'!","'"+new_name+"'!")
-                        else: # not necessary
-                            s.cells[key].contents = s.cells[key].contents.replace("'"+old_name+"'!",new_name+'!')
+                        needed = False
+                        for char in self.needs_quotes:
+                            if char in new_name:
+                                needed = True
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!","'"+new_name+"'!")
+                                break
+                        if self.is_float(new_name[0]):
+                                needed = True
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!","'"+new_name+"'!")
+                        if not needed: # not necessary
+                            s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!",new_name+'!')
 
-                        #TODO still need to replace other formulas
+                        
                         #remove other uneccesary '
                         contents_arr = s.cells[key].contents.split("'")
                         remove_apostrophe = []
@@ -386,10 +401,18 @@ class Workbook:
                             if (contents_arr[i][0] == '!' and contents_arr[i-1][0] != '!'):
                                 remove_apostrophe.append(contents_arr[i-1])
                         for i in remove_apostrophe:
-
-                            if " " in i: #do not change the name then
+                            #check if the other equations need quotes
+                            needed = False
+                            for char in self.needs_quotes:
+                                if char in i:
+                                    needed = True
+                                    break
+                            #also needs quotes if starts with a number
+                            if self.is_float(i[0]):
+                                needed = True
+                            if needed: #if needed do not change the name then
                                 continue
-                            else: #remove unecessary '
+                            else: # other wise remove unecessary '
                                 s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
 
 

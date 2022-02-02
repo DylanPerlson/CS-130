@@ -25,14 +25,14 @@ class Workbook:
     def __init__(self):
         # Initialize a new empty workbook.
         self.sheets = []
-        self.num_sheets = 0
+        self.number_sheets = 0
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
 
     def num_sheets(self) -> int:
         # Return the number of spreadsheets in the workbook.
-        return self.num_sheets
+        return self.number_sheets
        
 
     def list_sheets(self): # list
@@ -103,10 +103,10 @@ class Workbook:
             else:
                 new_sheet = Sheet(sheet_name)
 
-        self.num_sheets += 1 
+        self.number_sheets += 1 
         self.sheets.append(new_sheet)
 
-        return (self.num_sheets-1, sheet_name) # '-1' is because index should start at 0
+        return (self.number_sheets-1, sheet_name) # '-1' is because index should start at 0
 
       
         
@@ -133,7 +133,7 @@ class Workbook:
                 curr_sheet = self.sheets[i]
                 if curr_sheet.sheet_name.lower() == sheet_name.lower():
                     self.sheets.remove(curr_sheet)
-                    self.num_sheets -= 1
+                    self.number_sheets -= 1
                     return
         except KeyError as e:
             raise

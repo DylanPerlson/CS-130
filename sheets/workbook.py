@@ -25,6 +25,38 @@ class Workbook:
     def num_sheets(self) -> int:
         # Return the number of spreadsheets in the workbook.
         return self.num_sheets
+
+    def reorder_sheets(self, sheet_to_move, move_index):
+        if (sheet_to_move not in self.sheets):
+            raise KeyError
+        if (move_index < 0 or move_index >= len(self.sheets)):
+            raise ValueError
+        self.sheets.insert(move_index, sheet_to_move)
+    
+    def copy_sheet(self, sheet_to_copy):
+        if sheet_to_copy not in self.sheets:
+            raise KeyError
+
+        copy_index = 0
+        for i in range(len(self.sheets)):
+            if self.sheets[i].sheet_name == sheet_to_copy:
+                copy_index = i
+                break
+        
+        copy_counter = 1
+        while True:
+            new_sheet_name = sheet_to_copy + "_" + str(copy_counter)
+            if new_sheet_name not in self.sheets:
+                copy_sheet = self.new_sheet(new_sheet_name)
+                old_sheet = self.sheets[copy_index]
+                old_cells = old_sheet.cells
+                for key, value in old_cells:
+                    self.set_cell_contents(copy_sheet, key, value)
+                self.num_sheets += 1
+                break
+            else:
+                copy_counter += 1
+        return
        
 
     def list_sheets(self): # list

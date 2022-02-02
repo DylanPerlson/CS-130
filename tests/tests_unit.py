@@ -10,6 +10,40 @@ import unittest
 
 
 class TestWorkbook(unittest.TestCase):
+    def test_rename(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
+        wb.set_cell_contents(name2,'A1',"=s1!A1+3")
+        wb.rename_sheet('S1','new_name')
+        self.assertEqual('new_name',wb.sheets[0].sheet_name)
+        self.assertEqual('=new_name!A1+3',wb.get_cell_contents(name2,'A1'))
+        
+        wb.set_cell_contents(name2,'A1',"='new_name'!A1+3")
+        wb.rename_sheet('New_nAme','new_name2')
+        self.assertEqual('=new_name2!A1+3',wb.get_cell_contents(name2,'A1'))
+       
+        (_, name2) = wb.new_sheet("s3")
+        wb.set_cell_contents(name2,'A1',"='new_name2'!A1 + 's3'!A1")
+        wb.rename_sheet('new_name2','new?name')
+        self.assertEqual("='new?name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
+        
+        wb.set_cell_contents(name2,'A1',"='new?name'!A1 + 's3'!A1")
+        wb.rename_sheet('new?name','3name')
+        self.assertEqual("='3name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
+        
+
+        with self.assertRaises(KeyError):
+            wb.rename_sheet('foo','zoo')
+
+        with self.assertRaises(ValueError):
+            wb.rename_sheet('foo','')
+        # normal replace and uneccesary '' works no, do errors and other req work now?
+        
+     
+
+
+    
     """ Performing unit tests on the sheets module. """
     '''
     def test_set_cell_as_error(self):
@@ -418,6 +452,8 @@ class TestWorkbook(unittest.TestCase):
         wb = sheets.Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
 
+    #     self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
+    
         wb.set_cell_contents(name1, 'A3', '=5.0 & " should become 5"')
         self.assertEqual('5 should become 5', wb.get_cell_value(name1, 'A3'))
 
@@ -481,7 +517,7 @@ class TestWorkbook(unittest.TestCase):
     
     
 if __name__ == '__main__':
-    print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=0)
+    # print('------------------------NEW TEST------------------------')
+    unittest.main(verbosity=1)
         
 

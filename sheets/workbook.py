@@ -2,6 +2,8 @@
 from multiprocessing.sharedctypes import Value
 
 from anyio import WouldBlock # TODO do we need these
+from logging import exception
+from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
@@ -25,7 +27,8 @@ class Workbook:
         self.sheets = []
         self.num_sheets = 0
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
-
+        self.needs_quotes = ".?!,:;!@#$%^&*()- "
+        
 
     def num_sheets(self) -> int:
         # Return the number of spreadsheets in the workbook.
@@ -81,7 +84,7 @@ class Workbook:
             auto_name = "Sheet"
             sheet_name = auto_name + str(self.create_name())
             new_sheet = Sheet(sheet_name)
-        # TODO any other invalid strings?
+        
         
         # no leading or trailing white space allowed
         if sheet_name[0] == " " or sheet_name[-1] == " ": 
@@ -238,8 +241,8 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_contents(location) # TODO make sure get contents is correct
-            
+                return i.get_cell_contents(location)
+
         raise ValueError
 
 
@@ -386,6 +389,107 @@ class Workbook:
 
         json_string = json.dumps(file)
         fp.write(json_string)
+
+    def rename_sheet(self, sheet_name, new_sheet_name):
+        old_name = sheet_name
+        new_name = new_sheet_name
+        # Rename the specified sheet to the new sheet name.  Additionally, all
+        # cell formulas that referenced the original sheet name are updated to
+        # reference the new sheet name (using the same case as the new sheet
+        # name, and single-quotes iff [if and only if] necessary).
+        #
+        # The sheet_name match is case-insensitive; the text must match but the
+        # case does not have to.
+        #
+        # As with new_sheet(), the case of the new_sheet_name is preserved by
+        # the workbook.
+        #
+        # If the sheet_name is not found, a KeyError is raised.
+        #
+        # If the new_sheet_name is an empty string or is otherwise invalid, a
+        # ValueError is raised.
+         #As usual, the new sheet name must be both valid and unique in the workbook; if it is not, an exception is raised. 
+         #Also as usual, the case of the new name is preserved by the workbook.
+        
+        old_name_exists = False
+        proper_old_name = None
+        
+        #check if the workbook name is a valid name
+        if (new_name == ""): 
+            raise ValueError   
+        for i in new_name:
+            if not i.isalnum() and not i in self.allowed_characters:
+                raise ValueError
+        # no leading or trailing white space allowed
+        if new_name[0] == " " or new_name[-1] == " ": 
+            raise ValueError   
+ 
+       
+        # change the name of the sheet
+        for i in self.sheets:
+            #old name is case insensitive
+            if (i.sheet_name.lower() == old_name.lower()):
+                proper_old_name = i.sheet_name
+                i.sheet_name = new_name
+                old_name_exists = True
+                break;
+
+        # old name not found
+        if (old_name_exists == False):
+            raise KeyError
+            
+        # change the formulas for every cell
+        for s in self.sheets:
+            for key in s.cells:
+                #check if the cell is a formula
+                if s.cells[key].type == "FORMULA":
+                    #check if the formula contains the old_name
+                    if proper_old_name+'!' in s.cells[key].contents:                                  
+                        s.cells[key].contents = s.cells[key].contents.replace(proper_old_name+'!',new_name+'!')
+                    elif "'"+proper_old_name+"'!" in s.cells[key].contents:
+                       
+                    
+                    #    In fact, if a sheet’s name doesn’t start with an alphabetical 
+                    #    character or underscore, or if a sheet’s name contains spaces or 
+                    #    any other characters besides “A-Z”, “a-z”, “0-9” or the underscore “_”, 
+                    #    it must be quoted to parse correctly. For example: 'Other Totals'!G15
+                       
+                        # if necessary
+                        needed = False
+                        for char in self.needs_quotes:
+                            if char in new_name:
+                                needed = True
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!","'"+new_name+"'!")
+                                break
+                        if self.is_float(new_name[0]):
+                                needed = True
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!","'"+new_name+"'!")
+                        if not needed: # not necessary
+                            s.cells[key].contents = s.cells[key].contents.replace("'"+proper_old_name+"'!",new_name+'!')
+
+                        
+                        #remove other uneccesary '
+                        contents_arr = s.cells[key].contents.split("'")
+                        remove_apostrophe = []
+                        for i in range(len(contents_arr)):
+                            #make sure name doesnt start with a !
+                            #find where there is a name broken by '
+                            if (contents_arr[i][0] == '!' and contents_arr[i-1][0] != '!'):
+                                remove_apostrophe.append(contents_arr[i-1])
+                        for i in remove_apostrophe:
+                            #check if the other equations need quotes
+                            needed = False
+                            for char in self.needs_quotes:
+                                if char in i:
+                                    needed = True
+                                    break
+                            #also needs quotes if starts with a number
+                            if self.is_float(i[0]):
+                                needed = True
+                            if needed: #if needed do not change the name then
+                                continue
+                            else: # other wise remove unecessary '
+                                s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
 
     #helper fuction to determine if a value is a float
     def is_float(self, element):

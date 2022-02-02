@@ -112,7 +112,7 @@ class Sheet:
             self[curr_cell].get_value_from_contents(self[curr_cell].contents)
 
     def get_row_and_col(self,location):
-        """ Helper function to get absolute row/col of inputted location """
+        """ Helper function to get absolute row/col of inputted location (AD42) """
         
         for e,i in enumerate(location):
             if i.isdigit():
@@ -178,10 +178,3 @@ class Sheet:
         ref.visit(formula)
         return ref.references
         
-
-
-
-   
-
-        
- 

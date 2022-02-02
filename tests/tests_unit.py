@@ -1,6 +1,11 @@
 import os; os.system('cls')
 import context
 from sheets import *
+# import sheets
+# import decimal
+# import sheets
+# from sheets import CellErrorType
+import decimal
 import unittest
 
 
@@ -51,6 +56,8 @@ class TestWorkbook(unittest.TestCase):
         #wb = sheets.Workbook()    
         #(_, name) = wb.new_sheet("sheet")
         #print(wb.get_cell_value('name','A1'))
+
+
     def test_divide_by_zero(self):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("sheet")
@@ -66,6 +73,8 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.DIVIDE_BY_ZERO)
         
         #print(wb.get_cell_value(name,'A1') is CellError(CellErrorType.DIVIDE_BY_ZERO, "division by zero", ZeroDivisionError))
+
+
     # def test_string_errors(self):
     #     wb = sheets.Workbook()    
     #     (_, name) = wb.new_sheet("sheet")
@@ -75,6 +84,8 @@ class TestWorkbook(unittest.TestCase):
 
         #with self.assertRaises(CellErrorType.PARSE_ERROR):
             #wb.set_cell_contents(name,'A1',"='hi'+3")
+
+
     def test_error_operations(self):
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("sheet")
@@ -103,6 +114,7 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name,'A2','="Hello" & "World')
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
 
+
     # def test_set_error_cells(self):
     #     wb = sheets.Workbook()    
     #     (_, name) = wb.new_sheet("sheet")
@@ -113,6 +125,7 @@ class TestWorkbook(unittest.TestCase):
     #     wb.set_cell_contents(name,'A2','REF!')
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
  
+
     def test_string_comes_back_as_decimal(self): 
         wb = sheets.Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
@@ -330,9 +343,9 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
 
 
-
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
+
 
     def test_delete_sheets(self):
         wb = sheets.Workbook()
@@ -469,10 +482,42 @@ class TestWorkbook(unittest.TestCase):
     
         wb.set_cell_contents(name1, 'A3', '=12.0+1.00')
         self.assertEqual('13', str(wb.get_cell_value(name1, 'A3')))
+
+
+    def test_save_workbook(self):
+        wb = sheets.Workbook()
+        (_, name1) = wb.new_sheet("fiRst_sheet")
+
+        wb.set_cell_contents(name1, 'AA57', 'words')
+        wb.set_cell_contents(name1, 'AAA3', '=12+4')
+        wb.set_cell_contents(name1, 'JNE41', 'more words')
+
+        (_, name1) = wb.new_sheet("2nd_sheet")
+
+        wb.set_cell_contents(name1, 'aa57', '12.0')
+        wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
+        wb.set_cell_contents(name1, 'JNE41', '100')
+
+        with open('save_testfile.json', 'w') as fp:
+            wb.save_workbook(fp)
+
+
+    def test_load_workbook(self):
+        with open('load_testfile.json') as fp:
+            wb = sheets.Workbook.load_workbook(fp)
+
+        self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
+        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+
+
+    def test_loading_bad_formula(self): # TODO
+        pass
+        
+
     
     
 if __name__ == '__main__':
-    print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=0)
+    # print('------------------------NEW TEST------------------------')
+    unittest.main(verbosity=1)
         
 

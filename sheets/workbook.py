@@ -1,11 +1,19 @@
 
+from multiprocessing.sharedctypes import Value
+
+from anyio import WouldBlock # TODO do we need these
 from logging import exception
 from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
+import json
+
 MAX_ROW = 475254
 MAX_COL = 9999
+A_UPPERCASE = ord('A')
+ALPHABET_SIZE = 26
+
 class Workbook:
     import decimal
     # A workbook containing zero or more named spreadsheets.
@@ -193,10 +201,6 @@ class Workbook:
         #if sheet name not found, raise key error
         raise KeyError
 
-
-
-
-
     def set_cell_contents(self, sheet_name: str, location: str,
                           contents: 'None'):
         """
@@ -227,7 +231,7 @@ class Workbook:
             if (i.sheet_name == None):
                 continue
             if not self.check_valid_cell(location):
-                raise ValueError
+                raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
                 #self.check_valid_cell(location)
@@ -346,6 +350,78 @@ class Workbook:
                 
         return num
 
+    @staticmethod
+    def load_workbook(fp): # : TextIO) -> Workbook:
+        """
+        This is a static method (not an instance method) to load a workbook
+        from a text file or file-like object in JSON format, and return the
+        new Workbook instance.  Note that the _caller_ of this function is
+        expected to have opened the file; this function merely reads the file.
+        
+        If the contents of the input cannot be parsed by the Python json
+        module then a json.JSONDecodeError should be raised by the method.
+        (Just let the json module's exceptions propagate through.)  Similarly,
+        if an IO read error occurs (unlikely but possible), let any raised
+        exception propagate through.
+        
+        If any expected value in the input JSON is missing (e.g. a sheet
+        object doesn't have the "cell-contents" key), raise a KeyError with
+        a suitably descriptive message.
+        
+        If any expected value in the input JSON is not of the proper type
+        (e.g. an object instead of a list, or a number instead of a string),
+        raise a TypeError with a suitably descriptive message.
+        """
+
+        data = json.load(fp)
+        wb = Workbook()
+
+        if 'sheets' not in data:
+            raise KeyError("No 'sheets' key found in json file.")
+
+        for sheet in data['sheets']: # TODO check for empty stuff
+                                        # check cell validity
+                                        # missing required fields
+                                        # malperformed/unparseable json
+
+            if 'name' not in sheet:
+                raise KeyError("No 'name' key found in some sheet of the json file.")
+            if 'cell_contents' not in sheet:
+                raise KeyError("No 'cell_contents' key found in some sheet of the json file.")
+
+            sheet_name = sheet['name']
+            (_,_) = wb.new_sheet(sheet_name)
+
+            for location, content in sheet['cell_contents'].items():
+                wb.set_cell_contents(sheet_name, location, content)
+
+        return wb
+
+    def save_workbook(self, fp): #, fp: TextIO) -> None:
+        """
+        Instance method (not a static/class method) to save a workbook to a
+        text file or file-like object in JSON format.  Note that the _caller_
+        of this function is expected to have opened the file; this function
+        merely writes the file.
+        
+        If an IO write error occurs (unlikely but possible), let any raised
+        exception propagate through.
+        """
+
+        file = {"sheets":[]}
+
+        for i in self.sheets:
+            cells = {}
+            for key, value in i.cells.items():
+                cells[(self.base_10_to_alphabet(key[0])+str(key[1]))] = value.contents
+
+            sheet = {"name": i.sheet_name, "cell_contents": cells}
+
+            file["sheets"].append(sheet)
+
+        json_string = json.dumps(file)
+        fp.write(json_string)
+
     def rename_sheet(self, sheet_name, new_sheet_name):
         old_name = sheet_name
         new_name = new_sheet_name
@@ -447,10 +523,6 @@ class Workbook:
                             else: # other wise remove unecessary '
                                 s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
 
-
-
-        
-
     #helper fuction to determine if a value is a float
     def is_float(self, element):
         element = str(element)
@@ -475,3 +547,30 @@ class Workbook:
                 break
                 
         return row, col
+
+    def base_10_to_alphabet(self, number):
+        """ Helper function: base 10 to alphabet
+        Convert a decimal number to its base alphabet representation
+        from: https://codereview.stackexchange.com/a/182757
+        """
+
+
+
+        return ''.join(
+                chr(A_UPPERCASE + part)
+                for part in self._decompose(number)
+        )[::-1]
+
+    def _decompose(self, number):
+        """Generate digits from `number` in base alphabet, least significants
+        bits first.
+
+        Since A is 1 rather than 0 in base alphabet, we are dealing with
+        `number - 1` at each iteration to be able to extract the proper digits.
+
+        from: https://codereview.stackexchange.com/a/182757
+        """
+
+        while number:
+            number, remainder = divmod(number - 1, ALPHABET_SIZE)
+            yield remainder

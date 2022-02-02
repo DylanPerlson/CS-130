@@ -196,7 +196,7 @@ class Workbook:
             if (i.sheet_name == None):
                 continue
             if not self.check_valid_cell(location):
-                raise ValueError
+                raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
                 #self.check_valid_cell(location)
@@ -341,7 +341,19 @@ class Workbook:
         data = json.load(fp)
         wb = Workbook()
 
+        if 'sheets' not in data:
+            raise KeyError("No 'sheets' key found in json file.")
+
         for sheet in data['sheets']: # TODO check for empty stuff
+                                        # check cell validity
+                                        # missing required fields
+                                        # malperformed/unparseable json
+
+            if 'name' not in sheet:
+                raise KeyError("No 'name' key found in some sheet of the json file.")
+            if 'cell_contents' not in sheet:
+                raise KeyError("No 'cell_contents' key found in some sheet of the json file.")
+
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)
 
@@ -363,7 +375,7 @@ class Workbook:
 
         file = {"sheets":[]}
 
-        for i in self.sheets: # TODO they have to be in the right order !!!
+        for i in self.sheets:
             cells = {}
             for key, value in i.cells.items():
                 cells[(self.base_10_to_alphabet(key[0])+str(key[1]))] = value.contents

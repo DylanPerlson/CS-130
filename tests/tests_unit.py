@@ -1,9 +1,10 @@
 import os; os.system('cls')
 import context
-# from sheets import *
+from sheets import *
+# import sheets
 # import decimal
-import sheets
-from sheets import CellErrorType
+# import sheets
+# from sheets import CellErrorType
 import decimal
 import unittest
 
@@ -308,9 +309,9 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
 
 
-
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
+
 
     def test_delete_sheets(self):
         wb = sheets.Workbook()
@@ -449,7 +450,7 @@ class TestWorkbook(unittest.TestCase):
 
     def test_save_workbook(self):
         wb = sheets.Workbook()
-        (_, name1) = wb.new_sheet("first_sheet")
+        (_, name1) = wb.new_sheet("fiRst_sheet")
 
         wb.set_cell_contents(name1, 'AA57', 'words')
         wb.set_cell_contents(name1, 'AAA3', '=12+4')
@@ -457,7 +458,7 @@ class TestWorkbook(unittest.TestCase):
 
         (_, name1) = wb.new_sheet("2nd_sheet")
 
-        wb.set_cell_contents(name1, 'AA57', '12.0')
+        wb.set_cell_contents(name1, 'aa57', '12.0')
         wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
         wb.set_cell_contents(name1, 'JNE41', '100')
 
@@ -468,9 +469,13 @@ class TestWorkbook(unittest.TestCase):
     def test_load_workbook(self):
         with open('load_testfile.json') as fp:
             wb = sheets.Workbook.load_workbook(fp)
-            # print(test)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
+        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+
+
+    def test_loading_bad_formula(self): # TODO
+        pass
         
 
     

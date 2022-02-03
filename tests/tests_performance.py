@@ -1,34 +1,98 @@
 import os; os.system('cls')
 import context
 from sheets import *
-import decimal
-import unittest
 
-class TestWorkbook(unittest.TestCase):
-    def test_long_reference_chain(self):
-        wb = Workbook()
+def test_long_reference_chain():
+    wb = Workbook()
 
-        (_,name) = wb.new_sheet("sheet")
-        wb.set_cell_contents(name, 'A1', '1')
-        
-        for i in range(1, 150):
-            location_letter = wb.base_10_to_alphabet(i)
-            location_letter_prev = wb.base_10_to_alphabet(i-1)
-            location = str(location_letter)+str(1)
+    (_,name) = wb.new_sheet("sheet")
+    wb.set_cell_contents(name, 'A1', '1')
+    length = 50
+    
+    for i in range(1, length):
+        location_letter = wb.base_10_to_alphabet(i)
+        location_letter_prev = wb.base_10_to_alphabet(i-1)
+        location = str(location_letter)+str(1)
+        location_prev = str(location_letter_prev)+str(1)
 
-            wb.set_cell_contents(name, location, '=1+'+str(location_letter_prev)+str(1))
+        wb.set_cell_contents(name, location, '=1+'+location_prev)
+    
+    assert wb.get_cell_value(name, location) == length
 
-            if i%25 == 0:
-                print(wb.get_cell_value(name, str(location_letter)+str(1)))
+def test_very_connected_ref_chain(): # TODO implement later
+    pass
 
-        # print(wb.get_cell_contents(name, 'A1'))
-        # print(wb.get_cell_contents(name, 'BA1'))
-        # print(wb.get_cell_value(name, 'BA1'))
-        # print(wb.get_cell_contents(name, 'ALK1'))
-        # print(wb.get_cell_value(name, 'ALK1'))
+def test_cell_with_many_deps():
+    wb = Workbook()
 
+    (_,name) = wb.new_sheet("sheet")
+    # wb.set_cell_contents(name, 'A1', '1')
 
+    length = 50
+    formula = '='
+    
+    for i in range(1, length+1):
+        location = 'A'+str(i)
+        wb.set_cell_contents(name, location, '1')
+
+    for i in range(1, length+1):
+        location = 'A'+str(i)
+        formula = formula + '+' + location
+    
+    wb.set_cell_contents(name, 'B1', formula)
+    assert int(wb.get_cell_value(name, 'B1')) == length
+
+def test_significant_cell_change():
+    wb = Workbook()
+
+    (_,name) = wb.new_sheet("sheet")
+    wb.set_cell_contents(name, 'B1', '1')
+    # wb.set_cell_contents(name, 'A1', '1')
+
+    length = 50
+
+    for i in range(1, length+1):
+        location = 'A'+str(i)
+        wb.set_cell_contents(name, location, '=B1')
+    
+    wb.set_cell_contents(name, 'B1', '2')
+    assert wb.get_cell_contents(name, 'A1') == '=B1'
+    assert wb.get_cell_value(name, 'A1') == 2, 'Cell value of A1 is wrong.' # for Pieter there is an error here
+
+def test_cell_cycle():
+    wb = Workbook()
+
+    (_,name) = wb.new_sheet("sheet")
+    wb.set_cell_contents(name, 'A1', '1')
+    # wb.set_cell_contents(name, 'B1', '1')
+
+    length = 50
+
+    for i in range(2, length+1):
+        location = 'A'+str(i)
+        location_prev = 'A'+str(i-1)
+        wb.set_cell_contents(name, location, '='+location_prev)
+    
+    # for Pieter there is an error below
+    wb.set_cell_contents(name, 'A1', '='+location)
+    assert wb.get_cell_value(name,'A4').get_type() == CellErrorType.CIRCULAR_REFERENCE, 'No circular reference error given.'
+    wb.set_cell_contents(name, 'A1', '2')
+    assert wb.get_cell_value(name,'A4') == 2, 'Cell value of A4 is wrong.'
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=1)
+    import cProfile
+    from pstats import Stats
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+    test_long_reference_chain()
+    test_very_connected_ref_chain()
+    test_cell_with_many_deps()
+    test_significant_cell_change()
+    test_cell_cycle()
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('tottime').print_stats(5)

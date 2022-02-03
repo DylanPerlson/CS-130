@@ -1,7 +1,6 @@
 from collections import defaultdict
 from sheets.cell_error import CellError
 import lark
-
 from sheets.dependency_graph import Dependency_graph
 from .eval_expressions import RetrieveReferences
 from .cell import Cell
@@ -46,7 +45,8 @@ class Sheet:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
                 dependent_cells = self.retrieve_cell_references(contents)
-                if curr_cell.contents in dependent_cells:
+                if curr_cell in dependent_cells:
+                    #set circular reference error here
                     pass
                 for cell in dependent_cells:
                     #This part needs some thinking through
@@ -54,7 +54,7 @@ class Sheet:
                     value = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
                     dependent_cell_dict[(row,col)].append(value)
 
-    def set_cell_contents(self, location, contents):
+    def set_cell_contents(self, workbook_instance, location, contents):
         # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
@@ -81,6 +81,7 @@ class Sheet:
         if contents != None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
+                #pass
                 dependent_cells = self.retrieve_cell_references(contents)
                 if curr_cell.contents in dependent_cells:
                     #update all cells with circular reference here
@@ -88,7 +89,8 @@ class Sheet:
                 for cell in dependent_cells:
                     #This part needs some thinking through
                     #Need to check if old value and new values differ before adding to changed cells notification
-                    val = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
+                    val = self.cells[(row,col)].get_cell_value(workbook_instance, self)
+                    #val = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
                     if val not in old_dependent_values[cell].values():
                         updated_cells[self.sheet_name].append('''Get dependent cell location here''')
                         continue

@@ -161,6 +161,7 @@ class Workbook:
                 if curr_sheet.sheet_name.lower() == sheet_name.lower():
                     self.sheets.remove(curr_sheet)
                     self.number_sheets -= 1
+                    #Need to update cells here to have bad references since sheet doesn't exist anymore right?
                     return
         except KeyError as e:
             raise
@@ -214,7 +215,7 @@ class Workbook:
         rather, the cell's value will be a CellError object indicating the
         naure of the issue.
         """
-        
+        updated_cells = []
         for i in self.sheets:
             #edit cell content of specified sheet
             if (i.sheet_name == None):
@@ -232,8 +233,8 @@ class Workbook:
                     i.set_cell_contents(location, contents.strip())
                 #completed task
                 # [('Sheet1', 'B1'), ('Sheet1', 'C1')].
-                updated_cells = [(sheet_name, location)]
-                self.on_cells_changed(updated_cells)
+                updated_cells.append((sheet_name, location))
+                #self.on_cells_changed(updated_cells)
                 return
                
         #no sheet found
@@ -264,7 +265,7 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_contents(location)
+                return i.get_cell_contents(self, i, location)
 
         raise ValueError
 
@@ -385,7 +386,7 @@ class Workbook:
 
         return wb
 
-    def save_workbook(self, fp): #, fp: TextIO) -> None:
+    def save_workbook(self, fp):
         """
         Instance method (not a static/class method) to save a workbook to a
         text file or file-like object in JSON format.  Note that the _caller_
@@ -452,13 +453,15 @@ class Workbook:
                 proper_old_name = i.sheet_name
                 i.sheet_name = new_name
                 old_name_exists = True
-                break;
+                break
 
         # old name not found
         if (old_name_exists == False):
             raise KeyError
             
         # change the formulas for every cell
+        # Need to call on cells updated here as well
+        updated_cells = []
         for s in self.sheets:
             for key in s.cells:
                 #check if the cell is a formula
@@ -510,6 +513,7 @@ class Workbook:
                                 continue
                             else: # other wise remove unecessary '
                                 s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
+                updated_cells.append((new_name, s.cells[key]))
 
     #helper fuction to determine if a value is a float
     def is_float(self, element):

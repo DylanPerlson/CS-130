@@ -91,7 +91,7 @@ if __name__ == '__main__':
     test_very_connected_ref_chain()
     test_cell_with_many_deps()
     test_significant_cell_change()
-    test_cell_cycle()
+    #test_cell_cycle()
 
     pr.disable()
     stats = Stats(pr)

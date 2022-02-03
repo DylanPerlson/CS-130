@@ -56,7 +56,8 @@ def test_significant_cell_change():
         wb.set_cell_contents(name, location, '=B1')
     
     wb.set_cell_contents(name, 'B1', '2')
-    # assert wb.get_cell_value(name, 'A1') == 2 # TODO uncomment
+    assert wb.get_cell_contents(name, 'A1') == '=B1'
+    assert wb.get_cell_value(name, 'A1') == 2, 'Cell value of A1 is wrong.' # for Pieter there is an error here
 
 def test_cell_cycle():
     wb = Workbook()
@@ -72,11 +73,11 @@ def test_cell_cycle():
         location_prev = 'A'+str(i-1)
         wb.set_cell_contents(name, location, '='+location_prev)
     
-    # TODO uncomment below
-    # wb.set_cell_contents(name, 'A1', '='+location)
-    # assert wb.get_cell_value(name,'A4').get_type() == CellErrorType.CIRCULAR_REFERENCE
-    # wb.set_cell_contents(name, 'A1', '2')
-    # assert wb.get_cell_value(name,'A4') == 2 
+    # for Pieter there is an error below
+    wb.set_cell_contents(name, 'A1', '='+location)
+    assert wb.get_cell_value(name,'A4').get_type() == CellErrorType.CIRCULAR_REFERENCE, 'No circular reference error given.'
+    wb.set_cell_contents(name, 'A1', '2')
+    assert wb.get_cell_value(name,'A4') == 2, 'Cell value of A4 is wrong.'
 
 
 if __name__ == '__main__':

@@ -226,15 +226,15 @@ class Workbook:
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
                 if contents == None or (not self.is_float(contents) and contents.strip() == ''):
-                    i.set_cell_contents(location, None)
+                    i.set_cell_contents(i.sheet_name, location, None)
                 elif self.is_float(contents):
-                    i.set_cell_contents(location, contents)
+                    i.set_cell_contents(i.sheet_name, location, contents)
                 else: #store normally
-                    i.set_cell_contents(location, contents.strip())
+                    i.set_cell_contents(i.sheet_name, location, contents.strip())
                 #completed task
                 # [('Sheet1', 'B1'), ('Sheet1', 'C1')].
                 updated_cells.append((sheet_name, location))
-                #self.on_cells_changed(updated_cells)
+                self.on_cells_changed(updated_cells)
                 return
                
         #no sheet found

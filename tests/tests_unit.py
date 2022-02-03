@@ -6,6 +6,27 @@ import unittest
 
 
 class TestWorkbook(unittest.TestCase):
+    def test_aaron(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2',"hi")
+        wb.set_cell_contents(name,'A3',"=A1 + 2")
+        wb.set_cell_contents(name,'A1','2')
+
+    def test_reorder_workbook(self):
+        wb = Workbook()    
+        (_, name1) = wb.new_sheet("first_sheet")
+        (_, name2) = wb.new_sheet("second_sheet")
+        (_, name3) = wb.new_sheet("move_to_second_sheet")
+
+        wb.reorder_sheets(name3, 1)
+        print(wb.sheets[1].sheet_name)
+        self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
+        self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
+
+
+    '''
     def test_rename(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
@@ -42,10 +63,10 @@ class TestWorkbook(unittest.TestCase):
     
     """ Performing unit tests on the sheets module. """
     '''
-    def test_set_cell_as_error(self):
-        wb = Workbook()    
-        (_, name) = wb.new_sheet("sheet")
-        a = CellError(CellErrorType.)
+    # def test_set_cell_as_error(self):
+    #     wb = Workbook()    
+    #     (_, name) = wb.new_sheet("sheet")
+    #     a = CellError(CellErrorType.)
     '''
 
     #def test_bad_ref(self):
@@ -121,15 +142,6 @@ class TestWorkbook(unittest.TestCase):
     #     wb.set_cell_contents(name,'A2','REF!')
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
 
-    def test_reorder_workbook(self):
-        wb = Workbook()    
-        (_, name1) = wb.new_sheet("first_sheet")
-        (_, name2) = wb.new_sheet("second_sheet")
-        (_, name3) = wb.new_sheet("move_to_second_sheet")
-
-        wb.reorder_sheets(name3, 1)
-        self.assertEqual(name2, "move_to_second_sheet")
-        self.assertEqual(name3, "second_sheet")
     
     # def test_copy_sheet(self):
     #     wb = Workbook()    
@@ -527,7 +539,7 @@ class TestWorkbook(unittest.TestCase):
         
 
     
-    
+    '''
 if __name__ == '__main__':
     # print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=1)

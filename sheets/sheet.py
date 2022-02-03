@@ -40,19 +40,20 @@ class Sheet:
     def get_dependent_cells(self, row, col, contents):
         dependent_cell_dict = {}
         # these if functions prevent problems with non-formulas
-        curr_cell = self.cells[(row,col)]
         if contents != None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
+                curr_cell = self.cells[(row,col)]
                 dependent_cells = self.retrieve_cell_references(contents)
                 if curr_cell in dependent_cells:
                     #set circular reference error here
                     pass
                 for cell in dependent_cells:
-                    #This part needs some thinking through
-                    #Need to check if old value and new values differ before adding to changed cells notification
-                    value = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
-                    dependent_cell_dict[(row,col)].append(value)
+                    split_cell_string = cell.split('!')
+                    val = self.get_cell_value(split_cell_string[0], split_cell_string[1])
+                    depend_row, depend_col = self.get_row_and_col(split_cell_string[1])
+                    dependent_cell_dict[(split_cell_string[0],depend_row,depend_col)] = val
+        return dependent_cell_dict
 
     def set_cell_contents(self, workbook_instance, location, contents):
         # extract the row and col numbers from the letter-number location
@@ -65,35 +66,26 @@ class Sheet:
         if(col > self.extent[1]):
             self.extent[1] = col
         
-        #Get old values of dependent cells before updating and recalculating
-        if contents != None:
-            if contents[0] == '=' and contents[1] != '?':
-                old_dependent_values = self.get_dependent_cells(row,col,contents)
-        
-        if not (row,col) in self.cells.keys():
-            self.cells[(row,col)] = Cell(contents)
-        else:
-            self.cells[(row,col)].contents = contents # TODO maybe make a new Cell object here
+        self.cells[(row,col)] = Cell(contents) # if statement is old code; we need to update a cell entirely
 
-        # these if functions prevent problems with non-formulas
         updated_cells = {}
         curr_cell = self.cells[(row,col)]
-        if contents != None:
-            if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
-                # example: print(self.retrieve_cell_references(contents))
-                #pass
-                dependent_cells = self.retrieve_cell_references(contents)
-                if curr_cell.contents in dependent_cells:
-                    #update all cells with circular reference here
-                    pass
-                for cell in dependent_cells:
-                    #This part needs some thinking through
-                    #Need to check if old value and new values differ before adding to changed cells notification
-                    val = self.cells[(row,col)].get_cell_value(workbook_instance, self)
-                    #val = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
-                    if val not in old_dependent_values[cell].values():
-                        updated_cells[self.sheet_name].append('''Get dependent cell location here''')
-                        continue
+        # if contents != None:
+        if self.cells[(row,col)].type == "FORMULA":
+            # example: print(self.retrieve_cell_references(contents))
+            dependent_cells = self.retrieve_cell_references(contents)
+            if curr_cell in dependent_cells:
+                #update all cells with circular reference here
+                pass
+            for cell in dependent_cells:
+                #Need to check if old value and new values differ before adding to changed cells notification
+                dependent_cells_dict = self.get_dependent_cells(row,col,contents)
+                split_cell_string = cell.split('!')
+                val = self.get_cell_value(split_cell_string[0], split_cell_string[1])
+                depend_row, depend_col = self.get_row_and_col(split_cell_string[1])
+                if val != dependent_cells_dict[(split_cell_string[0],depend_row,depend_col)]:
+                    updated_cells[self.sheet_name].append('''Get dependent cell location here''')
+                    continue
         
         #return updated_cells
         

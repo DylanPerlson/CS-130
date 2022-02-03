@@ -21,9 +21,10 @@ class TestWorkbook(unittest.TestCase):
         (_, name3) = wb.new_sheet("move_to_second_sheet")
 
         wb.reorder_sheets(name3, 1)
-        print(wb.sheets[1].sheet_name)
+        
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
+        self.assertEqual(3,len(wb.sheets))
 
 
     '''

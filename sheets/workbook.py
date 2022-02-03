@@ -35,9 +35,10 @@ class Workbook:
     def reorder_sheets(self, sheet_to_move, move_index):
         if (move_index < 0 or move_index >= len(self.sheets)):
             raise ValueError
-        for i in self.sheets:
+        for e,i in enumerate(self.sheets):
             if i.sheet_name == sheet_to_move:
-                self.sheets.insert(move_index, sheet_to_move)
+                self.sheets.insert(move_index, i)
+                self.sheets.pop(e+1)
                 return
         raise KeyError
     

@@ -1,6 +1,8 @@
 from collections import defaultdict
 from sheets.cell_error import CellError
 import lark
+
+from sheets.dependency_graph import Dependency_graph
 from .eval_expressions import RetrieveReferences
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
@@ -16,100 +18,8 @@ class Sheet:
         self.extent = [0,0]
         self.num_cells = 0
         self.cells = {}
-        self.cell_graph = defaultdict(list)
-    
-    def add_cell_dependency(self,u,v):
-        """
-        function to add an edge to graph
-        Need to call this if formula is updated to reference another cell
-        """
-
-        (self.cells[u]).append(v)
-
-    def DFSUtil(self,v,visited):
-        """
-        A function used by DFS
-        Multi phase evaluation phase
-        Check all dependencies is one step, Update graph afterwards
-        Start updating cells
-        """
-
-        # Mark the current node as visited and print it
-        visited[v]= True
-
-        #Recur for all the vertices adjacent to this vertex
-        for i in self.cells[v]:
-            if visited[i]==False:
-                self.DFSUtil(i,visited)
-
-
-    def fill_order(self,v,visited, stack):
-        """ Mark the current node as visited """ 
-
-        visited[v]= True
-        #Recur for all the vertices adjacent to this vertex
-        for i in self.cell_graph[v]:
-            if visited[i]==False:
-                self.fill_order(i, visited, stack)
-        stack = stack.append(v)
-    
-    def get_transpose(self):
-        """ Function that returns reverse (or transpose) of this graph """
-
-        g = Sheet(self.sheet_name, self.parent_workbook)
-        g.num_cells = self.num_cells
-
-        # Recur for all the vertices adjacent to this vertex
-        for i in self.cell_graph:
-            for j in self.cell_graph[i]:
-                g.add_cell_dependency(j,i)
-        return g
-
-    def print_sccs(self):
-        """
-        The main function that finds and prints all strongly
-        connected components whilst performing topological sort
-        """
-        
-        circ_ref_cells = []
-        stack = []
-        # Mark all the vertices as not visited (For first DFS)
-        visited = [False] * (self.num_cells)
-        # Fill vertices in stack according to their finishing times
-        for i in range(self.cells):
-            if visited[i]==False:
-                self.fill_order(i, visited, stack)
-
-        # Create a reversed graph
-        gr = self.get_transpose()
-         
-        # Mark all the vertices as not visited (For second DFS)
-        visited = [False] * (self.num_cells)
-
-         # Now process all vertices in order defined by Stack
-        while stack:
-            i = stack.pop()
-            if visited[i]==False:
-                gr.DFSUtil(i, visited)
-                circ_ref_cells.append(i)
-        # Want to find all cycles,
-        # When you update a single cell, only that single cell's dependencies changes
-        # Topological order starting at A1
-        # At any given time, graph updates based around one location
-        # Suppose A1 =A2 A3 =A2
-        # user inputs something for A2
-        # lame way: loop through all cells to determine loop
-        # Better way: Have edge from A2 to A1, A3
-        # If A2 updates, you know what cells need to be updated
-        # Every Cell store edges of cells that rely on it
-        # Propogate changes out from that node
-
-        self.parent_workbook.del_sheet(self.sheet_name)
-        #If circular reference, only update cell VALUE to CIRCREF! error, not update contents
-        for curr_cell in circ_ref_cells:
-            self.set_cell_contents(curr_cell, CellError(CellErrorType.CIRCULAR_REFERENCE, "#CIRC_REF!", "None"))
-        for curr_cell in self.cells:
-            self[curr_cell].get_value_from_contents(self[curr_cell].contents)
+        self.dependent_cells = Dependency_graph()
+        self.parent_workbook = None
 
     def get_row_and_col(self,location):
         """ Helper function to get absolute row/col of inputted location (AD42) """
@@ -128,35 +38,69 @@ class Sheet:
                 
         return row, col
 
+    def get_dependent_cells(self, row, col, contents):
+        dependent_cell_dict = {}
+        # these if functions prevent problems with non-formulas
+        curr_cell = self.cells[(row,col)]
+        if contents != None:
+            if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
+                # example: print(self.retrieve_cell_references(contents))
+                dependent_cells = self.retrieve_cell_references(contents)
+                if curr_cell.contents in dependent_cells:
+                    pass
+                for cell in dependent_cells:
+                    #This part needs some thinking through
+                    #Need to check if old value and new values differ before adding to changed cells notification
+                    value = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
+                    dependent_cell_dict[(row,col)].append(value)
+
     def set_cell_contents(self, location, contents):
         # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError
-        #if row <= MAX_ROW and col <= MAX_COL:
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row
         if(col > self.extent[1]):
             self.extent[1] = col
-    
+        
+        #Get old values of dependent cells before updating and recalculating
+        if contents != None:
+            if contents[0] == '=' and contents[1] != '?':
+                old_dependent_values = self.get_dependent_cells(row,col,contents)
+        
         if not (row,col) in self.cells.keys():
             self.cells[(row,col)] = Cell(contents)
         else:
             self.cells[(row,col)].contents = contents # TODO maybe make a new Cell object here
-        # self.cells[(row,col)] = contents
-        # self.printSCCs()
 
         # these if functions prevent problems with non-formulas
+        updated_cells = {}
+        curr_cell = self.cells[(row,col)]
         if contents != None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
-                pass
+                dependent_cells = self.retrieve_cell_references(contents)
+                if curr_cell.contents in dependent_cells:
+                    #update all cells with circular reference here
+                    pass
+                for cell in dependent_cells:
+                    #This part needs some thinking through
+                    #Need to check if old value and new values differ before adding to changed cells notification
+                    val = cell.get_cell_value(self.sheet_name, self.get_row_and_col(cell))
+                    if val not in old_dependent_values[cell].values():
+                        updated_cells[self.sheet_name].append('''Get dependent cell location here''')
+                        continue
+        
+        #return updated_cells
+        
+             
 
     def get_cell_contents(self, location):
         row, col = self.get_row_and_col(location)
         if (row,col) not in self.cells.keys():
-            return None;
+            return None
         return self.cells[(row,col)].contents 
 
     def get_cell_value(self, workbook_instance, location):

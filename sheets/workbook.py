@@ -1,7 +1,7 @@
 
 from multiprocessing.sharedctypes import Value
 
-from anyio import WouldBlock # TODO do we need these
+#from anyio import WouldBlock # TODO do we need these
 from logging import exception
 from multiprocessing.sharedctypes import Value # TODO do we need these
 
@@ -29,42 +29,41 @@ class Workbook:
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
-
-    def num_sheets(self) -> int:
+    def num_sheets(self):
         # Return the number of spreadsheets in the workbook.
         return self.num_sheets
 
     def reorder_sheets(self, sheet_to_move, move_index):
-        if (sheet_to_move not in self.sheets):
-            raise KeyError
         if (move_index < 0 or move_index >= len(self.sheets)):
             raise ValueError
-        self.sheets.insert(move_index, sheet_to_move)
+        for i in self.sheets:
+            if i.sheet_name == sheet_to_move:
+                self.sheets.insert(move_index, sheet_to_move)
+                return
+        raise KeyError
     
     def copy_sheet(self, sheet_to_copy):
-        if sheet_to_copy not in self.sheets:
-            raise KeyError
-
-        copy_index = 0
+        copy_index = -1
         for i in range(len(self.sheets)):
             if self.sheets[i].sheet_name == sheet_to_copy:
                 copy_index = i
                 break
         
         copy_counter = 1
-        while True:
-            new_sheet_name = sheet_to_copy + "_" + str(copy_counter)
-            if new_sheet_name not in self.sheets:
-                copy_sheet = self.new_sheet(new_sheet_name)
-                old_sheet = self.sheets[copy_index]
-                old_cells = old_sheet.cells
-                for key, value in old_cells:
-                    self.set_cell_contents(copy_sheet, key, value)
-                self.num_sheets += 1
-                break
-            else:
-                copy_counter += 1
-        return
+        if copy_index != -1:
+            while True:
+                new_sheet_name = sheet_to_copy + "_" + str(copy_counter)
+                if new_sheet_name not in self.sheets:
+                    copy_sheet = self.new_sheet(new_sheet_name)
+                    old_sheet = self.sheets[copy_index]
+                    old_cells = old_sheet.cells
+                    for key, value in old_cells:
+                        self.set_cell_contents(copy_sheet, key, value)
+                    self.num_sheets += 1
+                    break
+                else:
+                    copy_counter += 1
+        raise KeyError
        
 
     def list_sheets(self): # list
@@ -140,9 +139,6 @@ class Workbook:
 
         return (self.num_sheets-1, sheet_name) # '-1' is because index should start at 0
 
-      
-        
-
     def del_sheet(self, sheet_name: str):
         """
         Delete the spreadsheet with the specified name.
@@ -169,9 +165,6 @@ class Workbook:
                     return
         except KeyError as e:
             raise
-       
-
-    
 
     def get_sheet_extent(self, sheet_name: str):
         """
@@ -183,9 +176,6 @@ class Workbook:
         
         If the specified sheet name is not found, a KeyError is raised.
         """
-        
-      
-        
         # new code for getting the extent
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
@@ -234,7 +224,6 @@ class Workbook:
                 raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
-                #self.check_valid_cell(location)
                 #if want to set cell contents to empty
                 if contents == None or (not self.is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(location, None)
@@ -243,6 +232,9 @@ class Workbook:
                 else: #store normally
                     i.set_cell_contents(location, contents.strip())
                 #completed task
+                # [('Sheet1', 'B1'), ('Sheet1', 'C1')].
+                updated_cells = [(sheet_name, location)]
+                self.on_cells_changed(updated_cells)
                 return
                
         #no sheet found
@@ -309,9 +301,6 @@ class Workbook:
                 return i.get_cell_value(workbook_instance,location) 
             
         raise KeyError
-
-
-
 
     def check_valid_cell (self, location):
         """ Check if the cell location is valid """    
@@ -547,6 +536,14 @@ class Workbook:
                 break
                 
         return row, col
+    
+    def on_cells_changed(self, changed_cells):
+        '''
+        This function gets called when cells change in the workbook that the
+        function was registered on.  The changed_cells argument is an iterable
+        of tuples; each tuple is of the form (sheet_name, cell_location).
+        '''
+        print(f'Cell(s) changed:  {changed_cells}')
 
     def base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet

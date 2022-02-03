@@ -38,6 +38,8 @@ class Cell():
         else:
             self.type = "LITERAL"
             self.value = str(contents)
+        self.dependent_cells = []
+        self.parent_sheet = None
 
 
     def get_cell_value(self, workbook_instance, sheet_instance):

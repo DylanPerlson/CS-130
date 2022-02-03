@@ -124,7 +124,16 @@ class TestWorkbook(unittest.TestCase):
     #     self.assertEqual(wb.get_cell_value(name,'A1'), CellErrorType.PARSE_ERROR)
     #     wb.set_cell_contents(name,'A2','REF!')
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
- 
+
+    # def test_reorder_workbook(self):
+    #     wb = sheets.Workbook()    
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     (_, name2) = wb.new_sheet("second_sheet")
+    #     (_, name3) = wb.new_sheet("move_to_second_sheet")
+
+    #     wb.reorder_sheets("move_to_second_sheet", 1)
+    #     self.assertEqual(name2, "move_to_second_sheet")
+    #     self.assertEqual(name3, "second_sheet")
 
     def test_string_comes_back_as_decimal(self): 
         wb = sheets.Workbook()    

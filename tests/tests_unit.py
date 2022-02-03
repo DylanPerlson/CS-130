@@ -26,6 +26,17 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
 
+    def test_copy(self):
+        wb = Workbook()    
+        
+        (_, name1) = wb.new_sheet("first_sheet")
+        (_, name2) = wb.new_sheet("second_sheet")
+        wb.set_cell_contents(name1,'A1','1')
+        wb.copy_sheet(name1)
+        
+        self.assertEqual(3,len(wb.sheets))
+        self.assertEqual(wb.sheets[0].cells.keys(),wb.sheets[2].cells.keys())
+
     def test_rename(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
@@ -142,12 +153,7 @@ class TestWorkbook(unittest.TestCase):
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
 
     
-    # def test_copy_sheet(self):
-    #     wb = Workbook()    
-    #     (_, name1) = wb.new_sheet("first_sheet")
-    #     (_, name2) = wb.new_sheet("second_sheet")
-
-    #     wb.copy_sheet("first_sheet")
+ 
 
     def test_string_comes_back_as_decimal(self): 
         wb = Workbook()    
@@ -538,7 +544,7 @@ class TestWorkbook(unittest.TestCase):
         pass
         
 if __name__ == '__main__':
-    # print('------------------------NEW TEST------------------------')
-    unittest.main(verbosity=1)
+    print('------------------------NEW TEST------------------------')
+    unittest.main(verbosity=0)
         
 

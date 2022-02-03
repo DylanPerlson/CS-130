@@ -7,6 +7,7 @@
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
 import json
+import copy
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -45,7 +46,7 @@ class Workbook:
     def copy_sheet(self, sheet_to_copy):
         copy_index = -1
         for i in range(len(self.sheets)):
-            if self.sheets[i].sheet_name == sheet_to_copy:
+            if self.sheets[i].sheet_name.lower() == sheet_to_copy.lower():
                 copy_index = i
                 break
         
@@ -54,15 +55,20 @@ class Workbook:
             while True:
                 new_sheet_name = sheet_to_copy + "_" + str(copy_counter)
                 if new_sheet_name not in self.sheets:
-                    copy_sheet = self.new_sheet(new_sheet_name)
+                    _,copy_sheet_name = self.new_sheet(new_sheet_name)
                     old_sheet = self.sheets[copy_index]
-                    old_cells = old_sheet.cells
-                    for key, value in old_cells:
-                        self.set_cell_contents(copy_sheet, key, value)
-                    self.num_sheets += 1
-                    break
+                    self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
+                    
+                    
+                    
+                    # for key in old_cells.keys():
+                    #     print(key)
+                        
+                    #     self.set_cell_contents(copy_sheet, key, old_cells[key].contents)
+                    self.number_sheets = self.number_sheets + 1
+                    return
                 else:
-                    copy_counter += 1
+                    copy_counter = copy_counter + 1
         raise KeyError
        
 
@@ -565,7 +571,7 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
-        #print(f'Cell(s) changed:  {changed_cells}')
+        print(f'Cell(s) changed:  {changed_cells}') 
 
     def base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet

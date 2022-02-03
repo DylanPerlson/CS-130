@@ -46,7 +46,7 @@ class Sheet:
                 # example: print(self.retrieve_cell_references(contents))
                 curr_cell = self.cells[(row,col)]
                 parent_cells = self.retrieve_cell_references(contents)
-                print(parent_cells)
+                #print(parent_cells)
                 if curr_cell in parent_cells:
                     #set circular reference error here
                     pass

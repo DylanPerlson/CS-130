@@ -8,6 +8,7 @@ from .cell_error import CellError, CellErrorType
 
 MAX_ROW = 475254
 MAX_COL = 9999
+master_cell_dict = {}
 
 # Object class for individual spreadsheet
 class Sheet:
@@ -37,21 +38,31 @@ class Sheet:
                 
         return row, col
 
-    def get_dependent_cells(self, row, col, contents):
+    def get_dependent_cells(self, row, col, location, contents):
         dependent_cell_dict = {}
         # these if functions prevent problems with non-formulas
         if contents != None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
                 curr_cell = self.cells[(row,col)]
-                dependent_cells = self.retrieve_cell_references(contents)
-                if curr_cell in dependent_cells:
+                parent_cells = self.retrieve_cell_references(contents)
+                print(parent_cells)
+                if curr_cell in parent_cells:
                     #set circular reference error here
                     pass
-                for cell in dependent_cells:
-                    split_cell_string = cell.split('!')
+                for curr_parent_cell in parent_cells:
+                    split_cell_string = curr_parent_cell.split('!')
                     val = self.get_cell_value(split_cell_string[0], split_cell_string[1])
                     depend_row, depend_col = self.get_row_and_col(split_cell_string[1])
+                    temp_tuple = (split_cell_string[0],depend_row,depend_col)
+                    if curr_parent_cell not in curr_cell.parent_cells:
+                        curr_cell.parent_cells[temp_tuple] = val
+                    curr_cell_string = self.sheet_name + "!" + str(location)
+
+                    
+#                    if curr_cell_string not in master_cell_dict[temp_tuple].get_children_cells():
+ #                       master_cell_dict[temp_tuple].add_child_cell(curr_cell_string, contents)
+
                     dependent_cell_dict[(split_cell_string[0],depend_row,depend_col)] = val
         return dependent_cell_dict
 
@@ -67,27 +78,36 @@ class Sheet:
             self.extent[1] = col
         
         self.cells[(row,col)] = Cell(contents) # if statement is old code; we need to update a cell entirely
-
+        # if not in the master dictionary
+        if (self.sheet_name,row,col) not in master_cell_dict:
+            master_cell_dict[(self.sheet_name,row,col)] = self.cells[(row,col)]
         updated_cells = {}
         curr_cell = self.cells[(row,col)]
-        # if contents != None:
+        
+        # Parse formula based on parent nodes
         if self.cells[(row,col)].type == "FORMULA":
             # example: print(self.retrieve_cell_references(contents))
-            dependent_cells = self.retrieve_cell_references(contents)
-            if curr_cell in dependent_cells:
+            parent_cells = self.retrieve_cell_references(contents)
+            if isinstance(parent_cells, CellError):
+                return
+            elif curr_cell in parent_cells:
                 #update all cells with circular reference here
                 pass
-            for cell in dependent_cells:
+            for cell in parent_cells:
                 #Need to check if old value and new values differ before adding to changed cells notification
-                dependent_cells_dict = self.get_dependent_cells(row,col,contents)
+                parent_cells_dict = self.get_dependent_cells(row,col,location, contents)
                 split_cell_string = cell.split('!')
                 val = self.get_cell_value(split_cell_string[0], split_cell_string[1])
                 depend_row, depend_col = self.get_row_and_col(split_cell_string[1])
-                if val != dependent_cells_dict[(split_cell_string[0],depend_row,depend_col)]:
-                    updated_cells[self.sheet_name].append('''Get dependent cell location here''')
-                    continue
+                if val != parent_cells_dict[(split_cell_string[0],depend_row,depend_col)]:
+                    updated_cells[self.sheet_name] = split_cell_string[1]
         
-        #return updated_cells
+        #If not a formula, update children node that depend on this cell
+        children_cells = self.cells[(row,col)].get_children_cells()
+        for curr_child_cell in children_cells:
+            curr_child_cell.get_cell_value(workbook_instance, self)
+            updated_cells[self.sheet_name].append(curr_child_cell)
+        return updated_cells
         
              
 
@@ -111,7 +131,10 @@ class Sheet:
     def retrieve_cell_references(self, contents):
         """ helper function that returns the references in a cell's formula """
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-        formula = parser.parse(contents)
+        try:
+            formula = parser.parse(self.contents)
+        except:
+            return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
         ref = RetrieveReferences(self)
         ref.visit(formula)
         return ref.references

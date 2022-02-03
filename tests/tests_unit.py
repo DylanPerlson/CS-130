@@ -26,8 +26,6 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
 
-
-    '''
     def test_rename(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
@@ -263,6 +261,7 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents("second_sheet", 'ba5', "'string" )
 
         content1 = wb.get_cell_contents("first_sheet", 'AA57')
+        
         content2 = wb.get_cell_contents(name2, 'ba4')
         content3 = wb.get_cell_contents(name2, 'ba5')
 
@@ -538,9 +537,6 @@ class TestWorkbook(unittest.TestCase):
     def test_loading_bad_formula(self): # TODO
         pass
         
-
-    
-    '''
 if __name__ == '__main__':
     # print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=1)

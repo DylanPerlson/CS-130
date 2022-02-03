@@ -192,6 +192,23 @@ class Workbook:
         #if sheet name not found, raise key error
         raise KeyError
 
+    def get_row_and_col(self,location):
+        """ Helper function to get absolute row/col of inputted location (AD42) """
+        
+        for e,i in enumerate(location):
+            if i.isdigit():
+                row = location[:e]          
+                #convert row letters to its row number
+                temp = 0
+                for j in range(1, len(row)+1):                            
+                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+                   
+                row = temp
+                col = int(location[e:])                
+                break
+                
+        return row, col
+    
     def set_cell_contents(self, sheet_name: str, location: str,
                           contents: 'None'):
         """
@@ -216,6 +233,7 @@ class Workbook:
         rather, the cell's value will be a CellError object indicating the
         naure of the issue.
         """
+        
         updated_cells = []
         for i in self.sheets:
             #edit cell content of specified sheet
@@ -266,7 +284,7 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self.check_valid_cell(location)
-                return i.get_cell_contents(self, i, location)
+                return i.get_cell_contents(location)
 
         raise ValueError
 
@@ -547,7 +565,7 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
-        print(f'Cell(s) changed:  {changed_cells}')
+        #print(f'Cell(s) changed:  {changed_cells}')
 
     def base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet

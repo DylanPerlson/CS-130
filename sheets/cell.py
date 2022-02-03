@@ -38,9 +38,15 @@ class Cell():
         else:
             self.type = "LITERAL"
             self.value = str(contents)
-        self.dependent_cells = []
+        self.parent_cells = {}
+        self.children_cells = {}
         self.parent_sheet = None
-
+    
+    def get_children_cells(self):
+        return self.children_cells
+    
+    def add_child_cell(self, location, value):
+        self.children_cells[location] = value
 
     def get_cell_value(self, workbook_instance, sheet_instance):
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')

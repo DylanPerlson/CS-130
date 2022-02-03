@@ -1,9 +1,8 @@
 
-from multiprocessing.sharedctypes import Value
-
-#from anyio import WouldBlock # TODO do we need these
-from logging import exception
-from multiprocessing.sharedctypes import Value # TODO do we need these
+# from multiprocessing.sharedctypes import Value
+# from anyio import WouldBlock # TODO do we need these
+# from logging import exception
+# from multiprocessing.sharedctypes import Value # TODO do we need these
 
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
@@ -25,7 +24,7 @@ class Workbook:
     def __init__(self):
         # Initialize a new empty workbook.
         self.sheets = []
-        self.num_sheets = 0
+        self.number_sheets = 0
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
@@ -134,10 +133,10 @@ class Workbook:
             else:
                 new_sheet = Sheet(sheet_name)
 
-        self.num_sheets += 1 
+        self.number_sheets += 1 
         self.sheets.append(new_sheet)
 
-        return (self.num_sheets-1, sheet_name) # '-1' is because index should start at 0
+        return (self.number_sheets-1, sheet_name) # '-1' is because index should start at 0
 
     def del_sheet(self, sheet_name: str):
         """
@@ -161,7 +160,7 @@ class Workbook:
                 curr_sheet = self.sheets[i]
                 if curr_sheet.sheet_name.lower() == sheet_name.lower():
                     self.sheets.remove(curr_sheet)
-                    self.num_sheets -= 1
+                    self.number_sheets -= 1
                     return
         except KeyError as e:
             raise

@@ -80,7 +80,7 @@ class Cell():
             #     evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
-                evaluation = CellError(CellErrorType.BAD_REFERENCE, "Invalid Cell Reference", None)
+                evaluation = CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
         
 
 

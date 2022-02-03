@@ -16,8 +16,8 @@ error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?
 def generate_error_object(error_arg):
     if isinstance(error_arg, CellError):
         cell_error_obj = error_arg
-    if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")):
-        return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+    if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
+        return CellError(CellErrorType.BAD_REFERENCE, "204: Invalid cell reference")
     elif error_arg == '#ERROR!' or isinstance(cell_error_obj, CellError(CellErrorType.PARSE_ERROR, "Parse Error")):
         return CellError(CellErrorType.PARSE_ERROR, "Parse Error")
     elif error_arg == '#CIRCREF!' or isinstance(cell_error_obj, CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")):
@@ -198,15 +198,15 @@ class EvalExpressions(Transformer):
             elif not args[0][0] == "'" and not args[0][-1] == "'":
                 sheet_name = args[0]
             else:
-                return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+                return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
             cell = args[1]
         else:
-            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference")
+            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
         except:
-            return CellError(CellErrorType.BAD_REFERENCE, "Invalid cell reference", None)
+            return CellError(CellErrorType.BAD_REFERENCE, "202: Invalid cell reference", None)
 
         # if cell_value == None:
         #    cell_value = 0 # TODO "" for string

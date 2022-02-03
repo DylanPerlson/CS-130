@@ -25,7 +25,7 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
-
+    
     def test_copy(self):
         wb = Workbook()    
         
@@ -72,12 +72,12 @@ class TestWorkbook(unittest.TestCase):
 
     
     """ Performing unit tests on the sheets module. """
-    '''
+    
     # def test_set_cell_as_error(self):
     #     wb = Workbook()    
     #     (_, name) = wb.new_sheet("sheet")
     #     a = CellError(CellErrorType.)
-    '''
+    
 
     #def test_bad_ref(self):
         #wb = Workbook()    
@@ -542,7 +542,7 @@ class TestWorkbook(unittest.TestCase):
 
     def test_loading_bad_formula(self): # TODO
         pass
-        
+    
 if __name__ == '__main__':
     print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=0)

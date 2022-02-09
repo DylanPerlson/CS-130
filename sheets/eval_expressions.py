@@ -10,10 +10,12 @@ from .cell_error import CellError, CellErrorType
 
 error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 
-#Helper function to generate error objects when parsing formulas
-#Error literals are strings
-#Might be creating cellerror objects
 def generate_error_object(error_arg):
+    """ 
+    Helper function to generate error objects when parsing formulas
+    Error literals are strings
+    Might be creating cellerror objects
+    """
     if isinstance(error_arg, CellError):
         cell_error_obj = error_arg
     if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
@@ -185,8 +187,8 @@ class EvalExpressions(Transformer):
         return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
-        # if using the current sheet
         
+        # if using the current sheet
         if len(args) == 1:      
             sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
@@ -202,6 +204,9 @@ class EvalExpressions(Transformer):
             cell = args[1]
         else:
             return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+
+        # delete the dollar sign from the cell reference
+        cell = cell.replace("$","")
 
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)

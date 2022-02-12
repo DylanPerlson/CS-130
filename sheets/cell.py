@@ -13,8 +13,7 @@ class Cell():
         # check that the cell is either a string or None
         if not isinstance(contents, str) and contents != None:
             raise TypeError('Content is not a string.')
-
-        # TODO if a number is given for contents an error should be raised
+            
         # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"

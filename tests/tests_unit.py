@@ -274,9 +274,10 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(content1, '12') 
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
-
+        
         with self.assertRaises(ValueError):
             wb.get_cell_contents(name1, ' AA57')
+
         with self.assertRaises(ValueError):
             wb.get_cell_contents(name1, 'A5A57')
 
@@ -400,29 +401,30 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name1,'BB60').get_type(),CellErrorType.TYPE_ERROR)
 
     #Currently isn't working for me
-    # def test_delete_sheets(self):
-    #     wb = Workbook()
-    #     (_,_) = wb.new_sheet("first_sheet")
-    #     (_,_) = wb.new_sheet("sheet_to_delete")
-    #     (_,_) = wb.new_sheet("third_sheet")
+    def test_delete_sheets(self):
+        wb = Workbook()
+        (_,_) = wb.new_sheet("first_sheet")
+        (_,_) = wb.new_sheet("sheet_to_delete")
+        (_,_) = wb.new_sheet("third_sheet")
 
-    #     with self.assertRaises(KeyError):
-    #         wb.del_sheet("invalid_sheet_name")
+        with self.assertRaises(KeyError):
+            wb.del_sheet("invalid_sheet_name")
 
-    #     wb.del_sheet("sheet_to_delete")
-    #     self.assertEqual(wb.num_sheets(), 2)
-    #     self.assertEqual(wb.list_sheets(),['first_sheet', 'third_sheet'])
-    #     wb.del_sheet("first_sheet")
-    #     self.assertEqual(wb.num_sheets(), 1)
-    #     self.assertEqual(wb.list_sheets(),['third_sheet'])
+        wb.del_sheet("sheet_to_delete")
+        self.assertEqual(wb.num_sheets(), 2)
+        self.assertEqual(wb.list_sheets(),['first_sheet', 'third_sheet'])
+        wb.del_sheet("first_sheet")
+        self.assertEqual(wb.num_sheets(), 1)
+        self.assertEqual(wb.list_sheets(),['third_sheet'])
 
-    #     (_,_) = wb.new_sheet("one_last_sheet")
-    #     self.assertEqual(wb.list_sheets(),['third_sheet',"one_last_sheet"])
+        (_,_) = wb.new_sheet("one_last_sheet")
+        self.assertEqual(wb.num_sheets(), 2)
+        self.assertEqual(wb.list_sheets(),['third_sheet',"one_last_sheet"])
 
-    #     wb.del_sheet("one_last_sheet")
-    #     wb.del_sheet("third_sheet")
-    #     self.assertEqual(wb.num_sheets(), 0)
-    #     self.assertEqual(wb.list_sheets(),[])
+        wb.del_sheet("one_last_sheet")
+        wb.del_sheet("third_sheet")
+        self.assertEqual(wb.num_sheets(), 0)
+        self.assertEqual(wb.list_sheets(),[])
     
 
     # def test_cell_errors(self): #make this a better parse error
@@ -551,23 +553,112 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
         wb.set_cell_contents(name1, 'JNE41', '100')
 
-        with open('save_testfile.json', 'w') as fp:
+        with open('tests/json/save_testfile.json', 'w') as fp:
             wb.save_workbook(fp)
 
 
     def test_load_workbook(self):
-        with open('load_testfile.json') as fp:
+        with open('tests/json/load_testfile.json') as fp:
             wb = Workbook.load_workbook(fp)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
         self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
 
 
+    def test_json_non_string_contents(self): # TODO seems to work
+        with self.assertRaises(TypeError):
+            with open('tests/json/error1_testfile.json') as fp:
+                wb = Workbook.load_workbook(fp)
+
+
+    def test_empty_json(self):
+        with open('tests/json/empty_testfile.json') as fp:
+            wb = Workbook.load_workbook(fp)
+
+        self.assertEqual([], wb.list_sheets())
+        self.assertEqual(0, wb.num_sheets())
+
+
+    def test_sheetlist_json(self):
+        with self.assertRaises(TypeError):
+            with open('tests/json/sheetlist_testfile.json') as fp:
+                wb = Workbook.load_workbook(fp)
+
+
+    def test_json_no_contents(self):
+        ''' Test that a workbook with a single sheet and no contents
+        is saved correctly. '''
+        with open('tests/json/no_contents_testfile.json') as fp:
+            wb = Workbook.load_workbook(fp)
+
+        self.assertEqual(['first_sheet'], wb.list_sheets())
+        self.assertEqual(1, wb.num_sheets())
+
+
+    def test_json_perserve_capitalization(self):
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("fiRst_sheet")
+        (_,_) = wb.new_sheet("second_sheet")
+        (_,_) = wb.new_sheet("LAST_sheet")
+
+        wb.set_cell_contents(name1, 'AA57', 'words')
+        wb.set_cell_contents(name1, 'AAA3', '=12+4')
+        wb.set_cell_contents(name1, 'JNE41', 'more words')
+
+        (_, name1) = wb.new_sheet("2nd_sheet")
+
+        wb.set_cell_contents(name1, 'aa57', '12.0')
+        wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
+        wb.set_cell_contents(name1, 'JNE41', '100')
+
+        listed_sheets = wb.list_sheets()
+
+        with open('tests/json/capitalization_testfile.json', 'w') as fp:
+            wb.save_workbook(fp)
+
+        with open('tests/json/capitalization_testfile.json') as fp:
+            wb2 = Workbook.load_workbook(fp)
+
+        self.assertEqual(listed_sheets, wb2.list_sheets())
+
+
+    def test_bad_inputs(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet()
+
+        wb.set_cell_contents(name, 'AA57', 'words')
+        wb.set_cell_contents(name, 'AAA3', '=12+4')
+        wb.set_cell_contents(name, 'JNE41', 'more words')
+
+        with self.assertRaises(ValueError):
+            wb.get_cell_contents(name, 'a 1')
+
+        with self.assertRaises(ValueError):
+            wb.get_cell_contents(name, 0)
+
+        with self.assertRaises(ValueError):
+            wb.get_cell_value(name, 'a 5')
+
+        with self.assertRaises(KeyError):
+            wb.get_cell_contents('non_existing_sheet', 'a5')
+
+
+    def test_set_none(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet()
+
+        wb.set_cell_contents(name, 'AA57', 'words')
+        self.assertEqual('words', wb.get_cell_contents(name, 'AA57'))
+
+        wb.set_cell_contents(name, 'AA57', None)
+        self.assertEqual(None, wb.get_cell_contents(name, 'AA57'))
+
+
     def test_loading_bad_formula(self): # TODO
         pass
     
 if __name__ == '__main__':
-    print('------------------------NEW TEST------------------------')
+    # print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=0)
         
 

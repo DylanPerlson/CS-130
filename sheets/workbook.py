@@ -84,7 +84,7 @@ class Workbook:
         cur_exists = False
         #check if the sheet exists
         for i in self.sheets:
-            if i.lower() == sheet_name.lower():
+            if i.sheet_name.lower() == sheet_name.lower():
                 cur_exists = True
                 #TODO i dont think i need this
                 cur_sheet = i
@@ -92,7 +92,7 @@ class Workbook:
 
         if to_sheet != None:
             for i in self.sheets:
-                if i.lower() == to_sheet.lower():
+                if i.sheet_name.lower() == to_sheet.lower():
                     to_exists = True
                     #TODO is this a valid reference pass? think so
                     to_sheet = i
@@ -121,17 +121,17 @@ class Workbook:
                 #TODO will need to change the cell contents i believe for formulas??
                 copy[(r,c)] = cur_sheet.get_cell_contents(cell)
                 #delete the value after copying
-                cur_sheet.set_cell_contents(cell, None)
+                cur_sheet.set_cell_contents(self,cell, None)
         
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):
             for c in range(start_col, end_col+1):
                 cell = str(self.base_10_to_alphabet(r+delta_row))+str(c+delta_col)
 
-                if to_sheet == None:
-                    cur_sheet.set_cell_contents(cell,copy[(r,c)])
+                if to_sheet is None:
+                    cur_sheet.set_cell_contents(self,cell,copy[(r,c)])
                 else:
-                    to_sheet.set_cell_contents(cell,copy[(r,c)])
+                    to_sheet.set_cell_contents(self,cell,copy[(r,c)])
 
 
         
@@ -191,7 +191,7 @@ class Workbook:
         if (move_index < 0 or move_index >= len(self.sheets)):
             raise ValueError
         for e,i in enumerate(self.sheets):
-            if i.sheet_name == sheet_to_move:
+            if i.sheet_name.lower() == sheet_to_move.lower():
                 self.sheets.insert(move_index, i)
                 self.sheets.pop(e+1)
                 return
@@ -397,14 +397,14 @@ class Workbook:
         updated_cells = []
         for i in self.sheets:
             #edit cell content of specified sheet
-            if (i.sheet_name == None):
+            if (i.sheet_name is None):
                 continue
             if not self.check_valid_cell(location):
                 raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
-                if contents == None or (not self.is_float(contents) and contents.strip() == ''):
+                if contents is None or (not self.is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(i.sheet_name, location, None)
                 elif self.is_float(contents):
                     i.set_cell_contents(i.sheet_name, location, contents)

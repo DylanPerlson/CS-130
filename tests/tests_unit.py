@@ -6,12 +6,26 @@ import unittest
 
 
 class TestWorkbook(unittest.TestCase):
-    def test_move_cell(self):
-        pass
+    def test_move_cells(self):
+            wb = Workbook()
+            (_, name) = wb.new_sheet("s1")
+            wb.set_cell_contents(name,'A1','1')
+            wb.set_cell_contents(name,'A2',"hi")
+            wb.set_cell_contents(name,'B2',"yo")
+            wb.move_cells(name,'A1','B3','A5')
+            
+            self.assertEqual(wb.get_cell_value(name,'A1'),'None')
+            self.assertEqual(wb.get_cell_value(name,'A5'),1)
+            self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
+            self.assertEqual(wb.get_cell_value(name,'B6'),"yo")
+
+
+            print(wb.get_cell_value(name,'A1'))
+            
     
     pause = True
     if not pause:
-        
+
         def test_aaron(self):
             wb = Workbook()
             (_, name) = wb.new_sheet("s1")

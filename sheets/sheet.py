@@ -70,7 +70,7 @@ class Sheet:
         # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
-            raise ValueError
+            raise ValueError('stuff')
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row

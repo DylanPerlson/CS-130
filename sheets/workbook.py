@@ -116,7 +116,7 @@ class Workbook:
             raise ValueError()   
         
         #if no name given
-        if sheet_name == None:
+        if sheet_name is None:
             name_given = True
             auto_name = "Sheet"
             sheet_name = auto_name + str(self._create_name())
@@ -241,20 +241,20 @@ class Workbook:
         """
         
         # check that the cell is either a string or None
-        if not isinstance(contents, str) and contents != None:
+        if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
 
         updated_cells = []
         for i in self.sheets:
             #edit cell content of specified sheet
-            if (i.sheet_name == None):
+            if (i.sheet_name is None):
                 continue
             if not self._check_valid_cell(location):
                 raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
-                if contents == None or (not self._is_float(contents) and contents.strip() == ''):
+                if contents is None or (not self._is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(i.sheet_name, location, None)
                 elif self._is_float(contents):
                     i.set_cell_contents(i.sheet_name, location, contents)

@@ -41,7 +41,7 @@ class Sheet:
     def get_dependent_cells(self, row, col, location, contents):
         dependent_cell_dict = {}
         # these if functions prevent problems with non-formulas
-        if contents != None:
+        if contents is not None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
                 curr_cell = self.cells[(row,col)]

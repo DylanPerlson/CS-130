@@ -102,9 +102,9 @@ class EvalExpressions(Transformer):
         if type(args[2]) is CellError:
             return args[2]
 
-        if (args[0] == None):
+        if (args[0] is None):
             args[0] = 0
-        if (args[2] == None):
+        if (args[2] is None):
             args[2] = 0
 
         # if (str(args[0]).isdigit and not str(args[2]).isdigit): 
@@ -137,9 +137,9 @@ class EvalExpressions(Transformer):
         if type(args[2]) is CellError:
             return args[2]
 
-        if (args[0] == None):
+        if (args[0] is None):
             args[0] = 0
-        if (args[2] == None):
+        if (args[2] is None):
             args[2] = 0
         
         if args[1] == '/' and str(args[2]) == '0':
@@ -172,9 +172,9 @@ class EvalExpressions(Transformer):
             return args[0]
         if type(args[1]) is CellError:
             return args[2]
-        if(args[0] == None):
+        if(args[0] is None):
             args[0] = ''
-        if(args[1] == None):
+        if(args[1] is None):
             args[1] = ''
 
         if (args[0] in error_literals or isinstance(args[0], CellError)):
@@ -213,6 +213,6 @@ class EvalExpressions(Transformer):
         except:
             return CellError(CellErrorType.BAD_REFERENCE, "202: Invalid cell reference", None)
 
-        # if cell_value == None:
+        # if cell_value is None:
         #    cell_value = 0 # TODO "" for string
         return cell_value

@@ -11,7 +11,7 @@ class Cell():
         self.parse_necessary = True
 
         # check that the cell is either a string or None
-        if not isinstance(contents, str) and contents != None:
+        if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
             
         # Determine Cell Type

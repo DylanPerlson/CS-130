@@ -417,8 +417,8 @@ class Workbook:
 
             if 'name' not in sheet:
                 raise KeyError("No 'name' key found in some sheet of the json file.")
-            if 'cell_contents' not in sheet:
-                raise KeyError("No 'cell_contents' key found in some sheet of the json file.")
+            if 'cell-contents' not in sheet:
+                raise KeyError("No 'cell-contents' key found in some sheet of the json file.")
 
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)

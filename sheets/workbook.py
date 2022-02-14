@@ -446,7 +446,7 @@ class Workbook:
             for key, value in i.cells.items():
                 cells[(self._base_10_to_alphabet(key[0])+str(key[1]))] = value.contents
 
-            sheet = {"name": i.sheet_name, "cell_contents": cells}
+            sheet = {"name": i.sheet_name, "cell-contents": cells}
 
             file["sheets"].append(sheet)
 

@@ -1,1 +1,1 @@
-{"sheets": [{"name": "fiRst_sheet", "cell_contents": {"AA57": "4", "AAA3": ["list"], "JNE41": "more words"}}, {"name": "2nd_sheet", "cell_contents": {"AA57": "12.0", "AAA3": "=12.0+1.00", "JNE41": "4"}}]}
+{"sheets": [{"name": "fiRst_sheet", "cell-contents": {"AA57": "4", "AAA3": ["list"], "JNE41": "more words"}}, {"name": "2nd_sheet", "cell_contents": {"AA57": "12.0", "AAA3": "=12.0+1.00", "JNE41": "4"}}]}

@@ -18,18 +18,21 @@ def generate_error_object(error_arg):
     """
     if isinstance(error_arg, CellError):
         cell_error_obj = error_arg
-    if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
-        return CellError(CellErrorType.BAD_REFERENCE, "204: Invalid cell reference")
-    elif error_arg == '#ERROR!' or isinstance(cell_error_obj, CellError(CellErrorType.PARSE_ERROR, "Parse Error")):
-        return CellError(CellErrorType.PARSE_ERROR, "Parse Error")
-    elif error_arg == '#CIRCREF!' or isinstance(cell_error_obj, CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")):
-        return CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-    elif error_arg == '#VALUE!' or isinstance(cell_error_obj, CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")):
-        return CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
-    elif error_arg == '#DIV/0!' or isinstance(cell_error_obj, CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")):
-        return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")
-    elif error_arg == '#NAME?' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_NAME, "Unrecognized function name")):
-        return CellError(CellErrorType.BAD_NAME, "Unrecognized function name")
+    return_error = None
+    if error_arg == '#REF!': #or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
+        return_error = CellError(CellErrorType.BAD_REFERENCE, "204: Invalid cell reference")
+    elif error_arg == '#ERROR!': #or isinstance(cell_error_obj, CellError(CellErrorType.PARSE_ERROR, "Parse Error")):
+        return_error = CellError(CellErrorType.PARSE_ERROR, "Parse Error")
+    elif error_arg == '#CIRCREF!': #or isinstance(cell_error_obj, CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")):
+        return_error = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+    elif error_arg == '#VALUE!': #or isinstance(cell_error_obj, CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")):
+        return_error = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
+    elif error_arg == '#DIV/0!': #or isinstance(cell_error_obj, CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")):
+        return_error = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0")
+    elif error_arg == '#NAME?': #or isinstance(cell_error_obj, CellError(CellErrorType.BAD_NAME, "Unrecognized function name")):
+        return_error = CellError(CellErrorType.BAD_NAME, "Unrecognized function name")
+    
+    return return_error
 
 #Use this somewhere
 
@@ -107,12 +110,12 @@ class EvalExpressions(Transformer):
         if (args[2] == None):
             args[2] = 0
 
-        # if (str(args[0]).isdigit and not str(args[2]).isdigit): 
-        #     newError = generate_error_object("#VALUE!")
-        #     return newError
-        # if (str(args[2]).isdigit and not str(args[0]).isdigit): 
-        #     newError = generate_error_object("#VALUE!")
-        #     return newError
+        if (isinstance(args[0],decimal.Decimal) and not isinstance(args[2],decimal.Decimal)): 
+            newError = generate_error_object("#VALUE!")
+            return newError
+        if (isinstance(args[2],decimal.Decimal) and not isinstance(args[0],decimal.Decimal)): 
+            newError = generate_error_object("#VALUE!")
+            return newError
 
         #Error_literals only consider strings, not CellError object
         # Make sure to account for both
@@ -145,10 +148,10 @@ class EvalExpressions(Transformer):
         if args[1] == '/' and str(args[2]) == '0':
             return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", "division by zero")
         
-        if (str(args[0]).isdigit and not str(args[2]).isdigit): 
+        if (isinstance(args[0],decimal.Decimal) and not isinstance(args[2],decimal.Decimal)): 
             newError = generate_error_object("#VALUE!")
             return newError
-        if (str(args[2]).isdigit and not str(args[0]).isdigit): 
+        if (isinstance(args[2],decimal.Decimal) and not isinstance(args[0],decimal.Decimal)): 
             newError = generate_error_object("#VALUE!")
             return newError
         

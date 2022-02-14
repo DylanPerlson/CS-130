@@ -70,6 +70,8 @@ class Cell():
         # trying to evaluate
         try: 
             evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
+            if isinstance(evaluation, CellError):
+                return evaluation
         except lark.exceptions.VisitError as e:
             
             if isinstance(e.__context__, ZeroDivisionError):
@@ -82,11 +84,11 @@ class Cell():
                 evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
                 # return the above error
 
+            elif isinstance(e.__context__, TypeError):
+                evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
+
             elif isinstance(e.__context__, NameError):
                 evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
-            
-            # elif isinstance(e.__context__, TypeError):
-            #     evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             else:
                 evaluation = CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)

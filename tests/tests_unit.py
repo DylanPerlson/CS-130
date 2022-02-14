@@ -376,6 +376,29 @@ class TestWorkbook(unittest.TestCase):
     def test_double_quotes_for_single_quotes(self):
         pass # TODO
 
+    def test_type_error_calculations(self):
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'AA57', '=5+"test"')
+        wb.set_cell_contents(name1, 'AA58', '=5-"test"')
+        wb.set_cell_contents(name1, 'AA59', '=5*"test"')
+        wb.set_cell_contents(name1, 'AA60', '=5/"test"')
+
+        self.assertEqual(wb.get_cell_value(name1,'AA57').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'AA58').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'AA59').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'AA60').get_type(),CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name1, 'BB57', '="test"+5')
+        wb.set_cell_contents(name1, 'BB58', '="test"-5')
+        wb.set_cell_contents(name1, 'BB59', '="test"/5')
+        wb.set_cell_contents(name1, 'BB60', '="test"*5')
+
+        self.assertEqual(wb.get_cell_value(name1,'BB57').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'BB58').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'BB59').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name1,'BB60').get_type(),CellErrorType.TYPE_ERROR)
+
     #Currently isn't working for me
     # def test_delete_sheets(self):
     #     wb = Workbook()

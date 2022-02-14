@@ -259,7 +259,7 @@ class Workbook:
                 #completed task
                 # [('Sheet1', 'B1'), ('Sheet1', 'C1')].
                 updated_cells.append((sheet_name, location))
-                self.on_cells_changed(updated_cells)
+                # self.on_cells_changed(updated_cells)
                 return
                
         #no sheet found
@@ -571,6 +571,7 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
+        # Don't do this
         print(f'Cell(s) changed:  {changed_cells}') 
 
     def base_10_to_alphabet(self, number):

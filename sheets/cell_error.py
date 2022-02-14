@@ -31,7 +31,7 @@ class CellError:
     evaluation.
     '''
 
-    def __init__(self, error_type, detail, exception is None):
+    def __init__(self, error_type, detail, exception = None):
         self._error_type = error_type
         self._detail = detail
         self._exception = exception

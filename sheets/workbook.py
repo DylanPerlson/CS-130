@@ -423,7 +423,7 @@ class Workbook:
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)
 
-            for location, content in sheet['cell_contents'].items():
+            for location, content in sheet['cell-contents'].items():
                 wb.set_cell_contents(sheet_name, location, content)
 
         return wb

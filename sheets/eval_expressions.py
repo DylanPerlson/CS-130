@@ -89,7 +89,7 @@ class EvalExpressions(Transformer):
         elif args[0] == '-':
             return -decimal.Decimal(args[1])
         else:
-            raise Exception
+            raise Exception()
 
     def parens(self, args):
         #if reference a cell error
@@ -128,7 +128,7 @@ class EvalExpressions(Transformer):
         elif args[1] == '-':
             return decimal.Decimal(decimal.Decimal(args[0])-decimal.Decimal(args[2]))
         else:
-            raise Exception
+            raise Exception()
 
     def mul_expr(self, args):
         #if reference a cell error
@@ -164,7 +164,7 @@ class EvalExpressions(Transformer):
         elif args[1] == '/':
             return decimal.Decimal(decimal.Decimal(args[0])/decimal.Decimal(args[2]))
         else:
-            raise Exception
+            raise Exception()
 
     def concat_expr(self, args):
         #if reference a cell error

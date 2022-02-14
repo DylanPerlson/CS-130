@@ -35,13 +35,13 @@ class Workbook:
 
     def reorder_sheets(self, sheet_to_move, move_index):
         if (move_index < 0 or move_index >= len(self.sheets)):
-            raise ValueError
+            raise ValueError()
         for e,i in enumerate(self.sheets):
             if i.sheet_name == sheet_to_move:
                 self.sheets.insert(move_index, i)
                 self.sheets.pop(e+1)
                 return
-        raise KeyError
+        raise KeyError()
     
     def copy_sheet(self, sheet_to_copy):
         copy_index = -1
@@ -69,7 +69,7 @@ class Workbook:
                     return
                 else:
                     copy_counter = copy_counter + 1
-        raise KeyError
+        raise KeyError()
        
 
     def list_sheets(self): # list
@@ -113,7 +113,7 @@ class Workbook:
         #check for invalid strings
        
         if (sheet_name == ""): 
-            raise ValueError   
+            raise ValueError()   
         
         #if no name given
         if sheet_name == None:
@@ -125,18 +125,18 @@ class Workbook:
         
         # no leading or trailing white space allowed
         if sheet_name[0] == " " or sheet_name[-1] == " ": 
-            raise ValueError   
+            raise ValueError()   
 
         for i in sheet_name:
             if not i.isalnum() and not i in self.allowed_characters:
-                raise ValueError
+                raise ValueError()
 
 
         #cannot already be taken
         if name_given == False:
             for i in self.sheets:
                 if i.sheet_name.lower() == sheet_name.lower():
-                    raise ValueError
+                    raise ValueError()
             else:
                 new_sheet = Sheet(sheet_name)
 
@@ -160,7 +160,7 @@ class Workbook:
             all_sheet_names.append(self.sheets[i].sheet_name.lower())
         
         if sheet_name not in all_sheet_names:
-            raise KeyError
+            raise KeyError()
         try:
             for i in range(len(self.sheets)):
                 #remove the sheet with sheet_name
@@ -195,8 +195,8 @@ class Workbook:
                 return (i.extent[0],i.extent[1])
 
 
-        #if sheet name not found, raise key error
-        raise KeyError
+        #if sheet name not found, raise key Error()
+        raise KeyError()
 
     def _get_row_and_col(self,location):
         """ Helper function to get absolute row/col of inputted location (AD42) """
@@ -267,7 +267,7 @@ class Workbook:
                 return
                
         #no sheet found
-        raise KeyError
+        raise KeyError()
         
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -289,14 +289,14 @@ class Workbook:
         cells are indicated by a value of None.
         """
         if not self._check_valid_cell(location):
-            raise ValueError
+            raise ValueError()
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 self._check_valid_cell(location)
                 return i.get_cell_contents(location)
 
-        raise KeyError
+        raise KeyError()
 
 
     def get_cell_value(self, sheet_name: str, location: str):
@@ -320,7 +320,7 @@ class Workbook:
         Decimal('1.000'); rather it would return Decimal('1').
         """
         if not self._check_valid_cell(location):
-            raise ValueError
+            raise ValueError()
 
         row,col = self._get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
@@ -332,7 +332,7 @@ class Workbook:
                 workbook_instance = self
                 return i.get_cell_value(workbook_instance,location) 
             
-        raise KeyError
+        raise KeyError()
 
     def _check_valid_cell (self, location):
         """ Check if the cell location is valid """    
@@ -355,7 +355,7 @@ class Workbook:
                 return False
             else:
                 return False 
-                # raise ValueError
+                # raise ValueError()
         
         for c in range(len(location)-1):
             if not location[c+1].isdigit() and location[c].isdigit():
@@ -479,13 +479,13 @@ class Workbook:
         
         #check if the workbook name is a valid name
         if (new_name == ""): 
-            raise ValueError   
+            raise ValueError()   
         for i in new_name:
             if not i.isalnum() and not i in self.allowed_characters:
-                raise ValueError
+                raise ValueError()
         # no leading or trailing white space allowed
         if new_name[0] == " " or new_name[-1] == " ": 
-            raise ValueError   
+            raise ValueError()   
  
        
         # change the name of the sheet
@@ -499,7 +499,7 @@ class Workbook:
 
         # old name not found
         if (old_name_exists == False):
-            raise KeyError
+            raise KeyError()
             
         # change the formulas for every cell
         # Need to call on cells updated here as well

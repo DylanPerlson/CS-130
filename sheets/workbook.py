@@ -26,8 +26,8 @@ class Workbook:
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
         
-    def move_cells(self, sheet_name: str, start_location: str,
-            end_location: str, to_location: str, to_sheet: Optional[str] = None) -> None:
+    def move_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
         # Move cells from one location to another, possibly moving them to
         # another sheet.  All formulas in the area being moved will also have
         # all relative and mixed cell-references updated by the relative
@@ -77,8 +77,10 @@ class Workbook:
         end_row, end_col = self.get_row_and_col(end_location)
 
         #TODO check for valid cell locs ie A3Z
+        if not self.check_valid_cell(start_location) or not self.check_valid_cell(end_location):
+            raise ValueError()
         if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
-            raise ValueError
+            raise ValueError()
             
         to_exists = False
         cur_exists = False
@@ -86,21 +88,19 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 cur_exists = True
-                #TODO i dont think i need this
                 cur_sheet = i
                 break
 
-        if to_sheet != None:
+        if to_sheet is not None:
             for i in self.sheets:
                 if i.sheet_name.lower() == to_sheet.lower():
                     to_exists = True
-                    #TODO is this a valid reference pass? think so
                     to_sheet = i
                     break
 
             #if no valid sheet name
             if to_exists == False or cur_exists == False:
-                raise KeyError
+                raise KeyError()
 
         # make sure they are in correct order
         if start_row > end_row:
@@ -119,7 +119,51 @@ class Workbook:
             for c in range(start_col, end_col+1):
                 cell = str(self.base_10_to_alphabet(r))+str(c)
                 #TODO will need to change the cell contents i believe for formulas??
+                #TODO HERE TODO
+
                 copy[(r,c)] = cur_sheet.get_cell_contents(cell)
+                #check if we need to update the formula         
+                if str(copy[(r,c)])[0] == '=':
+                    cell_list = []
+                    for e,i in enumerate(self.sheets):
+                        if i.sheet_name.lower() == sheet_name.lower():
+                            cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
+
+                    for i in cell_list:
+                        
+                        [name, loc] = i.split('!',1)
+                        
+                        #not in the sheet so do not need to update
+                        if name.lower() != sheet_name.lower():
+                           
+                            continue
+                        elif name.lower() == sheet_name.lower():
+                            #update rows  and cols
+                            loc_row, loc_col = self.get_row_and_col(loc)
+                            replace_r = loc_row
+                            replace_c = loc_col
+                            
+                            if loc_row in range(start_row, end_row+1):
+                                replace_r = loc_row + delta_row
+                                
+                            if loc_col in range(start_col, end_col+1):
+                                replace_c = loc_col + delta_col
+                            
+                            new_loc = str(self.base_10_to_alphabet(replace_r))+str(replace_c)
+                            #TODO there is a possible very nuanced error of overlapping replacements
+                            
+                            copy[(r,c)] = copy[(r,c)].replace(loc,new_loc)
+                            # print(copy[(r,c)])
+                            # print(loc)
+                            # print(new_loc)
+
+                        else:
+                            print('problem')
+                            raise ValueError()
+
+
+
+                
                 #delete the value after copying
                 cur_sheet.set_cell_contents(self,cell, None)
         
@@ -140,7 +184,7 @@ class Workbook:
         #move all of the values to the new area
 
     def copy_cells(self, sheet_name: str, start_location: str,
-            end_location: str, to_location: str, to_sheet: Optional[str] = None) -> None:
+            end_location: str, to_location: str, to_sheet: Optional[str] = None):
         # Copy cells from one location to another, possibly copying them to
         # another sheet.  All formulas in the area being copied will also have
         # all relative and mixed cell-references updated by the relative
@@ -181,7 +225,73 @@ class Workbook:
         # If a formula being copied contains a relative or mixed cell-reference
         # that will become invalid after updating the cell-reference, then the
         # cell-reference is replaced with a #REF! error-literal in the formula.
-        pass
+        
+        # this is the same as the move function, except it does not delete the functions
+        
+        cur_sheet = None
+        to_sheet = None
+        start_row, start_col = self.get_row_and_col(start_location)
+        end_row, end_col = self.get_row_and_col(end_location)
+
+        #TODO check for valid cell locs ie A3Z
+        if not self.check_valid_cell(start_location) or not self.check_valid_cell(end_location):
+            raise ValueError()
+        if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
+            raise ValueError()
+            
+        to_exists = False
+        cur_exists = False
+        #check if the sheet exists
+        for i in self.sheets:
+            if i.sheet_name.lower() == sheet_name.lower():
+                cur_exists = True
+                #TODO i dont think i need this
+                cur_sheet = i
+                break
+
+        if to_sheet is not None:
+            for i in self.sheets:
+                if i.sheet_name.lower() == to_sheet.lower():
+                    to_exists = True
+                    #TODO is this a valid reference pass? think so
+                    to_sheet = i
+                    break
+
+            #if no valid sheet name
+            if to_exists == False or cur_exists == False:
+                raise KeyError()
+
+        # make sure they are in correct order
+        if start_row > end_row:
+            start_row, end_row = end_row, start_row
+        if start_col > end_col:
+            start_col, end_col = end_col, start_col
+
+        copy = {}
+        #how much the rows and cols move
+        move_row, move_col = self.get_row_and_col(to_location)
+        delta_row = move_row - start_row
+        delta_col = move_col - start_col
+
+        #copy all of the cells
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self.base_10_to_alphabet(r))+str(c)
+                #TODO will need to change the cell contents i believe for formulas??
+                copy[(r,c)] = cur_sheet.get_cell_contents(cell)
+                
+        
+        #move to the new location - do this in two steps so dont overwrite before copying some
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self.base_10_to_alphabet(r+delta_row))+str(c+delta_col)
+
+                if to_sheet is None:
+                    cur_sheet.set_cell_contents(self,cell,copy[(r,c)])
+                else:
+                    to_sheet.set_cell_contents(self,cell,copy[(r,c)])
+
+
 
     def num_sheets(self):
         # Return the number of spreadsheets in the workbook.
@@ -725,7 +835,8 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
-        print(f'Cell(s) changed:  {changed_cells}') 
+        pass
+        #print(f'Cell(s) changed:  {changed_cells}') 
 
     def base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet

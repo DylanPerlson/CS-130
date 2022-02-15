@@ -132,7 +132,7 @@ class Sheet:
         """ helper function that returns the references in a cell's formula """
         parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         try:
-            formula = parser.parse(self.contents)
+            formula = parser.parse(contents)
         except:
             return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
         ref = RetrieveReferences(self)

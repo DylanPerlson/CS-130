@@ -1,18 +1,15 @@
 
-# from multiprocessing.sharedctypes import Value
-# from anyio import WouldBlock # TODO do we need these
-# from logging import exception
-# from multiprocessing.sharedctypes import Value # TODO do we need these
-
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
 import json
 import copy
+from typing import Optional
 
 MAX_ROW = 475254
 MAX_COL = 9999
 A_UPPERCASE = ord('A')
 ALPHABET_SIZE = 26
+do_not_delete = False
 
 class Workbook:
     import decimal
@@ -29,6 +26,216 @@ class Workbook:
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
+        
+    def move_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
+        # Move cells from one location to another, possibly moving them to
+        # another sheet.  All formulas in the area being moved will also have
+        # all relative and mixed cell-references updated by the relative
+        # distance each formula is being copied.
+        #
+        # Cells in the source area (that are not also in the target area) will
+        # become empty due to the move operation.
+        #
+        # The start_location and end_location specify the corners of an area of
+        # cells in the sheet to be moved.  The to_location specifies the
+        # top-left corner of the target area to move the cells to.
+        #
+        # Both corners are included in the area being moved; for example,
+        # copying cells A1-A3 to B1 would be done by passing
+        # start_location="A1", end_location="A3", and to_location="B1".
+        #
+        # The start_location value does not necessarily have to be the top left
+        # corner of the area to move, nor does the end_location value have to be
+        # the bottom right corner of the area; they are simply two corners of
+        # the area to move.
+        #
+        # This function works correctly even when the destination area overlaps
+        # the source area.
+        #
+        # The sheet name matches are case-insensitive; the text must match but
+        # the case does not have to.
+        #
+        # If to_sheet is None then the cells are being moved to another
+        # location within the source sheet.
+        #
+        # If any specified sheet name is not found, a KeyError is raised.
+        # If any cell location is invalid, a ValueError is raised.
+        #
+        # If the target area would extend outside the valid area of the
+        # spreadsheet (i.e. beyond cell ZZZZ9999), a ValueError is raised, and
+        # no changes are made to the spreadsheet.
+        #
+        # If a formula being moved contains a relative or mixed cell-reference
+        # that will become invalid after updating the cell-reference, then the
+        # cell-reference is replaced with a #REF! error-literal in the formula.
+        
+        #check for invalid cells or sheets
+        
+        #TODO add absolute cell references
+
+        cur_sheet = None
+        to_sheet = None
+        start_row, start_col = self._get_row_and_col(start_location)
+        end_row, end_col = self._get_row_and_col(end_location)
+
+       
+        if not self._check_valid_cell(start_location) or not self._check_valid_cell(end_location):
+            raise ValueError()
+        if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
+            raise ValueError()
+            
+        to_exists = False
+        cur_exists = False
+        #check if the sheet exists
+        for i in self.sheets:
+            if i.sheet_name.lower() == sheet_name.lower():
+                cur_exists = True
+                cur_sheet = i
+                break
+
+        if to_sheet is not None:
+            for i in self.sheets:
+                if i.sheet_name.lower() == to_sheet.lower():
+                    to_exists = True
+                    to_sheet = i
+                    break
+
+            #if no valid sheet name
+            if to_exists == False or cur_exists == False:
+                raise KeyError()
+
+        # make sure they are in correct order
+        if start_row > end_row:
+            start_row, end_row = end_row, start_row
+        if start_col > end_col:
+            start_col, end_col = end_col, start_col
+
+        copy = {}
+        #how much the rows and cols move
+        move_row, move_col = self._get_row_and_col(to_location)
+        delta_row = move_row - start_row
+        delta_col = move_col - start_col
+
+        #copy all of the cells
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self._base_10_to_alphabet(r))+str(c)
+
+                copy[(r,c)] = cur_sheet.get_cell_contents(cell)
+                #check if we need to update the formula         
+                if str(copy[(r,c)])[0] == '=':
+                    cell_list = []
+                    for e,i in enumerate(self.sheets):
+                        if i.sheet_name.lower() == sheet_name.lower():
+                            cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
+
+                    for i in cell_list:
+                        
+                        [name, loc] = i.split('!',1)
+                        
+                        #not in the sheet so do not need to update
+                        if name.lower() != sheet_name.lower():
+                           
+                            continue
+                        elif name.lower() == sheet_name.lower():
+                            #update rows  and cols
+                            loc_row, loc_col = self._get_row_and_col(loc)
+                            replace_r = loc_row
+                            replace_c = loc_col
+                            
+                            if loc_row in range(start_row, end_row+1):
+                                replace_r = loc_row + delta_row
+                                
+                            if loc_col in range(start_col, end_col+1):
+                                replace_c = loc_col + delta_col
+                            
+                            new_loc = str(self._base_10_to_alphabet(replace_r))+str(replace_c)
+                            #TODO there is a possible very nuanced error of overlapping replacements
+                            
+                            copy[(r,c)] = copy[(r,c)].replace(loc,new_loc)
+                            # print(copy[(r,c)])
+                            # print(loc)
+                            # print(new_loc)
+
+                        else:
+                            print('problem')
+                            raise ValueError()
+
+
+
+                
+                #delete the value after copying values - only if the move function was called
+                if do_not_delete == False:
+                    cur_sheet.set_cell_contents(self,cell, None)
+        
+        #move to the new location - do this in two steps so dont overwrite before copying some
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self._base_10_to_alphabet(r+delta_row))+str(c+delta_col)
+
+                if to_sheet is None:
+                    cur_sheet.set_cell_contents(self,cell,copy[(r,c)])
+                else:
+                    to_sheet.set_cell_contents(self,cell,copy[(r,c)])
+
+
+        
+        #store all the cells locally, copy values into a dict,
+        #delete all of the values from the area.. make the contents none
+        #move all of the values to the new area
+
+    def copy_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
+        # Copy cells from one location to another, possibly copying them to
+        # another sheet.  All formulas in the area being copied will also have
+        # all relative and mixed cell-references updated by the relative
+        # distance each formula is being copied.
+        #
+        # Cells in the source area (that are not also in the target area) are
+        # left unchanged by the copy operation.
+        #
+        # The start_location and end_location specify the corners of an area of
+        # cells in the sheet to be copied.  The to_location specifies the
+        # top-left corner of the target area to copy the cells to.
+        #
+        # Both corners are included in the area being copied; for example,
+        # copying cells A1-A3 to B1 would be done by passing
+        # start_location="A1", end_location="A3", and to_location="B1".
+        #
+        # The start_location value does not necessarily have to be the top left
+        # corner of the area to copy, nor does the end_location value have to be
+        # the bottom right corner of the area; they are simply two corners of
+        # the area to copy.
+        #
+        # This function works correctly even when the destination area overlaps
+        # the source area.
+        #
+        # The sheet name matches are case-insensitive; the text must match but
+        # the case does not have to.
+        #
+        # If to_sheet is None then the cells are being copied to another
+        # location within the source sheet.
+        #
+        # If any specified sheet name is not found, a KeyError is raised.
+        # If any cell location is invalid, a ValueError is raised.
+        #
+        # If the target area would extend outside the valid area of the
+        # spreadsheet (i.e. beyond cell ZZZZ9999), a ValueError is raised, and
+        # no changes are made to the spreadsheet.
+        #
+        # If a formula being copied contains a relative or mixed cell-reference
+        # that will become invalid after updating the cell-reference, then the
+        # cell-reference is replaced with a #REF! error-literal in the formula.
+        
+        # this is the same as the move function, except it does not delete the functions
+        global do_not_delete
+        do_not_delete = True
+        self.move_cells(sheet_name, start_location,
+            end_location, to_location, to_sheet)
+        do_not_delete = False
+
+
     def num_sheets(self):
         # Return the number of spreadsheets in the workbook.
         return self.number_sheets
@@ -37,7 +244,7 @@ class Workbook:
         if (move_index < 0 or move_index >= len(self.sheets)):
             raise ValueError()
         for e,i in enumerate(self.sheets):
-            if i.sheet_name == sheet_to_move:
+            if i.sheet_name.lower() == sheet_to_move.lower():
                 self.sheets.insert(move_index, i)
                 self.sheets.pop(e+1)
                 return
@@ -588,16 +795,14 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
-        print(f'Cell(s) changed:  {changed_cells}') 
+        pass
+        #print(f'Cell(s) changed:  {changed_cells}') 
 
     def _base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet
         Convert a decimal number to its base alphabet representation
         from: https://codereview.stackexchange.com/a/182757
         """
-
-
-
         return ''.join(
                 chr(A_UPPERCASE + part)
                 for part in self._decompose(number)

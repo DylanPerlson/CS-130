@@ -159,7 +159,7 @@ class Workbook:
         for i in range(len(self.sheets)):
             all_sheet_names.append(self.sheets[i].sheet_name.lower())
         
-        if sheet_name not in all_sheet_names:
+        if sheet_name.lower() not in all_sheet_names:
             raise KeyError()
         try:
             for i in range(len(self.sheets)):
@@ -446,7 +446,7 @@ class Workbook:
             for key, value in i.cells.items():
                 cells[(self._base_10_to_alphabet(key[0])+str(key[1]))] = value.contents
 
-            sheet = {"name": i.sheet_name, "cell_contents": cells}
+            sheet = {"name": i.sheet_name, "cell-contents": cells}
 
             file["sheets"].append(sheet)
 

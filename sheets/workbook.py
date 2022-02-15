@@ -159,7 +159,7 @@ class Workbook:
         for i in range(len(self.sheets)):
             all_sheet_names.append(self.sheets[i].sheet_name.lower())
         
-        if sheet_name not in all_sheet_names:
+        if sheet_name.lower() not in all_sheet_names:
             raise KeyError()
         try:
             for i in range(len(self.sheets)):

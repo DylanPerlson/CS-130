@@ -9,6 +9,7 @@ MAX_ROW = 475254
 MAX_COL = 9999
 A_UPPERCASE = ord('A')
 ALPHABET_SIZE = 26
+do_not_delete = False
 
 class Workbook:
     import decimal
@@ -164,8 +165,9 @@ class Workbook:
 
 
                 
-                #delete the value after copying
-                cur_sheet.set_cell_contents(self,cell, None)
+                #delete the value after copying values - only if the move function was called
+                if do_not_delete == False:
+                    cur_sheet.set_cell_contents(self,cell, None)
         
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):
@@ -183,8 +185,8 @@ class Workbook:
         #delete all of the values from the area.. make the contents none
         #move all of the values to the new area
 
-    def copy_cells(self, sheet_name: str, start_location: str,
-            end_location: str, to_location: str, to_sheet: Optional[str] = None):
+    def copy_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
         # Copy cells from one location to another, possibly copying them to
         # another sheet.  All formulas in the area being copied will also have
         # all relative and mixed cell-references updated by the relative
@@ -227,106 +229,11 @@ class Workbook:
         # cell-reference is replaced with a #REF! error-literal in the formula.
         
         # this is the same as the move function, except it does not delete the functions
-        
-        cur_sheet = None
-        to_sheet = None
-        start_row, start_col = self.get_row_and_col(start_location)
-        end_row, end_col = self.get_row_and_col(end_location)
-
-       
-        if not self.check_valid_cell(start_location) or not self.check_valid_cell(end_location):
-            raise ValueError()
-        if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
-            raise ValueError()
-            
-        to_exists = False
-        cur_exists = False
-        #check if the sheet exists
-        for i in self.sheets:
-            if i.sheet_name.lower() == sheet_name.lower():
-                cur_exists = True
-                cur_sheet = i
-                break
-
-        if to_sheet is not None:
-            for i in self.sheets:
-                if i.sheet_name.lower() == to_sheet.lower():
-                    to_exists = True
-                    to_sheet = i
-                    break
-
-            #if no valid sheet name
-            if to_exists == False or cur_exists == False:
-                raise KeyError()
-
-        # make sure they are in correct order
-        if start_row > end_row:
-            start_row, end_row = end_row, start_row
-        if start_col > end_col:
-            start_col, end_col = end_col, start_col
-
-        copy = {}
-        #how much the rows and cols move
-        move_row, move_col = self.get_row_and_col(to_location)
-        delta_row = move_row - start_row
-        delta_col = move_col - start_col
-
-        #copy all of the cells
-        for r in range(start_row, end_row+1):
-            for c in range(start_col, end_col+1):
-                cell = str(self.base_10_to_alphabet(r))+str(c)
-
-                copy[(r,c)] = cur_sheet.get_cell_contents(cell)
-                #check if we need to update the formula         
-                if str(copy[(r,c)])[0] == '=':
-                    cell_list = []
-                    for e,i in enumerate(self.sheets):
-                        if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
-
-                    for i in cell_list:
-                        
-                        [name, loc] = i.split('!',1)
-                        
-                        #not in the sheet so do not need to update
-                        if name.lower() != sheet_name.lower():
-                           
-                            continue
-                        elif name.lower() == sheet_name.lower():
-                            #update rows  and cols
-                            loc_row, loc_col = self.get_row_and_col(loc)
-                            replace_r = loc_row
-                            replace_c = loc_col
-                            
-                            if loc_row in range(start_row, end_row+1):
-                                replace_r = loc_row + delta_row
-                                
-                            if loc_col in range(start_col, end_col+1):
-                                replace_c = loc_col + delta_col
-                            
-                            new_loc = str(self.base_10_to_alphabet(replace_r))+str(replace_c)
-                            #TODO there is a possible very nuanced error of overlapping replacements
-                            
-                            copy[(r,c)] = copy[(r,c)].replace(loc,new_loc)
-                            # print(copy[(r,c)])
-                            # print(loc)
-                            # print(new_loc)
-
-                        else:
-                            print('problem')
-                            raise ValueError()
-
-        
-        #move to the new location - do this in two steps so dont overwrite before copying some
-        for r in range(start_row, end_row+1):
-            for c in range(start_col, end_col+1):
-                cell = str(self.base_10_to_alphabet(r+delta_row))+str(c+delta_col)
-
-                if to_sheet is None:
-                    cur_sheet.set_cell_contents(self,cell,copy[(r,c)])
-                else:
-                    to_sheet.set_cell_contents(self,cell,copy[(r,c)])
-
+        global do_not_delete
+        do_not_delete = True
+        self.move_cells(sheet_name, start_location,
+            end_location, to_location, to_sheet)
+        do_not_delete = False
 
 
     def num_sheets(self):

@@ -26,10 +26,16 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name2,'B2','1')
             wb.set_cell_contents(name2,'A2','=A1+B2+2')
             wb.set_cell_contents(name2,'A3','=A1+s1!B2')
+            wb.set_cell_contents(name2,'B3','=$A$1+2')
             wb.copy_cells(name2,'A1','B4','B3')
+
+            #print(wb.get_cell_contents(name2,'B3'))
             self.assertEqual(wb.get_cell_contents(name2,'A3'),'=A1+s1!B2')
             self.assertEqual(wb.get_cell_contents(name2,'B4'),'=B3+C4+2')
             self.assertEqual(wb.get_cell_contents(name2,'B5'),'=B3+s1!B2')
+
+
+
             
     def test_move_cells(self):
             wb = Workbook()

@@ -71,12 +71,14 @@ class Workbook:
         
         #check for invalid cells or sheets
         
+        #TODO add absolute cell references
+
         cur_sheet = None
         to_sheet = None
         start_row, start_col = self.get_row_and_col(start_location)
         end_row, end_col = self.get_row_and_col(end_location)
 
-        #TODO check for valid cell locs ie A3Z
+       
         if not self.check_valid_cell(start_location) or not self.check_valid_cell(end_location):
             raise ValueError()
         if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
@@ -118,8 +120,6 @@ class Workbook:
         for r in range(start_row, end_row+1):
             for c in range(start_col, end_col+1):
                 cell = str(self.base_10_to_alphabet(r))+str(c)
-                #TODO will need to change the cell contents i believe for formulas??
-                #TODO HERE TODO
 
                 copy[(r,c)] = cur_sheet.get_cell_contents(cell)
                 #check if we need to update the formula         
@@ -233,7 +233,7 @@ class Workbook:
         start_row, start_col = self.get_row_and_col(start_location)
         end_row, end_col = self.get_row_and_col(end_location)
 
-        #TODO check for valid cell locs ie A3Z
+       
         if not self.check_valid_cell(start_location) or not self.check_valid_cell(end_location):
             raise ValueError()
         if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
@@ -245,7 +245,6 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 cur_exists = True
-                #TODO i dont think i need this
                 cur_sheet = i
                 break
 
@@ -253,7 +252,6 @@ class Workbook:
             for i in self.sheets:
                 if i.sheet_name.lower() == to_sheet.lower():
                     to_exists = True
-                    #TODO is this a valid reference pass? think so
                     to_sheet = i
                     break
 
@@ -277,9 +275,47 @@ class Workbook:
         for r in range(start_row, end_row+1):
             for c in range(start_col, end_col+1):
                 cell = str(self.base_10_to_alphabet(r))+str(c)
-                #TODO will need to change the cell contents i believe for formulas??
+
                 copy[(r,c)] = cur_sheet.get_cell_contents(cell)
-                
+                #check if we need to update the formula         
+                if str(copy[(r,c)])[0] == '=':
+                    cell_list = []
+                    for e,i in enumerate(self.sheets):
+                        if i.sheet_name.lower() == sheet_name.lower():
+                            cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
+
+                    for i in cell_list:
+                        
+                        [name, loc] = i.split('!',1)
+                        
+                        #not in the sheet so do not need to update
+                        if name.lower() != sheet_name.lower():
+                           
+                            continue
+                        elif name.lower() == sheet_name.lower():
+                            #update rows  and cols
+                            loc_row, loc_col = self.get_row_and_col(loc)
+                            replace_r = loc_row
+                            replace_c = loc_col
+                            
+                            if loc_row in range(start_row, end_row+1):
+                                replace_r = loc_row + delta_row
+                                
+                            if loc_col in range(start_col, end_col+1):
+                                replace_c = loc_col + delta_col
+                            
+                            new_loc = str(self.base_10_to_alphabet(replace_r))+str(replace_c)
+                            #TODO there is a possible very nuanced error of overlapping replacements
+                            
+                            copy[(r,c)] = copy[(r,c)].replace(loc,new_loc)
+                            # print(copy[(r,c)])
+                            # print(loc)
+                            # print(new_loc)
+
+                        else:
+                            print('problem')
+                            raise ValueError()
+
         
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):

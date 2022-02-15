@@ -8,12 +8,12 @@ from decimal import *
 class Cell():
     def __init__ (self, contents):
         self.contents = contents
+        self.parse_necessary = True
 
         # check that the cell is either a string or None
-        if not isinstance(contents, str) and contents != None:
+        if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
-
-        # TODO if a number is given for contents an error should be raised
+            
         # Determine Cell Type
         if str(contents)[0] == '=':
             self.type = "FORMULA"
@@ -49,7 +49,6 @@ class Cell():
         self.children_cells[location] = value
 
     def get_cell_value(self, workbook_instance, sheet_instance):
-        parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 
         #digit case
         if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
@@ -58,15 +57,18 @@ class Cell():
         elif self.contents[0] == "'":
             return self.remove_trailing_zeros(self.value)
         
-        # trying to parse
-        try:
-            formula = parser.parse(self.contents)
-        except:
-            return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
+        if self.parse_necessary:
+            # trying to parse
+            try:
+                parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+                self.parsed_contents = parser.parse(self.contents)
+                self.parse_necessary = False
+            except:
+                return CellError(CellErrorType.PARSE_ERROR, 'Unable to parse formula' ,'Parse Error')
             
         # trying to evaluate
         try: 
-            evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(formula)
+            evaluation = EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
         except lark.exceptions.VisitError as e:
             
             if isinstance(e.__context__, ZeroDivisionError):

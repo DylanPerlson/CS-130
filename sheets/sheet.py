@@ -41,7 +41,7 @@ class Sheet:
     def get_dependent_cells(self, row, col, location, contents):
         dependent_cell_dict = {}
         # these if functions prevent problems with non-formulas
-        if contents != None:
+        if contents is not None:
             if contents[0] == '=' and contents[1] != '?': # self.cells[(row,col)].type == "FORMULA":
                 # example: print(self.retrieve_cell_references(contents))
                 curr_cell = self.cells[(row,col)]
@@ -70,7 +70,7 @@ class Sheet:
         # extract the row and col numbers from the letter-number location
         row, col = self.get_row_and_col(location)
         if row > MAX_ROW or col > MAX_COL:
-            raise ValueError('stuff')
+            raise ValueError()
         # in case the new cell is beyond the extent
         if(row > self.extent[0]):
             self.extent[0] = row

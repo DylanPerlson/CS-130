@@ -10,10 +10,12 @@ from .cell_error import CellError, CellErrorType
 
 error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 
-#Helper function to generate error objects when parsing formulas
-#Error literals are strings
-#Might be creating cellerror objects
 def generate_error_object(error_arg):
+    """ 
+    Helper function to generate error objects when parsing formulas
+    Error literals are strings
+    Might be creating cellerror objects
+    """
     if isinstance(error_arg, CellError):
         cell_error_obj = error_arg
     if error_arg == '#REF!' or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
@@ -87,7 +89,7 @@ class EvalExpressions(Transformer):
         elif args[0] == '-':
             return -decimal.Decimal(args[1])
         else:
-            raise Exception
+            raise Exception()
 
     def parens(self, args):
         #if reference a cell error
@@ -100,9 +102,9 @@ class EvalExpressions(Transformer):
         if type(args[2]) is CellError:
             return args[2]
 
-        if (args[0] == None):
+        if (args[0] is None):
             args[0] = 0
-        if (args[2] == None):
+        if (args[2] is None):
             args[2] = 0
 
         # if (str(args[0]).isdigit and not str(args[2]).isdigit): 
@@ -126,7 +128,7 @@ class EvalExpressions(Transformer):
         elif args[1] == '-':
             return decimal.Decimal(decimal.Decimal(args[0])-decimal.Decimal(args[2]))
         else:
-            raise Exception
+            raise Exception()
 
     def mul_expr(self, args):
         #if reference a cell error
@@ -135,9 +137,9 @@ class EvalExpressions(Transformer):
         if type(args[2]) is CellError:
             return args[2]
 
-        if (args[0] == None):
+        if (args[0] is None):
             args[0] = 0
-        if (args[2] == None):
+        if (args[2] is None):
             args[2] = 0
         
         if args[1] == '/' and str(args[2]) == '0':
@@ -162,7 +164,7 @@ class EvalExpressions(Transformer):
         elif args[1] == '/':
             return decimal.Decimal(decimal.Decimal(args[0])/decimal.Decimal(args[2]))
         else:
-            raise Exception
+            raise Exception()
 
     def concat_expr(self, args):
         #if reference a cell error
@@ -170,9 +172,9 @@ class EvalExpressions(Transformer):
             return args[0]
         if type(args[1]) is CellError:
             return args[2]
-        if(args[0] == None):
+        if(args[0] is None):
             args[0] = ''
-        if(args[1] == None):
+        if(args[1] is None):
             args[1] = ''
 
         if (args[0] in error_literals or isinstance(args[0], CellError)):
@@ -185,8 +187,8 @@ class EvalExpressions(Transformer):
         return str(str(args[0])+str(args[1]))
 
     def cell(self, args):
-        # if using the current sheet
         
+        # if using the current sheet
         if len(args) == 1:      
             sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
@@ -203,11 +205,14 @@ class EvalExpressions(Transformer):
         else:
             return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
+        # delete the dollar sign from the cell reference
+        cell = cell.replace("$","")
+
         try:
             cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
         except:
             return CellError(CellErrorType.BAD_REFERENCE, "202: Invalid cell reference", None)
 
-        # if cell_value == None:
+        # if cell_value is None:
         #    cell_value = 0 # TODO "" for string
         return cell_value

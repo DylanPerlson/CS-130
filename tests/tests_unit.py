@@ -26,7 +26,7 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name2,'B2','1')
             wb.set_cell_contents(name2,'A2','=A1+B2+2')
             wb.set_cell_contents(name2,'A3','=A1+s1!B2')
-            wb.set_cell_contents(name2,'B3','=$A$1+2')
+            #wb.set_cell_contents(name2,'B3','=$A$1+2')
             wb.copy_cells(name2,'A1','B4','B3')
 
             #print(wb.get_cell_contents(name2,'B3'))
@@ -268,314 +268,53 @@ class TestWorkbook(unittest.TestCase):
             self.assertEqual(name3,"Sheet1")
             self.assertEqual(name5,"Sheet3")
 
-            self.assertEqual(index1,0)
-            self.assertEqual(index2,1)
-            self.assertEqual(index3,2)
+            with open('tests/json/save_testfile.json', 'w') as fp:
+                wb1.save_workbook(fp)
 
 
-        def test_limited_punctuation(self): # allowed: .?!,:;!@#$%^&*()-_
-            wb = Workbook()
-            (_,_) = wb.new_sheet(". is the best")
-            (_,_) = wb.new_sheet("@ is the best")
-            (_,_) = wb.new_sheet("# is the best")
-            (_,_) = wb.new_sheet("$ is the best")
-            (_,_) = wb.new_sheet("& is the best")
-            (_,_) = wb.new_sheet("_ is the best")
-            with self.assertRaises(ValueError):
-                (_,name) = wb.new_sheet("€ is the best")
-            with self.assertRaises(ValueError):
-                (_,name) = wb.new_sheet("' is the best")
-            with self.assertRaises(ValueError):
-                (_,name) = wb.new_sheet('" is the best')
+        def test_load_workbook(self):
+            with open('tests/json/load_testfile.json') as fp:
+                wb = Workbook.load_workbook(fp)
 
+            self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
+            self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
 
-        def test_whitespace_in_sheet_name(self):
-            wb = Workbook()
-            with self.assertRaises(ValueError):
-                (_,_) = wb.new_sheet(" first_sheet")
-            with self.assertRaises(ValueError):
-                (_,_) = wb.new_sheet("first_sheet ")
 
+        def test_json_non_string_contents(self): # TODO seems to work
+            with self.assertRaises(TypeError):
+                with open('tests/json/error1_testfile.json') as fp:
+                    wb = Workbook.load_workbook(fp)
 
-        def test_mistakes_in_cell_location(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
 
-            with self.assertRaises(ValueError):
-                wb.set_cell_contents(name1, ' AA57', '12')
-            with self.assertRaises(ValueError):
-                wb.set_cell_contents(name1, 'A5A57', '12')
+        def test_empty_json(self):
+            with open('tests/json/empty_testfile.json') as fp:
+                wb = Workbook.load_workbook(fp)
 
+            self.assertEqual([], wb.list_sheets())
+            self.assertEqual(0, wb.num_sheets())
 
-        def test_sheet_name_uniqueness(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            with self.assertRaises(ValueError):
-                (_, name2) = wb.new_sheet("first_sheet")
-            with self.assertRaises(ValueError):
-                (_, name2) = wb.new_sheet("First_Sheet")
 
+        def test_sheetlist_json(self):
+            with self.assertRaises(TypeError):
+                with open('tests/json/sheetlist_testfile.json') as fp:
+                    wb = Workbook.load_workbook(fp)
 
-        def test_set_and_get_cell_contents(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            (_, name2) = wb.new_sheet("second_sheet")
 
-            wb.set_cell_contents(name1, 'AA57', '12')
-            wb.set_cell_contents("second_sheet", 'ba4', '=10' )
-            wb.set_cell_contents("second_sheet", 'ba5', "'string" )
+        def test_json_no_contents(self):
+            ''' Test that a workbook with a single sheet and no contents
+            is saved correctly. '''
+            with open('tests/json/no_contents_testfile.json') as fp:
+                wb = Workbook.load_workbook(fp)
 
-            content1 = wb.get_cell_contents("first_sheet", 'AA57')
-            
-            content2 = wb.get_cell_contents(name2, 'ba4')
-            content3 = wb.get_cell_contents(name2, 'ba5')
+            self.assertEqual(['first_sheet'], wb.list_sheets())
+            self.assertEqual(1, wb.num_sheets())
 
-            self.assertEqual(content1, '12') 
-            self.assertEqual(content2, '=10')
-            self.assertEqual(content3, "'string")
 
-            with self.assertRaises(ValueError):
-                wb.get_cell_contents(name1, ' AA57')
-            with self.assertRaises(ValueError):
-                wb.get_cell_contents(name1, 'A5A57')
-
-
-        def test_whitespace_cell_contents(self):
-            """ test that leading and trailing whitespace is removed from contents """
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-
-            wb.set_cell_contents(name1, 'AA57', 'Lots of space in the back      ')
-            wb.set_cell_contents(name1, 'ba4', '        =54' )
-            wb.set_cell_contents(name1, 'ba5', "      " )
-            wb.set_cell_contents(name1, 'C23', "")
-
-            content1 = wb.get_cell_contents("first_sheet", 'AA57')
-            content2 = wb.get_cell_contents(name1, 'ba4')
-            content3 = wb.get_cell_contents(name1, 'ba5')
-            content4 = wb.get_cell_contents(name1, 'C23')
-
-            self.assertEqual(content1, 'Lots of space in the back') 
-            # TODO ^ not sure whether this must be a string or decimal.Decimal
-            self.assertEqual(content2, '=54')
-            self.assertEqual(content3, None)
-            self.assertEqual(content4, None)
-
-
-        def test_simple_formula_with_decimal(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-
-            content = '=12+3-5'
-            wb.set_cell_contents(name1, 'AA57', content)
-            self.assertEqual(decimal.Decimal(12+3-5),wb.get_cell_value(name1, 'aa57'))
-
-            content = '=12+3*(4+5)/4'
-            wb.set_cell_contents(name1, 'ba43', content)
-            self.assertEqual(decimal.Decimal(12+3*(4+5)/4),wb.get_cell_value(name1, 'ba43'))
-
-            content = '=42*-4*-1'
-            wb.set_cell_contents(name1, 'eee3', content)
-            self.assertEqual(decimal.Decimal(42*-4*-1),wb.get_cell_value(name1, 'eee3'))
-
-
-        def test_max_sheet_size(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            wb.set_cell_contents(name1, 'ZZZZ9999', 'maximum')
-            value1 = wb.get_cell_contents("first_sheet", 'ZZZZ9999')
-            self.assertEqual(value1, 'maximum')
-
-            with self.assertRaises(ValueError):
-                wb.set_cell_contents(name1, 'ZZZZ10000', 'too many columns')
-            with self.assertRaises(ValueError):
-                wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
-
-
-        def test_simple_cell_reference(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            (_, name2) = wb.new_sheet("second_sheet")
-
-            wb.set_cell_contents(name1, 'AA57', '5')
-            wb.set_cell_contents(name1, 'c4', '=aa57')
-            wb.set_cell_contents(name2, 'c4', '=first_sheet!aa57')
-            wb.set_cell_contents(name2, 'c5', "='first_sheet'!aa57")
-            self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4')) 
-            self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4')) 
-            self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5')) 
-
-
-        def test_extent(self):
-            wb = Workbook()
-            (_, name) = wb.new_sheet("first_sheet")
-            self.assertEqual((0,0),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'D14', 'something')
-            self.assertEqual((4,14),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'Z3', 'something')
-            self.assertEqual((26,14),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'AA20', 'something')
-            self.assertEqual((27,20),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'AA20', None)
-            self.assertEqual((26,14),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'Z3', None)
-            self.assertEqual((4,14),wb.get_sheet_extent(name))
-
-            wb.set_cell_contents(name, 'D14', None)
-            self.assertEqual((0,0),wb.get_sheet_extent(name))
-
-            self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
-
-
-        def test_double_quotes_for_single_quotes(self):
-            pass # TODO
-
-        #Currently isn't working for me
-        # def test_delete_sheets(self):
-        #     wb = Workbook()
-        #     (_,_) = wb.new_sheet("first_sheet")
-        #     (_,_) = wb.new_sheet("sheet_to_delete")
-        #     (_,_) = wb.new_sheet("third_sheet")
-
-        #     with self.assertRaises(KeyError):
-        #         wb.del_sheet("invalid_sheet_name")
-
-        #     wb.del_sheet("sheet_to_delete")
-        #     self.assertEqual(wb.num_sheets(), 2)
-        #     self.assertEqual(wb.list_sheets(),['first_sheet', 'third_sheet'])
-        #     wb.del_sheet("first_sheet")
-        #     self.assertEqual(wb.num_sheets(), 1)
-        #     self.assertEqual(wb.list_sheets(),['third_sheet'])
-
-        #     (_,_) = wb.new_sheet("one_last_sheet")
-        #     self.assertEqual(wb.list_sheets(),['third_sheet',"one_last_sheet"])
-
-        #     wb.del_sheet("one_last_sheet")
-        #     wb.del_sheet("third_sheet")
-        #     self.assertEqual(wb.num_sheets(), 0)
-        #     self.assertEqual(wb.list_sheets(),[])
-        
-
-        # def test_cell_errors(self): #make this a better parse error
-        #     wb = Workbook()
-        #     (_, name1) = wb.new_sheet("first_sheet")
-        
-        #     wb.set_cell_contents(name1, 'B4', '=9/0')
-        #     value1 = wb.get_cell_value("first_sheet", 'B4')
-        #     print(list(wb.sheets[0].cells.values())[0].contents)
-        #     print("Expect divide by 0 errors")
-        #     print(value1)
-
-        #     wb.set_cell_contents(name1, 'C4', '=5+')
-        #     value3 = wb.get_cell_value("first_sheet", 'C4')
-        #     print(list(wb.sheets[0].cells.values())[1].contents)
-        #     print("Expect parse error")
-        #     print(value3)
-
-        #     wb.set_cell_contents(name1, 'D4', '=second_sheet!A4 + 1')
-        #     value4 = wb.get_cell_value("first_sheet", 'D4')
-        #     print(list(wb.sheets[0].cells.values())[2].contents)
-        #     print("Expect bad reference error")
-        #     print(value4)
-
-        #     wb.set_cell_contents(name1, 'E4', '="Hello"+1')
-        #     value5 = wb.get_cell_value("first_sheet", 'E4')
-        #     print(list(wb.sheets[0].cells.values())[3].contents)
-        #     print("Expect type error")
-        #     print(value5)
-
-            # wb.set_cell_contents(name1, 'B4', '=5>3')
-            # value6 = wb.get_cell_value("first_sheet", 'B4')
-            # print(list(wb.sheets[0].cells.values())[5].contents)
-            # print("Expect name error")
-            # print(value6)
-
-            #Edge case that has to prioritize errors
-        
-        def test_decimal(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            (_, name2) = wb.new_sheet("second_sheet")
-
-            wb.set_cell_contents(name1, 'AA57', '12.0')
-            wb.set_cell_contents(name1, 'AA58', '=aa57')
-            wb.set_cell_contents("second_sheet", 'ba4', '=10' )
-            wb.set_cell_contents("second_sheet", 'ba5', "'string" )
-
-            content1 = wb.get_cell_value("first_sheet", 'AA57')
-            content1a = wb.get_cell_value("first_sheet", 'AA58')
-            content2 = wb.get_cell_value(name2, 'ba4')
-
-            self.assertEqual(content1, decimal.Decimal(12)) 
-            self.assertEqual(content1a, decimal.Decimal(12)) 
-            self.assertEqual(content2, decimal.Decimal(10))
-
-
-        def test_type_conversion(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            wb.set_cell_contents(name1, 'AA57', '12.0')
-            wb.set_cell_contents(name1, 'AA58', "'123")
-            wb.set_cell_contents(name1, 'AA59', "=aa57+aa58")
-
-            self.assertEqual(decimal.Decimal(135), wb.get_cell_value(name1, 'aa59'))
-
-
-        def test_string_concat(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-            wb.set_cell_contents(name1, 'AA57', 'hello')
-            wb.set_cell_contents(name1, 'AA58', "' world")
-            wb.set_cell_contents(name1, 'aa59', '=aa57 & " world" & "!"')
-
-            self.assertEqual('hello world!', wb.get_cell_value(name1, 'aa59'))
-
-
-        # test based on the acceptance tests, but I don't fully understand
-        def test_trailing_zeros_with_concat(self):
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-
-        #     self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
-        
-            wb.set_cell_contents(name1, 'A3', '=5.0 & " should become 5"')
-            self.assertEqual('5 should become 5', wb.get_cell_value(name1, 'A3'))
-
-        
-        """ implementing a test for 'from sheets import *'
-        def test_from_import(self):
-            import sys
-            from sheets import *
-            
-            self.assertTrue('Workbook' in sys.modules) """
-
-
-        def test_decimal_trailing_zeros(self):
-            """ implementing a test for trailing zeros with the decimals """
-            wb = Workbook()
-            (_, name1) = wb.new_sheet("first_sheet")
-
-            wb.set_cell_contents(name1, 'AA57', '12.0')
-            self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
-        
-            wb.set_cell_contents(name1, 'A1', '100')
-            self.assertEqual('100', str(wb.get_cell_value(name1, 'A1')))
-        
-            wb.set_cell_contents(name1, 'A2', '1000.50')
-            self.assertEqual('1000.5', str(wb.get_cell_value(name1, 'A2')))
-        
-            wb.set_cell_contents(name1, 'A3', '=12.0+1.00')
-            self.assertEqual('13', str(wb.get_cell_value(name1, 'A3')))
-
-
-        def test_save_workbook(self):
+        def test_json_perserve_capitalization(self):
             wb = Workbook()
             (_, name1) = wb.new_sheet("fiRst_sheet")
+            (_,_) = wb.new_sheet("second_sheet")
+            (_,_) = wb.new_sheet("LAST_sheet")
 
             wb.set_cell_contents(name1, 'AA57', 'words')
             wb.set_cell_contents(name1, 'AAA3', '=12+4')
@@ -587,23 +326,54 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
             wb.set_cell_contents(name1, 'JNE41', '100')
 
-            with open('save_testfile.json', 'w') as fp:
+            listed_sheets = wb.list_sheets()
+
+            with open('tests/json/capitalization_testfile.json', 'w') as fp:
                 wb.save_workbook(fp)
 
+            with open('tests/json/capitalization_testfile.json') as fp:
+                wb2 = Workbook.load_workbook(fp)
 
-        def test_load_workbook(self):
-            with open('load_testfile.json') as fp:
-                wb = Workbook.load_workbook(fp)
+            self.assertEqual(listed_sheets, wb2.list_sheets())
 
-            self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
-            self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+
+        def test_bad_inputs(self):
+            wb = Workbook()
+            (_, name) = wb.new_sheet()
+
+            wb.set_cell_contents(name, 'AA57', 'words')
+            wb.set_cell_contents(name, 'AAA3', '=12+4')
+            wb.set_cell_contents(name, 'JNE41', 'more words')
+
+            with self.assertRaises(ValueError):
+                wb.get_cell_contents(name, 'a 1')
+
+            with self.assertRaises(ValueError):
+                wb.get_cell_contents(name, 0)
+
+            with self.assertRaises(ValueError):
+                wb.get_cell_value(name, 'a 5')
+
+            with self.assertRaises(KeyError):
+                wb.get_cell_contents('non_existing_sheet', 'a5')
+
+
+        def test_set_none(self):
+            wb = Workbook()
+            (_, name) = wb.new_sheet()
+
+            wb.set_cell_contents(name, 'AA57', 'words')
+            self.assertEqual('words', wb.get_cell_contents(name, 'AA57'))
+
+            wb.set_cell_contents(name, 'AA57', None)
+            self.assertEqual(None, wb.get_cell_contents(name, 'AA57'))
 
 
         def test_loading_bad_formula(self): # TODO
             pass
         
 if __name__ == '__main__':
-    print('------------------------NEW TEST------------------------')
+    # print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=0)
         
 

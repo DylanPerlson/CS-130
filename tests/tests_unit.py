@@ -9,7 +9,6 @@ import unittest
 class TestWorkbook(unittest.TestCase):
     def test_copy_cells(self):
             wb = Workbook()
-            
             (_, name) = wb.new_sheet("s1")
             wb.set_cell_contents(name,'A1','1')
             wb.set_cell_contents(name,'A2',"hi")

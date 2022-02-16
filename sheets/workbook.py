@@ -498,9 +498,10 @@ class Workbook:
                 else: #store normally
                     i.set_cell_contents(i.sheet_name, location, contents.strip())
                 #completed task
-                # [('Sheet1', 'B1'), ('Sheet1', 'C1')].
                 updated_cells.append((sheet_name, location))
-                # self.on_cells_changed(updated_cells)
+                for i in self.notification_functions:
+                    for curr_cell in updated_cells:
+                        i(self, curr_cell)
                 return
                
         #no sheet found
@@ -826,18 +827,13 @@ class Workbook:
     def add_notification_function(self, new_func):
         self.notification_functions.append(new_func)
 
-    def notify_cells_changed(self):
-        for curr_func in self.notification_functions:
-            continue
-            
-    def on_cells_changed(self, changed_cells):
-        '''
-        This function gets called when cells change in the workbook that the
-        function was registered on.  The changed_cells argument is an iterable
-        of tuples; each tuple is of the form (sheet_name, cell_location).
-        '''
-        pass
-        #print(f'Cell(s) changed:  {changed_cells}') 
+    def notify_cells_changed(self, *args):
+        for curr_arg in args:
+            if curr_arg not in self.notification_functions:
+                self.notification_functions.append(curr_arg)
+            #TODO: Check for errors, don't add function if error returned
+            # if isinstance(update_value, Exception) or isinstance(update_value, CellError):
+            #     continue
 
     def _base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet

@@ -340,6 +340,5 @@ class Project1(unittest.TestCase):
         self.assertEqual(name5,"Sheet3")
 
 
-# uncomment to test only this file
-# if __name__ == '__main__':
-#     unittest.main(verbosity=3)
+if __name__ == '__main__':
+    unittest.main(verbosity=1)

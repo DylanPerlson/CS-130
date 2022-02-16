@@ -129,34 +129,63 @@ class Workbook:
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
                             cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
-
+                            
                     for i in cell_list:
                         
                         [name, loc] = i.split('!',1)
-                        
+                        old_loc = loc
                         #not in the sheet so do not need to update
-                        if name.lower() != sheet_name.lower():
-                           
+                        if name.lower() != sheet_name.lower():                           
                             continue
+
+                        #is in sheet so need to update
                         elif name.lower() == sheet_name.lower():
+                            abs_row = False
+                            abs_col = False
+
+                            if '$' in loc:
+                                abs_loc = loc.split('$')
+                                if (abs_loc[0] == ''):
+                                    abs_col = True
+                                if (abs_loc[-1].isdigit()):
+                                    abs_row = True
+                                 #TODO swap bc we implimented our helper wrong
+                                abs_col, abs_row = abs_row, abs_col
+
+                                loc = ''.join(abs_loc)
+                                
+
                             #update rows  and cols
+                            
                             loc_row, loc_col = self._get_row_and_col(loc)
+
+                            
+
+
                             replace_r = loc_row
                             replace_c = loc_col
                             
-                            if loc_row in range(start_row, end_row+1):
+                            if loc_row in range(start_row, end_row+1) and abs_row == False:
                                 replace_r = loc_row + delta_row
                                 
-                            if loc_col in range(start_col, end_col+1):
+                            if loc_col in range(start_col, end_col+1) and abs_col == False:
                                 replace_c = loc_col + delta_col
                             
-                            new_loc = str(self._base_10_to_alphabet(replace_r))+str(replace_c)
+
+                            #TODO swap bc we implimented our helper wrong
+                            replace_r, replace_c = replace_c, replace_r
+
+                            if abs_row == True and abs_col == False:
+                                new_loc = '$'+str(self._base_10_to_alphabet(replace_c))+str(replace_r)
+                            elif abs_row == False and abs_col == True:
+                                new_loc = str(self._base_10_to_alphabet(replace_c))+'$'+str(replace_r)
+                            elif abs_row == True and abs_col == True:
+                                new_loc = '$'+str(self._base_10_to_alphabet(replace_c))+'$'+str(replace_r)
+                            else:
+                                new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
                             #TODO there is a possible very nuanced error of overlapping replacements
                             
-                            copy[(r,c)] = copy[(r,c)].replace(loc,new_loc)
-                            # print(copy[(r,c)])
-                            # print(loc)
-                            # print(new_loc)
+                            copy[(r,c)] = copy[(r,c)].replace(old_loc,new_loc)
 
                         else:
                             print('problem')
@@ -420,7 +449,7 @@ class Workbook:
                 col = int(location[e:])                
                 break
                 
-        return row, col
+        return row, col #these should actually be swapped I think?
     
     def set_cell_contents(self, sheet_name: str, location: str,
                           contents: 'None'):

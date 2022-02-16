@@ -4,8 +4,75 @@ from sheets import *
 import decimal
 import unittest
 
+#TODO add range check
 
 class TestWorkbook(unittest.TestCase):
+    def test_copy_cells(self):
+            wb = Workbook()
+            
+            (_, name) = wb.new_sheet("s1")
+            wb.set_cell_contents(name,'A1','1')
+            wb.set_cell_contents(name,'A2',"hi")
+            wb.set_cell_contents(name,'B2',"yo")
+            wb.copy_cells(name,'A1','B3','A5')
+            
+            
+            self.assertEqual(wb.get_cell_value(name,'A1'),1)
+            self.assertEqual(wb.get_cell_value(name,'A5'),1)
+            self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
+            self.assertEqual(wb.get_cell_value(name,'B6'),"yo")
+
+            (_, name2) = wb.new_sheet("s2")
+            wb.set_cell_contents(name2,'A1','1')
+            wb.set_cell_contents(name2,'B2','1')
+            wb.set_cell_contents(name2,'A2','=A1+B2+2')
+            wb.set_cell_contents(name2,'A3','=A1+s1!B2')
+            wb.set_cell_contents(name2,'B3','=$A1+2')
+            wb.set_cell_contents(name2,'B4','=A$1+2')
+            
+
+            
+            wb.copy_cells(name2,'A1','B4','B3')
+
+           
+            self.assertEqual(wb.get_cell_contents(name2,'C5'),'=$A3+2')
+            self.assertEqual(wb.get_cell_contents(name2,'C6'),'=B$1+2')
+            self.assertEqual(wb.get_cell_contents(name2,'A3'),'=A1+s1!B2')
+            self.assertEqual(wb.get_cell_contents(name2,'B4'),'=B3+C4+2')
+            self.assertEqual(wb.get_cell_contents(name2,'B5'),'=B3+s1!B2')
+
+
+
+            
+    def test_move_cells(self):
+            wb = Workbook()
+            
+            (_, name) = wb.new_sheet("s1")
+            wb.set_cell_contents(name,'A1','1')
+            wb.set_cell_contents(name,'A2',"hi")
+            wb.set_cell_contents(name,'B2',"yo")
+            
+            wb.move_cells(name,'A1','B3','A5')
+            
+            self.assertEqual(wb.get_cell_value(name,'A1'),'None')
+            self.assertEqual(wb.get_cell_value(name,'A5'),1)
+            self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
+            self.assertEqual(wb.get_cell_value(name,'B6'),"yo")
+
+            (_, name2) = wb.new_sheet("s2")
+            wb.set_cell_contents(name2,'A1','1')
+            wb.set_cell_contents(name2,'B2','1')
+            wb.set_cell_contents(name2,'A2','=A1+B2+2')
+            wb.set_cell_contents(name2,'A3','=A1+s1!B2')
+
+            wb.move_cells(name2,'A1','B4','B3')
+
+            self.assertEqual(wb.get_cell_contents(name2,'B4'),'=B3+C4+2')
+            self.assertEqual(wb.get_cell_contents(name2,'B5'),'=B3+s1!B2')
+            
+    
+    
+
     def test_aaron(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -49,7 +116,7 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name2,'A1',"='new_name'!A1+3")
         wb.rename_sheet('New_nAme','new_name2')
         self.assertEqual('=new_name2!A1+3',wb.get_cell_contents(name2,'A1'))
-       
+    
         (_, name2) = wb.new_sheet("s3")
         wb.set_cell_contents(name2,'A1',"='new_name2'!A1 + 's3'!A1")
         wb.rename_sheet('new_name2','new?name')
@@ -67,7 +134,7 @@ class TestWorkbook(unittest.TestCase):
             wb.rename_sheet('foo','')
         # normal replace and uneccesary '' works no, do errors and other req work now?
         
-     
+    
 
 
     
@@ -96,7 +163,7 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name,'A3','0')
         wb.set_cell_contents(name,'A5','=2+A1')
         self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.DIVIDE_BY_ZERO)
-       
+    
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.DIVIDE_BY_ZERO)
         
         #print(wb.get_cell_value(name,'A1') is CellError(CellErrorType.DIVIDE_BY_ZERO, "division by zero", ZeroDivisionError))
@@ -172,15 +239,15 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A1'),None)
         self.assertEqual(wb.get_cell_contents(name,'A1'),None)
         
-         
-    # def test_empty_cells(self):
-    #     """ Testing whether empty cells return 0 or ''. """   
-    #     wb = Workbook()
-    #     (_, name) = wb.new_sheet("first_sheet")
-    #     wb.set_cell_contents(name,'B4','=A2+3')
-    #     self.assertEqual(wb.get_cell_value(name,'B4'),3)
-    #     wb.set_cell_contents(name,'B7','=A6&"hi"')
-    #     self.assertEqual(wb.get_cell_value(name,'B7'),'hi')
+        
+    def test_empty_cells(self):
+        """ Testing whether empty cells return 0 or ''. """   
+        wb = Workbook()
+        (_, name) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name,'B4','=A2+3')
+        self.assertEqual(wb.get_cell_value(name,'B4'),3)
+        wb.set_cell_contents(name,'B7','=A6&"hi"')
+        self.assertEqual(wb.get_cell_value(name,'B7'),'hi')
 
 
     def test_naming_sheets_and_workbooks(self):
@@ -653,9 +720,9 @@ class TestWorkbook(unittest.TestCase):
 
     def test_loading_bad_formula(self): # TODO
         pass
-    
+        
 if __name__ == '__main__':
-    # print('------------------------NEW TEST------------------------')
+    print('------------------------NEW TEST------------------------')
     unittest.main(verbosity=0)
         
 

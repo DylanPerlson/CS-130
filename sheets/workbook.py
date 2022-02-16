@@ -1,9 +1,4 @@
 
-# from multiprocessing.sharedctypes import Value
-# from anyio import WouldBlock # TODO do we need these
-# from logging import exception
-# from multiprocessing.sharedctypes import Value # TODO do we need these
-
 from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
 import json
@@ -13,8 +8,10 @@ MAX_ROW = 475254
 MAX_COL = 9999
 A_UPPERCASE = ord('A')
 ALPHABET_SIZE = 26
+do_not_delete = False
 
 class Workbook:
+    
     import decimal
     # A workbook containing zero or more named spreadsheets.
     #
@@ -30,6 +27,244 @@ class Workbook:
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
+        
+    def move_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
+        # Move cells from one location to another, possibly moving them to
+        # another sheet.  All formulas in the area being moved will also have
+        # all relative and mixed cell-references updated by the relative
+        # distance each formula is being copied.
+        #
+        # Cells in the source area (that are not also in the target area) will
+        # become empty due to the move operation.
+        #
+        # The start_location and end_location specify the corners of an area of
+        # cells in the sheet to be moved.  The to_location specifies the
+        # top-left corner of the target area to move the cells to.
+        #
+        # Both corners are included in the area being moved; for example,
+        # copying cells A1-A3 to B1 would be done by passing
+        # start_location="A1", end_location="A3", and to_location="B1".
+        #
+        # The start_location value does not necessarily have to be the top left
+        # corner of the area to move, nor does the end_location value have to be
+        # the bottom right corner of the area; they are simply two corners of
+        # the area to move.
+        #
+        # This function works correctly even when the destination area overlaps
+        # the source area.
+        #
+        # The sheet name matches are case-insensitive; the text must match but
+        # the case does not have to.
+        #
+        # If to_sheet is None then the cells are being moved to another
+        # location within the source sheet.
+        #
+        # If any specified sheet name is not found, a KeyError is raised.
+        # If any cell location is invalid, a ValueError is raised.
+        #
+        # If the target area would extend outside the valid area of the
+        # spreadsheet (i.e. beyond cell ZZZZ9999), a ValueError is raised, and
+        # no changes are made to the spreadsheet.
+        #
+        # If a formula being moved contains a relative or mixed cell-reference
+        # that will become invalid after updating the cell-reference, then the
+        # cell-reference is replaced with a #REF! error-literal in the formula.
+        
+        #check for invalid cells or sheets
+
+        cur_sheet = None
+        to_sheet = None
+        start_row, start_col = self._get_col_and_row(start_location)
+        end_row, end_col = self._get_col_and_row(end_location)
+
+       
+        if not self._check_valid_cell(start_location) or not self._check_valid_cell(end_location):
+            raise ValueError()
+        if end_row > MAX_ROW or end_col > MAX_COL or start_row > MAX_ROW or start_col > MAX_COL:
+            raise ValueError()
+            
+        to_exists = False
+        cur_exists = False
+        #check if the sheet exists
+        for i in self.sheets:
+            if i.sheet_name.lower() == sheet_name.lower():
+                cur_exists = True
+                cur_sheet = i
+                break
+
+        if to_sheet is not None:
+            for i in self.sheets:
+                if i.sheet_name.lower() == to_sheet.lower():
+                    to_exists = True
+                    to_sheet = i
+                    break
+
+            #if no valid sheet name
+            if to_exists == False or cur_exists == False:
+                raise KeyError()
+
+        # make sure they are in correct order
+        if start_row > end_row:
+            start_row, end_row = end_row, start_row
+        if start_col > end_col:
+            start_col, end_col = end_col, start_col
+
+        copy = {}
+        #how much the rows and cols move
+        move_row, move_col = self._get_col_and_row(to_location)
+        delta_row = move_row - start_row
+        delta_col = move_col - start_col
+
+        #copy all of the cells
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self._base_10_to_alphabet(r))+str(c)
+
+                copy[(r,c)] = cur_sheet.get_cell_contents(cell)
+                #check if we need to update the formula         
+                if str(copy[(r,c)])[0] == '=':
+                    cell_list = []
+                    for e,i in enumerate(self.sheets):
+                        if i.sheet_name.lower() == sheet_name.lower():
+                            cell_list = self.sheets[e]._retrieve_cell_references(copy[(r,c)])
+                            
+                    for i in cell_list:
+                        
+                        [name, loc] = i.split('!',1)
+                        old_loc = loc
+                        #not in the sheet so do not need to update
+                        if name.lower() != sheet_name.lower():                           
+                            continue
+
+                        #is in sheet so need to update
+                        elif name.lower() == sheet_name.lower():
+                            abs_row = False
+                            abs_col = False
+
+                            if '$' in loc:
+                                abs_loc = loc.split('$')
+                                if (abs_loc[0] == ''):
+                                    abs_col = True
+                                if (abs_loc[-1].isdigit()):
+                                    abs_row = True
+                                
+                                #TODO swap bc we implimented our helper wrong
+                                abs_col, abs_row = abs_row, abs_col
+
+                                loc = ''.join(abs_loc)
+                                
+
+                            #update rows  and cols
+                            
+                            loc_row, loc_col = self._get_col_and_row(loc)
+
+                            
+
+
+                            replace_r = loc_row
+                            replace_c = loc_col
+                            
+                            if loc_row in range(start_row, end_row+1) and abs_row == False:
+                                replace_r = loc_row + delta_row
+                                
+                            if loc_col in range(start_col, end_col+1) and abs_col == False:
+                                replace_c = loc_col + delta_col
+                            
+
+                            #TODO swap bc we implimented our helper wrong
+                            replace_r, replace_c = replace_c, replace_r
+
+                            if abs_row == True and abs_col == False:
+                                new_loc = '$'+str(self._base_10_to_alphabet(replace_c))+str(replace_r)
+                            elif abs_row == False and abs_col == True:
+                                new_loc = str(self._base_10_to_alphabet(replace_c))+'$'+str(replace_r)
+                            elif abs_row == True and abs_col == True:
+                                new_loc = '$'+str(self._base_10_to_alphabet(replace_c))+'$'+str(replace_r)
+                            else:
+                                new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
+                            #TODO there is a possible very nuanced error of overlapping replacements
+                            
+                            copy[(r,c)] = copy[(r,c)].replace(old_loc,new_loc)
+
+                        else:
+                            print('problem')
+                            raise ValueError()
+
+
+
+                
+                #delete the value after copying values - only if the move function was called
+                if do_not_delete == False:
+                    cur_sheet.set_cell_contents(self,cell, None)
+        
+        #move to the new location - do this in two steps so dont overwrite before copying some
+        for r in range(start_row, end_row+1):
+            for c in range(start_col, end_col+1):
+                cell = str(self._base_10_to_alphabet(r+delta_row))+str(c+delta_col)
+
+                if to_sheet is None:
+                    cur_sheet.set_cell_contents(self,cell,copy[(r,c)])
+                else:
+                    to_sheet.set_cell_contents(self,cell,copy[(r,c)])
+
+
+        
+        #store all the cells locally, copy values into a dict,
+        #delete all of the values from the area.. make the contents none
+        #move all of the values to the new area
+
+    def copy_cells(self, sheet_name, start_location,
+            end_location, to_location, to_sheet = None):
+        # Copy cells from one location to another, possibly copying them to
+        # another sheet.  All formulas in the area being copied will also have
+        # all relative and mixed cell-references updated by the relative
+        # distance each formula is being copied.
+        #
+        # Cells in the source area (that are not also in the target area) are
+        # left unchanged by the copy operation.
+        #
+        # The start_location and end_location specify the corners of an area of
+        # cells in the sheet to be copied.  The to_location specifies the
+        # top-left corner of the target area to copy the cells to.
+        #
+        # Both corners are included in the area being copied; for example,
+        # copying cells A1-A3 to B1 would be done by passing
+        # start_location="A1", end_location="A3", and to_location="B1".
+        #
+        # The start_location value does not necessarily have to be the top left
+        # corner of the area to copy, nor does the end_location value have to be
+        # the bottom right corner of the area; they are simply two corners of
+        # the area to copy.
+        #
+        # This function works correctly even when the destination area overlaps
+        # the source area.
+        #
+        # The sheet name matches are case-insensitive; the text must match but
+        # the case does not have to.
+        #
+        # If to_sheet is None then the cells are being copied to another
+        # location within the source sheet.
+        #
+        # If any specified sheet name is not found, a KeyError is raised.
+        # If any cell location is invalid, a ValueError is raised.
+        #
+        # If the target area would extend outside the valid area of the
+        # spreadsheet (i.e. beyond cell ZZZZ9999), a ValueError is raised, and
+        # no changes are made to the spreadsheet.
+        #
+        # If a formula being copied contains a relative or mixed cell-reference
+        # that will become invalid after updating the cell-reference, then the
+        # cell-reference is replaced with a #REF! error-literal in the formula.
+        
+        # this is the same as the move function, except it does not delete the functions
+        global do_not_delete
+        do_not_delete = True
+        self.move_cells(sheet_name, start_location,
+            end_location, to_location, to_sheet)
+        do_not_delete = False
+
+
     def num_sheets(self):
         # Return the number of spreadsheets in the workbook.
         return self.number_sheets
@@ -38,7 +273,7 @@ class Workbook:
         if (move_index < 0 or move_index >= len(self.sheets)):
             raise ValueError()
         for e,i in enumerate(self.sheets):
-            if i.sheet_name == sheet_to_move:
+            if i.sheet_name.lower() == sheet_to_move.lower():
                 self.sheets.insert(move_index, i)
                 self.sheets.pop(e+1)
                 return
@@ -117,7 +352,7 @@ class Workbook:
             raise ValueError()   
         
         #if no name given
-        if sheet_name == None:
+        if sheet_name is None:
             name_given = True
             auto_name = "Sheet"
             sheet_name = auto_name + str(self._create_name())
@@ -160,7 +395,7 @@ class Workbook:
         for i in range(len(self.sheets)):
             all_sheet_names.append(self.sheets[i].sheet_name.lower())
         
-        if sheet_name not in all_sheet_names:
+        if sheet_name.lower() not in all_sheet_names:
             raise KeyError()
         try:
             for i in range(len(self.sheets)):
@@ -199,9 +434,10 @@ class Workbook:
         #if sheet name not found, raise key Error()
         raise KeyError()
 
-    def _get_row_and_col(self,location):
+    def _get_col_and_row(self,location):
         """ Helper function to get absolute row/col of inputted location (AD42) """
-        
+        # be aware we did this backwards
+
         for e,i in enumerate(location):
             if i.isdigit():
                 row = location[:e]          
@@ -214,7 +450,7 @@ class Workbook:
                 col = int(location[e:])                
                 break
                 
-        return row, col
+        return row, col #these should actually be swapped I think?
     
     def set_cell_contents(self, sheet_name: str, location: str,
                           contents: 'None'):
@@ -242,20 +478,20 @@ class Workbook:
         """
         
         # check that the cell is either a string or None
-        if not isinstance(contents, str) and contents != None:
+        if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
 
         updated_cells = []
         for i in self.sheets:
             #edit cell content of specified sheet
-            if (i.sheet_name == None):
+            if (i.sheet_name is None):
                 continue
             if not self._check_valid_cell(location):
                 raise ValueError('Cell location invalid.')
             
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
-                if contents == None or (not self._is_float(contents) and contents.strip() == ''):
+                if contents is None or (not self._is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(i.sheet_name, location, None)
                 elif self._is_float(contents):
                     i.set_cell_contents(i.sheet_name, location, contents)
@@ -323,7 +559,7 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        row,col = self._get_row_and_col(location)
+        row,col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
             return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
@@ -418,13 +654,13 @@ class Workbook:
 
             if 'name' not in sheet:
                 raise KeyError("No 'name' key found in some sheet of the json file.")
-            if 'cell_contents' not in sheet:
-                raise KeyError("No 'cell_contents' key found in some sheet of the json file.")
+            if 'cell-contents' not in sheet:
+                raise KeyError("No 'cell-contents' key found in some sheet of the json file.")
 
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)
 
-            for location, content in sheet['cell_contents'].items():
+            for location, content in sheet['cell-contents'].items():
                 wb.set_cell_contents(sheet_name, location, content)
 
         return wb
@@ -447,7 +683,7 @@ class Workbook:
             for key, value in i.cells.items():
                 cells[(self._base_10_to_alphabet(key[0])+str(key[1]))] = value.contents
 
-            sheet = {"name": i.sheet_name, "cell_contents": cells}
+            sheet = {"name": i.sheet_name, "cell-contents": cells}
 
             file["sheets"].append(sheet)
 
@@ -567,7 +803,7 @@ class Workbook:
         except ValueError:
             return False
 
-    def _get_row_and_col(self,location):
+    def _get_col_and_row(self,location):
         # Helper function to get absolute row/col of inputted location 
         for e,i in enumerate(location):
             if i.isdigit():
@@ -592,6 +828,7 @@ class Workbook:
 
     def notify_cells_changed(self):
         for curr_func in self.notification_functions:
+            continue
             
     def on_cells_changed(self, changed_cells):
         '''
@@ -599,17 +836,14 @@ class Workbook:
         function was registered on.  The changed_cells argument is an iterable
         of tuples; each tuple is of the form (sheet_name, cell_location).
         '''
-        # Don't do this
-        print(f'Cell(s) changed:  {changed_cells}') 
+        pass
+        #print(f'Cell(s) changed:  {changed_cells}') 
 
     def _base_10_to_alphabet(self, number):
         """ Helper function: base 10 to alphabet
         Convert a decimal number to its base alphabet representation
         from: https://codereview.stackexchange.com/a/182757
         """
-
-
-
         return ''.join(
                 chr(A_UPPERCASE + part)
                 for part in self._decompose(number)

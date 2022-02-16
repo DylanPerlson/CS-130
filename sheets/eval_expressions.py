@@ -145,19 +145,16 @@ class EvalExpressions(Transformer):
         if args[1] == '/' and str(args[2]) == '0':
             return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", "division by zero")
         
-        if (str(args[0]).isdigit and not str(args[2]).isdigit): 
-            newError = generate_error_object("#VALUE!")
-            return newError
+        if (str(args[0]).isdigit and not str(args[2]).isdigit):  
+            return generate_error_object("#VALUE!")
         if (str(args[2]).isdigit and not str(args[0]).isdigit): 
-            newError = generate_error_object("#VALUE!")
-            return newError
+             return generate_error_object("#VALUE!")
         
         if (args[0] in error_literals or isinstance(args[0], CellError)):
-            newError = generate_error_object(args[0])
-            return newError
+            return generate_error_object(args[0])
+            
         if (args[2] in error_literals or isinstance(args[2], CellError)):
-            newError = generate_error_object(args[2])
-            return newError
+            return generate_error_object(args[2])
         
         if args[1] == '*':
             return decimal.Decimal(decimal.Decimal(args[0])*decimal.Decimal(args[2]))
@@ -178,11 +175,10 @@ class EvalExpressions(Transformer):
             args[1] = ''
 
         if (args[0] in error_literals or isinstance(args[0], CellError)):
-            newError = generate_error_object(args[0])
-            return newError
+            return generate_error_object(args[0])
         if (args[1] in error_literals or isinstance(args[1], CellError)):
-            newError = generate_error_object(args[1])
-            return newError   
+            return generate_error_object(args[1])
+             
 
         return str(str(args[0])+str(args[1]))
 

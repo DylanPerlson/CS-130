@@ -3,7 +3,6 @@ from sheets.cell_error import CellError, CellErrorType
 from .sheet import Sheet
 import json
 import copy
-from typing import Optional
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -12,6 +11,7 @@ ALPHABET_SIZE = 26
 do_not_delete = False
 
 class Workbook:
+    
     import decimal
     # A workbook containing zero or more named spreadsheets.
     #
@@ -71,13 +71,11 @@ class Workbook:
         # cell-reference is replaced with a #REF! error-literal in the formula.
         
         #check for invalid cells or sheets
-        
-        #TODO add absolute cell references
 
         cur_sheet = None
         to_sheet = None
-        start_row, start_col = self._get_row_and_col(start_location)
-        end_row, end_col = self._get_row_and_col(end_location)
+        start_row, start_col = self._get_col_and_row(start_location)
+        end_row, end_col = self._get_col_and_row(end_location)
 
        
         if not self._check_valid_cell(start_location) or not self._check_valid_cell(end_location):
@@ -113,7 +111,7 @@ class Workbook:
 
         copy = {}
         #how much the rows and cols move
-        move_row, move_col = self._get_row_and_col(to_location)
+        move_row, move_col = self._get_col_and_row(to_location)
         delta_row = move_row - start_row
         delta_col = move_col - start_col
 
@@ -128,7 +126,7 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e].retrieve_cell_references(copy[(r,c)])
+                            cell_list = self.sheets[e]._retrieve_cell_references(copy[(r,c)])
                             
                     for i in cell_list:
                         
@@ -149,7 +147,8 @@ class Workbook:
                                     abs_col = True
                                 if (abs_loc[-1].isdigit()):
                                     abs_row = True
-                                 #TODO swap bc we implimented our helper wrong
+                                
+                                #TODO swap bc we implimented our helper wrong
                                 abs_col, abs_row = abs_row, abs_col
 
                                 loc = ''.join(abs_loc)
@@ -157,7 +156,7 @@ class Workbook:
 
                             #update rows  and cols
                             
-                            loc_row, loc_col = self._get_row_and_col(loc)
+                            loc_row, loc_col = self._get_col_and_row(loc)
 
                             
 
@@ -434,9 +433,10 @@ class Workbook:
         #if sheet name not found, raise key Error()
         raise KeyError()
 
-    def _get_row_and_col(self,location):
+    def _get_col_and_row(self,location):
         """ Helper function to get absolute row/col of inputted location (AD42) """
-        
+        # be aware we did this backwards
+
         for e,i in enumerate(location):
             if i.isdigit():
                 row = location[:e]          
@@ -558,7 +558,7 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        row,col = self._get_row_and_col(location)
+        row,col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
             return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
@@ -802,7 +802,7 @@ class Workbook:
         except ValueError:
             return False
 
-    def _get_row_and_col(self,location):
+    def _get_col_and_row(self,location):
         # Helper function to get absolute row/col of inputted location 
         for e,i in enumerate(location):
             if i.isdigit():

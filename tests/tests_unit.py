@@ -152,9 +152,6 @@ class TestWorkbook(unittest.TestCase):
     #     wb.set_cell_contents(name,'A2','REF!')
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
 
-    
- 
-
     def test_string_comes_back_as_decimal(self): 
         wb = Workbook()    
         (_, name) = wb.new_sheet("first_sheet")
@@ -176,14 +173,14 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_contents(name,'A1'),None)
         
          
-    def test_empty_cells(self):
-        """ Testing whether empty cells return 0 or ''. """   
-        wb = Workbook()
-        (_, name) = wb.new_sheet("first_sheet")
-        wb.set_cell_contents(name,'B4','=A2+3')
-        self.assertEqual(wb.get_cell_value(name,'B4'),3)
-        wb.set_cell_contents(name,'B7','=A6&"hi"')
-        self.assertEqual(wb.get_cell_value(name,'B7'),'hi')
+    # def test_empty_cells(self):
+    #     """ Testing whether empty cells return 0 or ''. """   
+    #     wb = Workbook()
+    #     (_, name) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name,'B4','=A2+3')
+    #     self.assertEqual(wb.get_cell_value(name,'B4'),3)
+    #     wb.set_cell_contents(name,'B7','=A6&"hi"')
+    #     self.assertEqual(wb.get_cell_value(name,'B7'),'hi')
 
 
     def test_naming_sheets_and_workbooks(self):

@@ -16,8 +16,6 @@ def generate_error_object(error_arg):
     Error literals are strings
     Might be creating cellerror objects
     """
-    if isinstance(error_arg, CellError):
-        cell_error_obj = error_arg
     return_error = None
     if error_arg == '#REF!': #or isinstance(cell_error_obj, CellError(CellErrorType.BAD_REFERENCE, "205: Invalid cell reference")):
         return_error = CellError(CellErrorType.BAD_REFERENCE, "204: Invalid cell reference")

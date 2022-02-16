@@ -26,6 +26,7 @@ class Workbook:
         # Initialize a new empty workbook.
         self.sheets = []
         self.number_sheets = 0
+        self.notification_functions = []
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
@@ -581,7 +582,17 @@ class Workbook:
                 break
                 
         return row, col
-    
+    #Notification functions are user defined
+    #store notification functions as list parameter
+    #Every time cell is changed, run all functions in notification list
+    #Be able to catch errors in case that's what function returns
+    #Don't need to print anything necessarily 
+    def add_notification_function(self, new_func):
+        self.notification_functions.append(new_func)
+
+    def notify_cells_changed(self):
+        for curr_func in self.notification_functions:
+            
     def on_cells_changed(self, changed_cells):
         '''
         This function gets called when cells change in the workbook that the

@@ -27,6 +27,9 @@ class Workbook:
         self.master_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
+
+        self.check_circ_ref = []
+        self.evaluate_again = []
         
         
     def move_cells(self, sheet_name, start_location,
@@ -501,27 +504,35 @@ class Workbook:
                     i.set_cell_contents(self, location, contents.strip())
                 #completed task
                
+                curr_cell = sheet_name.lower() + '!' + location
+
+                #reset cells_change
+                self.cells_change = []
 
 
-                # append the current cell
-                updated_cells.append((sheet_name.lower() + '!' + location))
-                #append any dependent cells
-                name_of_childs = sheet_name.lower() + '!' + location
-                if name_of_childs in self.master_cell_dict:
-                    for child in self.master_cell_dict[name_of_childs]:
-                        updated_cells.append(child)  
+
+                #notify all the cells
+                self._notify_helper(sheet_name, curr_cell)
+
+                
+
+                # # append the current cell
+                # updated_cells.append((sheet_name.lower() + '!' + location))
+                # #append any dependent cells
+                # name_of_childs = sheet_name.lower() + '!' + location
+                # if name_of_childs in self.master_cell_dict:
+                #     for child in self.master_cell_dict[name_of_childs]:
+                #         updated_cells.append(child)  
 
                
+                
 
-
-                #TODO is there going to be a prbolem with storing sheet_name instead of sheet_name.lower()?????
-                for i in self.notification_functions:
-                    for curr_cell in updated_cells:
-                        split_cell_string = curr_cell.split('!')
-                        if split_cell_string[0].lower() == sheet_name.lower():
-                            i(self, split_cell_string[1])
-                        else:
-                            i(self,curr_cell)
+                # for i in self.notification_functions:
+                #     for curr_cell in updated_cells:
+                #         split_cell_string = curr_cell.split('!')
+                #         #TODO change this to the helper functions
+                        
+                        
                 return
                
         #no sheet found
@@ -839,6 +850,7 @@ class Workbook:
                 break
                 
         return row, col
+
     #Notification functions are user defined
     #store notification functions as list parameter
     #Every time cell is changed, run all functions in notification list
@@ -846,7 +858,51 @@ class Workbook:
     #Don't need to print anything necessarily 
     def add_notification_function(self, new_func):
         self.notification_functions.append(new_func)
+    
+    def _notify_helper(self, sheet_name, curr_cell):
+        #add all of our cells to the evaluate again list if it is not in it already
+        if curr_cell not in self.evaluate_again:
+            self.evaluate_again.append(curr_cell)
 
+            #TODO need to remove it from the evaluate list if it has ben re-evaluated
+            #TODO also need to create a cell.value to access the evaluated value
+
+
+
+        #call all of our own dependencies
+
+
+        #also check for circ references and if a cell has been updated
+
+            
+
+        #update code
+        #TODO also need to create a function to determine whether or not a cell has been updated??
+
+
+        #circ ref
+        #TODO what if it is not a circle but just mulitple place reference it? is that even possible???
+        if curr_cell in self.check_circ_ref:
+            #TODO CIRC ERRORS
+            print('circ error')
+
+        for i in self.notification_functions:
+            split_cell_string = curr_cell.split('!')
+            if split_cell_string[0].lower() == sheet_name.lower():
+                i(self, split_cell_string[1])
+            else:
+                i(self,curr_cell)
+            
+        
+        #Iterate up through dependent cells of our current cell
+        dependents_list = self.master_cell_dict[curr_cell]
+        for dependent in dependents_list:      
+                split_cell_string = dependent.split('!')               
+                self._notify_helper(split_cell_string[0], dependent)
+
+
+        
+    #IS THIS HOW WE ARE DOING THE NOTIFICATIONS????
     def notify_cells_changed(self, *args):
         for curr_arg in args:
             if curr_arg not in self.notification_functions:

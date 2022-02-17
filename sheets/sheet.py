@@ -39,7 +39,8 @@ class Sheet:
                 break
                 
         return row, col
-
+    
+    #Helper function to recursive notify any dependent cells, parents and 
     # def _get_dependent_cells(self, row, col, location, contents):
     #     dependent_cell_dict = {}
     #     # these if functions prevent problems with non-formulas

@@ -599,6 +599,7 @@ class TestWorkbook(unittest.TestCase):
             wb = Workbook.load_workbook(fp)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
+        print(wb.get_cell_value("first_sheet",'AAB3'))
         self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
 
     def test_json_non_string_contents(self): # TODO seems to work

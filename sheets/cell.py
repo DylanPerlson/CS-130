@@ -9,6 +9,7 @@ class Cell():
     def __init__ (self, contents):
         self.contents = contents
         self.parse_necessary = True
+        self.evaluated_value = None #TODO is this the way to use the evaluated value???
 
         # check that the cell is either a string or None
         if not isinstance(contents, str) and contents is not None:
@@ -42,12 +43,7 @@ class Cell():
         self.children_cells = {}
         self.parent_sheet = None
     
-    def get_children_cells(self):
-        return self.children_cells
     
-    def add_child_cell(self, location, value):
-        self.children_cells[location] = value
-
     def get_cell_value(self, workbook_instance, sheet_instance):
 
         #digit case

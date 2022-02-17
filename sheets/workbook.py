@@ -513,27 +513,8 @@ class Workbook:
 
                 #notify all the cells
                 self._notify_helper(sheet_name, curr_cell)
+                return   
 
-                
-
-                # # append the current cell
-                # updated_cells.append((sheet_name.lower() + '!' + location))
-                # #append any dependent cells
-                # name_of_childs = sheet_name.lower() + '!' + location
-                # if name_of_childs in self.master_cell_dict:
-                #     for child in self.master_cell_dict[name_of_childs]:
-                #         updated_cells.append(child)  
-
-               
-                
-
-                # for i in self.notification_functions:
-                #     for curr_cell in updated_cells:
-                #         split_cell_string = curr_cell.split('!')
-                #         #TODO change this to the helper functions
-                        
-                        
-                return
                
         #no sheet found
         raise KeyError()
@@ -895,10 +876,11 @@ class Workbook:
             
         
         #Iterate up through dependent cells of our current cell
-        dependents_list = self.master_cell_dict[curr_cell]
-        for dependent in dependents_list:      
-                split_cell_string = dependent.split('!')               
-                self._notify_helper(split_cell_string[0], dependent)
+        if curr_cell in self.master_cell_dict.keys():
+            dependents_list = self.master_cell_dict[curr_cell]
+            for dependent in dependents_list:      
+                    split_cell_string = dependent.split('!')               
+                    self._notify_helper(split_cell_string[0], dependent)
 
 
         

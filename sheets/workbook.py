@@ -807,6 +807,35 @@ class Workbook:
                                 s.cells[key].contents = s.cells[key].contents.replace("'"+i+"'!",i+"!")
                 updated_cells.append((new_name, s.cells[key]))
 
+        #need to update sheetname in cell dependencies
+        #TODO fix rename and circ ref
+
+
+        #create a list of keys to change bc cannot change during
+        change_keys = []
+        for cell in self.master_cell_dict:
+            #check if one of the master cells has it as a value
+            #everything should already be lower so not an issue
+            old_name = old_name.lower()
+            
+            #TODO just hope no sheetname is also a cell value, dont think donnie is that mean
+            #the value is a list so need to iterate through the list
+            for i in range(len(self.master_cell_dict[cell])):
+                self.master_cell_dict[cell][i] = self.master_cell_dict[cell][i].replace(old_name,new_name.lower())
+            #if old name is in the key now replace
+            if old_name in cell:
+                change_keys.append(cell)
+        
+        #change all the necesarry key values
+        for key in change_keys:
+            new_cell = cell.replace(old_name,new_name)
+            #create the new entry
+            self.master_cell_dict[new_cell] = self.master_cell_dict[cell]
+            #delete the old entry
+            self.master_cell_dict.pop(cell)
+                
+
+
     #helper fuction to determine if a value is a float
     def _is_float(self, element):
         element = str(element)

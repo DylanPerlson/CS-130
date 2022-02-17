@@ -37,6 +37,47 @@ class Project1(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.BAD_REFERENCE)
         self.assertEqual(wb.get_cell_value(name,'A7').get_type(),CellErrorType.BAD_REFERENCE)
 
+    def test_error_operations_with_parentheses(self):
+        wb = Workbook()    
+        (_, name) = wb.new_sheet("sheet")
+        wb.set_cell_contents(name,'A4','=4 / #ERROR!')
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.PARSE_ERROR)  
+
+        wb.set_cell_contents(name,'A2','=4 * #CIRCREF!')
+        self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.CIRCULAR_REFERENCE)
+
+        wb.set_cell_contents(name,'A1','=4 + #REF!')   
+        self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.BAD_REFERENCE)
+
+        wb.set_cell_contents(name,'A3','= #NAME?')
+        self.assertEqual(wb.get_cell_value(name,'A3').get_type(),CellErrorType.BAD_NAME)
+
+        wb.set_cell_contents(name,'A5','=4 - #VALUE!')
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=+#DIV/0!')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.DIVIDE_BY_ZERO)
+
+        # with parentheses
+        wb.set_cell_contents(name,'A4','=4 / (#ERROR!)')
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.PARSE_ERROR)  
+
+        wb.set_cell_contents(name,'A2','=4 * (#CIRCREF!)')
+        self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.CIRCULAR_REFERENCE)
+
+        wb.set_cell_contents(name,'A1','=4 + (#REF!)')   
+        self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.BAD_REFERENCE)
+
+        wb.set_cell_contents(name,'A3','= (#NAME?)')
+        self.assertEqual(wb.get_cell_value(name,'A3').get_type(),CellErrorType.BAD_NAME)
+
+        wb.set_cell_contents(name,'A5','= 4 - (#VALUE!)')
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','= +(#DIV/0!)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.DIVIDE_BY_ZERO)
+
+
     def test_parse_errors(self):
         wb = Workbook()    
         (_, name) = wb.new_sheet("sheet")
@@ -267,6 +308,13 @@ class Project1(unittest.TestCase):
         content = '=42*-4*-1'
         wb.set_cell_contents(name1, 'eee3', content)
         self.assertEqual(decimal.Decimal(42*-4*-1),wb.get_cell_value(name1, 'eee3'))
+
+    def test_minus_address(self):
+        wb = Workbook()
+        (_, sheet) = wb.new_sheet()
+        wb.set_cell_contents(sheet,'A1','=1')   
+        wb.set_cell_contents(sheet,'A2','=-A1')
+        self.assertEqual(decimal.Decimal(-1), wb.get_cell_value(sheet, 'a2'))
 
     def test_max_sheet_size(self):
         wb = Workbook()

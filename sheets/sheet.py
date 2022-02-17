@@ -15,7 +15,7 @@ class Sheet:
     # Sheet object constructor taking in name and workbook
     def __init__(self, sheet_name):         
         self.sheet_name = sheet_name
-        self.extent = [0,0]
+        # self.extent = [0,0]
         self.num_cells = 0
         self.cells = {}
         self.dependent_cells = Dependency_graph()
@@ -73,10 +73,10 @@ class Sheet:
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError()
         # in case the new cell is beyond the extent
-        if(row > self.extent[0]):
-            self.extent[0] = row
-        if(col > self.extent[1]):
-            self.extent[1] = col
+        # if(row > self.extent[0]):
+        #     self.extent[0] = row
+        # if(col > self.extent[1]):
+        #     self.extent[1] = col
         
         self.cells[(row,col)] = Cell(contents) # if statement is old code; we need to update a cell entirely
         # if not in the master dictionary

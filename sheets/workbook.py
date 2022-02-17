@@ -421,13 +421,13 @@ class Workbook:
         # new code for getting the extent
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
-                i.extent = [0,0]
+                extent = [0,0]
                 for key in i.cells:
-                    if i.cells[key].contents is not None and key[0] > i.extent[0]:
-                        i.extent[0] = key[0]
-                    if i.cells[key].contents is not None and key[1] > i.extent[1]:
-                        i.extent[1] = key[1]
-                return (i.extent[0],i.extent[1])
+                    if i.cells[key].contents is not None and key[0] > extent[0]:
+                        extent[0] = key[0]
+                    if i.cells[key].contents is not None and key[1] > extent[1]:
+                        extent[1] = key[1]
+                return (extent[0],extent[1])
 
 
         #if sheet name not found, raise key Error()

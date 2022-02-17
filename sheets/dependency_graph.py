@@ -3,14 +3,14 @@ from sheets.cell_error import CellError
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
 
-class Dependency_graph:
+class DependencyGraph:
     def __init__(self, num_nodes = 0):
         # Initialize a new dependency graph
         self.graph = defaultdict(list)
         self.num_nodes = num_nodes
 
     # function to add an edge to graph
-    def addEdge(self,u,v):
+    def add_edge(self,u,v):
         if u not in self.graph.keys() and u not in self.graph.values():
             self.num_nodes += 1
         if v not in self.graph.keys() and v not in self.graph.values():
@@ -18,7 +18,7 @@ class Dependency_graph:
         self.graph[u].append(v)
  
     # A recursive function used by topologicalSort
-    def topologicalSortUtil(self,v,visited,stack):
+    def topological_sort_util(self,v,visited,stack):
         # Mark the current node as visited.
         visited[v] = True
  
@@ -32,7 +32,7 @@ class Dependency_graph:
  
     # The function to do Topological Sort. It uses recursive
     # topologicalSortUtil()
-    def topologicalSort(self):
+    def topological_sort(self):
         # Mark all the vertices as not visited
         visited = [False]*self.num_nodes
         stack =[]

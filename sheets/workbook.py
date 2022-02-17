@@ -24,6 +24,7 @@ class Workbook:
         self.sheets = []
         self.number_sheets = 0
         self.notification_functions = []
+        self.master_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
         
@@ -489,19 +490,38 @@ class Workbook:
             if not self._check_valid_cell(location):
                 raise ValueError('Cell location invalid.')
             
+            #set cell contents and notify parent cells
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
                 if contents is None or (not self._is_float(contents) and contents.strip() == ''):
-                    i.set_cell_contents(i.sheet_name, location, None)
+                    i.set_cell_contents(self, location, None)
                 elif self._is_float(contents):
-                    i.set_cell_contents(i.sheet_name, location, contents)
+                    i.set_cell_contents(self, location, contents)
                 else: #store normally
-                    i.set_cell_contents(i.sheet_name, location, contents.strip())
+                    i.set_cell_contents(self, location, contents.strip())
                 #completed task
-                updated_cells.append((sheet_name, location))
+               
+
+
+                # append the current cell
+                updated_cells.append((sheet_name.lower() + '!' + location))
+                #append any dependent cells
+                name_of_childs = sheet_name.lower() + '!' + location
+                if name_of_childs in self.master_cell_dict:
+                    for child in self.master_cell_dict[name_of_childs]:
+                        updated_cells.append(child)  
+
+               
+
+
+                #TODO is there going to be a prbolem with storing sheet_name instead of sheet_name.lower()?????
                 for i in self.notification_functions:
                     for curr_cell in updated_cells:
-                        i(self, curr_cell)
+                        split_cell_string = curr_cell.split('!')
+                        if split_cell_string[0].lower() == sheet_name.lower():
+                            i(self, split_cell_string[1])
+                        else:
+                            i(self,curr_cell)
                 return
                
         #no sheet found

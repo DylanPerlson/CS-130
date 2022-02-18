@@ -18,12 +18,12 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A4', '=A3')
         wb.set_cell_contents(name,'A1', '5')
     
-    def test_circular_references(self):
-        wb = Workbook()
-        (_, name) = wb.new_sheet("s1")
-        wb.set_cell_contents(name,'A1','1')
-        wb.set_cell_contents(name,'A2',"=A1")
-        wb.set_cell_contents(name,'A1',"=A2")
+    # def test_circular_references(self):
+    #     wb = Workbook()
+    #     (_, name) = wb.new_sheet("s1")
+    #     wb.set_cell_contents(name,'A1','1')
+    #     wb.set_cell_contents(name,'A2',"=A1")
+    #     wb.set_cell_contents(name,'A1',"=A2")
 
         
 

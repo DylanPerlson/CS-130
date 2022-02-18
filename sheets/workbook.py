@@ -189,8 +189,10 @@ class Workbook:
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
                             #TODO there is a possible very nuanced error of overlapping replacements
+                            old_cell_contents = copy[(r,c)]
+                            copy[(r,c)] = copy[(r,c)].replace(old_loc,new_loc) #this is cell.contents
+                            new_cell_contents = copy[((r,c))]
                             
-                            copy[(r,c)] = copy[(r,c)].replace(old_loc,new_loc)
 
                         else:
                             print('problem')
@@ -649,14 +651,14 @@ class Workbook:
                 self._check_valid_cell(location)
                 workbook_instance = self
                 curr_cell = sheet_name.lower() + '!' + location
-                if self.master_cell_dict[curr_cell] == []:
-                    return i.get_cell_value(workbook_instance,location)
-                else:
-                    components = self.kosaraju(sheet_name.lower(), location)
-                    for curr_compoent in components:
-                        if len(curr_compoent) > 1:
-                            for curr_cell in curr_compoent:
-                                curr_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
+                # if self.master_cell_dict[curr_cell] == []:
+                return i.get_cell_value(workbook_instance,location)
+                # else:
+                #     components = self.kosaraju(sheet_name.lower(), location)
+                #     for curr_compoent in components:
+                #         if len(curr_compoent) > 1:
+                #             for curr_cell in curr_compoent:
+                #                 curr_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
 
             
         raise KeyError()

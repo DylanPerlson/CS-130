@@ -88,8 +88,11 @@ class Cell():
 
             else:
                 return CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
-
-        return self.remove_trailing_zeros(evaluation)
+        
+        if evaluation is None:
+            return 0
+        else:
+            return self.remove_trailing_zeros(evaluation)
   
     def is_float(self, element):
         """ helper fuction to determine if a value is a float """

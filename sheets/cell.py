@@ -70,7 +70,6 @@ class Cell():
             if isinstance(evaluation, CellError):
                 return evaluation
         except lark.exceptions.VisitError as e:
-            
             if isinstance(e.__context__, ZeroDivisionError):
                 """ Value you set is the cell error OBJECT
                 String is what the user sees/inputs 
@@ -89,8 +88,6 @@ class Cell():
 
             else:
                 return CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
-        
-
 
         return self.remove_trailing_zeros(evaluation)
   

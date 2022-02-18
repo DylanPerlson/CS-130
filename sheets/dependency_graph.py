@@ -1,4 +1,8 @@
 from collections import defaultdict
+from platform import node
+from weakref import ref
+
+from sklearn.decomposition import DictionaryLearning
 from sheets.cell_error import CellError
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
@@ -46,6 +50,27 @@ class DependencyGraph:
         # Print contents of stack
         return stack
     
+# create a new Dictionary   
+# with all the keys from master cell dict 
+
+
+# visited_dict = curly
+# for key in master_cell_dict.keys:
+#     visited_dict[key] = False
+
+#     pick the current node we are getting the value from as the starting node 
+#     do a dfs on the start node 
+
+#     and at every node mark visited dict to true  
+
+#     if we ever reach a visited dict that is true 
+
+#     then return circ ref
+
+#     or if we run out of nodes to search, then we also end return not circ ref
+
+
+
     # def DFSUtil(self,v,visited):
     #     """
     #     A function used by DFS

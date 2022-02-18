@@ -16,7 +16,6 @@ class Sheet:
         self.extent = [0,0]
         self.num_cells = 0
         self.cells = {}
-        self.parent_workbook = None
 
     def _get_col_and_row(self,location):
         """ Helper function to get absolute row/col of inputted location (AD42) """
@@ -53,6 +52,7 @@ class Sheet:
             if curr_cell.type == "FORMULA":
                 prev_contents = curr_cell.contents
                 #notify parent cells to remove this cell from their dependents list
+                #parent_cell sheet_name!A1
                 for parent_cell in self._retrieve_cell_references(prev_contents):
                     # reminder our rows and cols are switch, but we need to keep it this way                    
                     #remove current cell

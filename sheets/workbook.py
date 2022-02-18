@@ -25,6 +25,7 @@ class Workbook:
         self.number_sheets = 0
         self.notification_functions = []
         self.master_cell_dict = {}
+        self.visited_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
 
@@ -547,8 +548,75 @@ class Workbook:
                 return i.get_cell_contents(location)
 
         raise KeyError()
+    
+    #Helper function to carry out depth for search for whole dependency graph
+    def _dfs_helper(self, sheet_name, location, parent_dict, stack):
+        curr_cell = sheet_name + '!' + location
+        for next_cell in self.master_cell_dict[curr_cell]:
+            if next_cell not in parent_dict:
+                parent_dict[next_cell] = curr_cell
+                next_cell_components = next_cell.split('!')
+                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
+        stack.append(curr_cell)
 
+    #Primary function called to initiate DFS
+    def _dfs(self, sheet_name, location, stack):
+        parent_dict = {}
+        stack = []
+        curr_cell = sheet_name + '!' + location
+        for next_cell in self.master_cell_dict[(curr_cell)]:
+            next_cell_components = next_cell.split('!')
+            if next_cell not in parent_dict:
+                parent_dict[next_cell] = None
+                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
+        return stack
+    
+    #Helper function used to initiate DFS
+    def _dfs_single_cell(self, curr_dict, sheet_name, location, visited, stack):
+        curr_cell = sheet_name + '!' + location
+        for next_cell in self.master_cell_dict[curr_cell]:
+            if next_cell not in visited:
+                visited[next_cell] = curr_cell
+                next_cell_components = next_cell.split('!')
+                self._dfs_single_cell(curr_dict, next_cell_components[0], next_cell_components[1], visited, stack)
+        stack.append(curr_cell)
+    
+    #Helper function to find all components including strongly connected ones
+    #Any component longer than 1 in length is strongly connected
+    #Set all cells inside those components values to CIRCULAR_REFERENCE ERRORS
+    def kosaraju(self, sheet_name, location):
+        #Create stack of all dependent cells from performing DFS on starting current cell
+        stack = self._dfs(sheet_name, location, [])
 
+        #Reverse whole graph to perform stage 2 of Kosaraju's algorithm
+        reverse_depend = {}
+        for curr_cell in self.master_cell_dict.keys():
+            reverse_depend[curr_cell] = {}
+        for curr_cell in self.master_cell_dict.keys():
+            for next_cell in self.master_cell_dict[curr_cell]:
+                reverse_depend[next_cell][curr_cell] = True
+
+        # Traverse graph via poppping cells offstack
+        visited = {}
+        components = []
+        i = 0
+
+        while stack != []:
+            curr_cell = stack.pop()
+            #Don't need to DFS if already visited
+            if curr_cell in visited:
+                continue
+            else:
+                #Generate components based on dependencies of cells
+                components.append([])
+                if curr_cell not in visited:
+                    visited[curr_cell] = True
+                    curr_cell_components = curr_cell.split('!')
+                    self._dfs_single_cell(reverse_depend, curr_cell_components[0], curr_cell_components[1], visited, components[i])
+                components.append([])
+                i = i + 1
+        return components
+        
     def get_cell_value(self, sheet_name: str, location: str):
         """
         Return the evaluated value of the specified cell on the specified
@@ -580,7 +648,16 @@ class Workbook:
             if i.sheet_name.lower() == sheet_name.lower():
                 self._check_valid_cell(location)
                 workbook_instance = self
-                return i.get_cell_value(workbook_instance,location) 
+                curr_cell = sheet_name.lower() + '!' + location
+                if self.master_cell_dict[curr_cell] == []:
+                    return i.get_cell_value(workbook_instance,location)
+                else:
+                    components = self.kosaraju(sheet_name.lower(), location)
+                    for curr_compoent in components:
+                        if len(curr_compoent) > 1:
+                            for curr_cell in curr_compoent:
+                                curr_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
+
             
         raise KeyError()
 

@@ -1,11 +1,15 @@
 import context
 from sheets import *
-import decimal
+from decimal import Decimal
 import unittest
 
 
+D = Decimal # D(1) is now equivalent to decimal.Decimal(1)
+
 class Pieter(unittest.TestCase):
     pass
+
+
 
 
 

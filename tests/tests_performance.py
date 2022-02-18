@@ -1,4 +1,4 @@
-import os; os.system('cls')
+import os; os.system('clear')
 import context
 from sheets import *
 
@@ -10,8 +10,8 @@ def test_long_reference_chain():
     length = 50
     
     for i in range(1, length):
-        location_letter = wb.base_10_to_alphabet(i)
-        location_letter_prev = wb.base_10_to_alphabet(i-1)
+        location_letter = wb._base_10_to_alphabet(i)
+        location_letter_prev = wb._base_10_to_alphabet(i-1)
         location = str(location_letter)+str(1)
         location_prev = str(location_letter_prev)+str(1)
 
@@ -19,7 +19,7 @@ def test_long_reference_chain():
     
     assert wb.get_cell_value(name, location) == length
 
-def test_very_connected_ref_chain(): # TODO implement later
+def test_very_connected_ref_chain(): # TODO dimplement later
     pass
 
 def test_cell_with_many_deps():
@@ -79,6 +79,50 @@ def test_cell_cycle():
     wb.set_cell_contents(name, 'A1', '2')
     assert wb.get_cell_value(name,'A4') == 2, 'Cell value of A4 is wrong.'
 
+def test_fibonacci():
+    wb = Workbook()
+
+    (_,sheet) = wb.new_sheet()
+    wb.set_cell_contents(sheet, 'A1', '1')
+    wb.set_cell_contents(sheet, 'A2', '1')
+
+    length = 15
+
+    for i in range(3, length+1):
+        location = 'A'+str(i)
+        location_prev1 = 'A'+str(i-1)
+        location_prev2 = 'A'+str(i-2)
+        wb.set_cell_contents(sheet, location, '=' + location_prev1 + '+' + location_prev2)
+    
+    cell_value = wb.get_cell_value(sheet, location)
+    fibo_output = _fibonacci(length)
+    assert cell_value == fibo_output, f'get_cell_value should be {fibo_output}, but is {cell_value}'
+    
+# helper function for nth Fibonacci number
+def _fibonacci(n):
+    # from https://www.geeksforgeeks.org/python-program-for-program-for-fibonacci-numbers-2/
+    a = 0
+    b = 1
+     
+    # Check is n is less than 0
+    if n < 0:
+        print("Incorrect input")
+     
+    # Check is n is equal to 0
+    elif n == 0:
+        return 0
+    
+    # Check if n is equal to 1
+    elif n == 1:
+        return b
+    else:
+        for _ in range(1, n):
+            c = a + b
+            a = b
+            b = c
+        return b
+
+
 
 if __name__ == '__main__':
     import cProfile
@@ -91,8 +135,9 @@ if __name__ == '__main__':
     test_very_connected_ref_chain()
     test_cell_with_many_deps()
     test_significant_cell_change()
-    #test_cell_cycle()
+    test_fibonacci()
+    # test_cell_cycle()
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(5)
+    stats.sort_stats('tottime').print_stats(25)

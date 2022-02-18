@@ -45,7 +45,7 @@ def _is_float(self, element):
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
-    elif curr_arg is None:
+    elif curr_arg == None:
         return 0
     elif isinstance(curr_arg, str) and str(curr_arg)[0] == "'": # TODO edge case of trailing whitespace in front of quote
         if _is_float(str(curr_arg[1:])):
@@ -58,7 +58,7 @@ def _get_value_as_number(curr_arg):
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
-    elif curr_arg is None:
+    elif curr_arg == None:
         return ''
     elif isinstance(curr_arg, decimal.Decimal):
         return str(curr_arg)
@@ -130,23 +130,12 @@ class EvalExpressions(Transformer):
         return args[0]
 
     def add_expr(self, args):
-        #if reference a cell error
-        # if type(args[0]) is CellError:
-        #     return args[0]
-        # if type(args[2]) is CellError:
-        #     return args[2]
-
-        # if (args[0] is None):
-        #     args[0] = 0
-        # if (args[2] is None):
-        #     args[2] = 0
-
-        if (isinstance(args[0],decimal.Decimal) and not isinstance(args[2],decimal.Decimal)): 
-            newError = generate_error_object("#VALUE!")
-            return newError
-        if (isinstance(args[2],decimal.Decimal) and not isinstance(args[0],decimal.Decimal)): 
-            newError = generate_error_object("#VALUE!")
-            return newError
+        # if (isinstance(args[0],decimal.Decimal) and not isinstance(args[2],decimal.Decimal)): 
+        #     newError = generate_error_object("#VALUE!")
+        #     return newError
+        # if (isinstance(args[2],decimal.Decimal) and not isinstance(args[0],decimal.Decimal) and ): 
+        #     newError = generate_error_object("#VALUE!")
+        #     return newError
 
         #Error_literals only consider strings, not CellError object
         # Make sure to account for both
@@ -258,11 +247,6 @@ class EvalExpressions(Transformer):
 
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
-
-        # try:
-        # cell_value = self.workbook_instance.get_cell_value(sheet_name, cell)
-        # except:
-        #     return CellError(CellErrorType.BAD_REFERENCE, "202: Invalid cell reference", None)
 
         # if cell_value is None:
         #    cell_value = 0 # TODO "" for string

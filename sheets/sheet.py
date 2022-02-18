@@ -69,17 +69,21 @@ class Sheet:
             return
         elif curr_cell.type == "FORMULA":
             prev_contents = curr_cell.contents
-            #notify parent cells to remove this cell from their dependents list
-            for parent_cell in self._retrieve_cell_references(prev_contents):
-                # reminder our rows and cols are switch, but we need to keep it this way                    
-                #add current cell
-                
-                #create the list if it does not exist
-                if parent_cell not in workbook_instance.master_cell_dict:
-                    workbook_instance.master_cell_dict[(parent_cell)] = []
+            parent_cells = self._retrieve_cell_references(prev_contents)
+            if isinstance(parent_cells, CellError):
+                return
+            else:
+                #notify parent cells to remove this cell from their dependents list
+                for parent_cell in parent_cells:
+                    # reminder our rows and cols are switch, but we need to keep it this way                    
+                    #add current cell
+                    
+                    #create the list if it does not exist
+                    if parent_cell not in workbook_instance.master_cell_dict:
+                        workbook_instance.master_cell_dict[(parent_cell)] = []
 
-                appending_entry = self.sheet_name.lower()  + '!' + location
-                workbook_instance.master_cell_dict[(parent_cell)].append(appending_entry)
+                    appending_entry = self.sheet_name.lower()  + '!' + location
+                    workbook_instance.master_cell_dict[(parent_cell)].append(appending_entry)
         
         
     def get_cell_contents(self, location):

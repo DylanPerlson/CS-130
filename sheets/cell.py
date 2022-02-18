@@ -45,9 +45,11 @@ class Cell():
     
     
     def get_cell_value(self, workbook_instance, sheet_instance):
-
+        #None case
+        if self.type == "NONE":
+            return None
         #digit case
-        if str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
+        elif str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
             return self.remove_trailing_zeros(self.value)
         #string case
         elif self.contents[0] == "'":
@@ -76,17 +78,17 @@ class Cell():
                 Can manually set cell error via #DIV/0! and so on
                 set cell contents should only take strings """
 
-                evaluation = CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
+                return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", ZeroDivisionError)
                 # return the above error
 
             elif isinstance(e.__context__, TypeError):
-                evaluation = CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
+                return CellError(CellErrorType.TYPE_ERROR, "Incompatible types for operation")
 
             elif isinstance(e.__context__, NameError):
-                evaluation = CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
+                return CellError(CellErrorType.BAD_NAME, "Unrecognized function name", NameError)
 
             else:
-                evaluation = CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
+                return CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
         
 
 

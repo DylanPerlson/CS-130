@@ -32,21 +32,22 @@ class Pieter(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(sh, 'A3'), 2)
 
-    def test_reorder_workbook_pieter(self):
+    def test_move_sheet_pieter(self):
         wb = Workbook()
         (idx1, name1) = wb.new_sheet("first_sheet")
         (idx2, name2) = wb.new_sheet("second_sheet")
         (idx3, name3) = wb.new_sheet("move_to_second_sheet")
 
-        print('idx1', idx1)
-        print('idx2', idx2)
-        print('idx3', idx3)
+        # print('idx1', idx1)
+        # print('idx2', idx2)
+        # print('idx3', idx3)
 
-        wb.reorder_sheets(name3, 1)
+        wb.move_sheet(name3, 1)
 
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
+        self.assertEqual(wb.list_sheets(), [name1, name3, name2])
 
 
 

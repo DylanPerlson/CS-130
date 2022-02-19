@@ -538,19 +538,12 @@ class Workbook:
                
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-                #reset cells_change
-                # self.cells_change = []
 
 
 
                 #notify all the cells
                 self._notify_helper(sheet_name, curr_cell)
-                #reset all circ ref counters
-                for s in self.sheets:
-                    for c in s.cells:
-                        s.cells[c].circ_ref_count = 0
-                #after setting the new contents, get the cell value
-                
+               
 
                 # now we need to notify all of our dependents
                 self._dependencies_changed_helper(sheet_name, location)
@@ -560,6 +553,10 @@ class Workbook:
                 #!!!DO NOT REMOVE THIS UNDER ANY CIRCUMSTANCES UNLESS
                 # CONSULTING WITH THE ENTIRE TEAM!!
                 self.get_cell_value(sheet_name, location)
+
+                
+                #notify all the cells
+                self._notify_helper(sheet_name, curr_cell)
                 
                 #return is needed so we do not raise a key error
                 return
@@ -580,12 +577,14 @@ class Workbook:
         #for each dependent, tell it that is has changed
         #and then tell their dependents
         # if sheet_location in self.master_cell_dict:
-            
-        #     for cells in self.master_cell_dict[sheet_location]:
-        #          self.cell_changed_dict[sheet_location.lower] = True
-        #          splitting = cells.split('!')
-                
-        #          self._dependencies_changed_helper(splitting[0],splitting[1])
+
+        if sheet_location in self.master_cell_dict:
+            self.cell_changed_dict[sheet_location.lower] = True
+            for cells in self.master_cell_dict[sheet_location]:
+                    self.cell_changed_dict[cells.lower] = True
+                    splitting = cells.split('!')
+                    print(cells)
+                    self._dependencies_changed_helper(splitting[0],splitting[1])
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -1071,15 +1070,7 @@ class Workbook:
                     self._notify_helper(split_cell_string[0], dependent)
             self.check_circ_ref.remove(curr_cell)
 
-# def notify_cells_changed(self, *args):
-#     """This function gives a notification of the changed cells."""
-#     for curr_arg in args:
-#         if curr_arg not in self.notification_functions:
-#             self.notification_functions.append(curr_arg)
-#         #TODO: Check for errors, don't add function if error returned
-#         # if isinstance(update_value, Exception) or isinstance(update_value, CellError):
-#         #     continue
-
+#
     def _base_10_to_alphabet(self, number):
         """Helper function: base 10 to alphabet
         Convert a decimal number to its base alphabet representation

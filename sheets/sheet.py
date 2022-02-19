@@ -75,6 +75,16 @@ class Sheet:
             return
         elif curr_cell.type == "FORMULA":
             prev_contents = curr_cell.contents
+
+            
+            #tell dependents that they need to re-evaluate again
+            sheet_location = self.sheet_name.lower()+'!'+location.lower()
+            workbook_instance.cell_changed_dict[sheet_location] = True
+            if sheet_location in workbook_instance.master_cell_dict:
+                for dependents in workbook_instance.master_cell_dict[sheet_location]:
+                    workbook_instance.cell_changed_dict[dependents.lower()] = True
+                    
+
             parent_cells = self._retrieve_cell_references(prev_contents)
             if isinstance(parent_cells, CellError):
                 return
@@ -88,9 +98,10 @@ class Sheet:
                     if parent_cell.lower() not in workbook_instance.master_cell_dict:
                         workbook_instance.master_cell_dict[(parent_cell.lower())] = []
 
-                    appending_entry = self.sheet_name.lower()  + '!' + location
+                    appending_entry = self.sheet_name.lower()  + '!' + location.lower()
+                    #add this cell to our parents dependency list
                     workbook_instance.master_cell_dict[(parent_cell.lower())].append(appending_entry.lower())
-        
+                    
         
     def get_cell_contents(self, location):
         """Function that gets the contents of the cell."""

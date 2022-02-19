@@ -9,7 +9,7 @@ class Dylan(unittest.TestCase):
     #     wb = Workbook()
     #     (_, name) = wb.new_sheet("s1")
     #     wb.set_cell_contents(name,'A2',"=A1")
-    #     self.assertEqual(wb.get_cell_value(name,'A2'),0)
+    #     self.assertEqual(wb.get_cell_value(name,'A2'),None)
 
 
     # def test_reference_change(self):

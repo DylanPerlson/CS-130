@@ -17,7 +17,8 @@ class Cell():
         self.evaluated_value = None #TODO is this the way to use the evaluated value???
         self.value = None
         self.parsed_contents = ''
-        self.circ_ref_count = 0
+        self.not_changed = False
+        
 
 
 
@@ -45,15 +46,28 @@ class Cell():
             self.type = "LITERAL"
             self.value = str(contents)
 
+    def _check_if_changed(self,workbook_instance, sheet_location):
+        
+        #also if all of our dependencies were not change
+        if sheet_location.lower() in workbook_instance.master_cell_dict:
+            for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
+                if i in workbook_instance.cell_changed_dict:
+                    self._check_if_changed(workbook_instance, i)
+                    if workbook_instance.cell_changed_dict[i.lower()] == True:
+                        self.not_changed = False
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
         sheet_location = sheet_instance.sheet_name + '!' + location
-
+        
         #if that cell has been changed just return the evaluated value
 
+       
 
-        if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+
+        self._check_if_changed(workbook_instance, sheet_location.lower())
+
+        if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
             return self.evaluated_value #TODO we need to change this
 
 
@@ -61,7 +75,8 @@ class Cell():
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
         #TODO move this???
-        #workbook_instance.cell_changed_dict[sheet_location.lower()] = False
+        workbook_instance.cell_changed_dict[sheet_location.lower()] = False
+        self.not_changed = True
 
         #None case
         if self.type == "NONE":

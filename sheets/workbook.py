@@ -396,18 +396,18 @@ class Workbook:
 
         # no leading or trailing white space allowed
         if sheet_name[0] == " " or sheet_name[-1] == " ":
-            raise ValueError()
+            raise ValueError(f'Invalid sheetname: {sheet_name}')
 
         for i in sheet_name:
             if not i.isalnum() and not i in self.allowed_characters:
-                raise ValueError()
+                raise ValueError(f'Invalid sheetname: {sheet_name}')
 
 
         #cannot already be taken
         if name_given is False:
             for i in self.sheets:
                 if i.sheet_name.lower() == sheet_name.lower():
-                    raise ValueError()
+                    raise ValueError(f'Invalid sheetname: {sheet_name}')
 
             new_sheet = Sheet(sheet_name)
 
@@ -821,8 +821,8 @@ class Workbook:
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)
 
-            if not isinstance(data['cell-contents'], dict):
-                raise TypeError('Value for cell-contents not a dictionary.')
+            # if not isinstance(data['cell-contents'], dict):
+            #     raise TypeError('Value for cell-contents not a dictionary.')
 
             for location, content in sheet['cell-contents'].items():
                 if not isinstance(content, str) and not content is None:

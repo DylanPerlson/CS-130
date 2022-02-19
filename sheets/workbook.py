@@ -805,7 +805,7 @@ class Workbook:
             raise KeyError("No 'sheets' key found in json file.")
 
         if not isinstance(data['sheets'], list):
-            raise TypeError('Object for sheets is not a list')
+            raise TypeError('Value for sheets is not a list')
 
         for sheet in data['sheets']:
             # check for empty stuff:
@@ -820,6 +820,9 @@ class Workbook:
 
             sheet_name = sheet['name']
             (_,_) = wb.new_sheet(sheet_name)
+
+            if not isinstance(data['cell-contents'], dict):
+                raise TypeError('Value for cell-contents not a dictionary.')
 
             for location, content in sheet['cell-contents'].items():
                 if not isinstance(content, str) and not content is None:

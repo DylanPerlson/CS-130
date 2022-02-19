@@ -18,6 +18,7 @@ class Cell():
         self.value = None
         self.parsed_contents = ''
         
+        
 
         # check that the cell is either a string or None
         if not isinstance(contents, str) and contents is not None:
@@ -121,13 +122,15 @@ class Cell():
 
             return self.evaluated_value
 
-        except RuntimeError:
+        except RuntimeError or RecursionError:
              
-            self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
+            self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE, 
+            "Circular Reference", None)
             return self.evaluated_value 
         except Exception as e: #TODO bad practice
             print(e)
-            self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE, "206: Invalid Cell Reference", None)
+            self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE, 
+            "206: Invalid Cell Reference", None)
             return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)

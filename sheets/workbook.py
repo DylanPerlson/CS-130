@@ -715,15 +715,15 @@ class Workbook:
                 self._check_valid_cell(location)
                 workbook_instance = self
                 curr_cell = sheet_name + '!' + location
-                if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
-                    return i.get_cell_value(workbook_instance,location)
-                else:
-                    components = self.kosaraju(sheet_name.lower(), location)
-                    for curr_compoent in components:
-                        if len(curr_compoent) > 1:
-                            for next_cell in curr_compoent:
-                                next_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
-
+                #if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
+                return i.get_cell_value(workbook_instance,location)
+                # else: Tempt comment out this
+                #     components = self.kosaraju(sheet_name.lower(), location)
+                #     for curr_compoent in components:
+                #         if len(curr_compoent) > 1:
+                #             for next_cell in curr_compoent:
+                #                 next_cell.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
+                #                ### self.cell_changed_dict[sheet_name.lower()+'!'+location] = False
             
         raise KeyError()
 
@@ -1023,58 +1023,25 @@ class Workbook:
 
         return row, col
 
-    def on_cells_changed(self, changed_cells):
-        """This function gets called when cells change in the workbook that the
-        function was registered on.  The changed_cells argument is an iterable
-        of tuples; each tuple is of the form (sheet_name, cell_location).
-        """
-        # pass
-        # print(f'Cell(s) changed:  {changed_cells}')
-
-        #Notification functions are user defined
-        #store notification functions as list parameter
-        #Every time cell is changed, run all functions in notification list
-        #Be able to catch errors in case that's what function returns
-        #Don't need to print anything necessarily
-
     def add_notification_function(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
-    def _notify_helper(self, sheet_name, curr_cell):
+    def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
         """add all of our cells to the evaluate again list if it is not in it already"""
-        if curr_cell not in self.evaluate_again:
-            self.evaluate_again.append(curr_cell)
-
-            #TODO need to remove it from the evaluate list if it has ben re-evaluated
-            #TODO also need to create a cell.value to access the evaluated value
-
-        #call all of our own dependencies
-
-        #also check for circ references and if a cell has been updated
-
-        #update code
-        #TODO also need to create a function to determine
-        # whether or not a cell has been updated??
-
-        #circ ref
-        #TODO what if it is not a circle but just mulitple place reference it? is that even possible???
-        # curr_cell_split = curr_cell.split('!')
-        # components = self.kosaraju(sheet_name.lower(), curr_cell_split[1].lower())
-        # for curr_compoent in components:
-        #     if len(curr_compoent) > 1:
-        #         for next_cell in curr_compoent:
-        #             next_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
-        #             self.check_circ_ref.append(next_cell)
+        # if curr_cell not in self.evaluate_again:
+        #     self.evaluate_again.append(curr_cell)
+        
+        #if call_origin == "get_cell_value":
         if curr_cell in self.check_circ_ref:
-            #TODO CIRC ERRORS
+            # CIRC ERRORS
             for next_cell in self.check_circ_ref:
                 curr_cell_split = next_cell.split('!')
                 row, col = self._get_col_and_row(curr_cell_split[1])
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                #TODO DYLAN need to set it as not changed
+                #need to set it as not changed
                 self.cell_changed_dict[curr_cell.lower()] = False
             return
 
@@ -1085,28 +1052,23 @@ class Workbook:
             else:
                 i(self,curr_cell)
 
-        #Iterate up through dependent cells of our current cell
+    #Iterate up through dependent cells of our current cell
         if curr_cell in self.master_cell_dict:
             dependents_list = self.master_cell_dict[curr_cell]
             self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:      
                     split_cell_string = dependent.split('!')               
                     self._notify_helper(split_cell_string[0], dependent)
+            # self.check_circ_ref(curr_cell)
 
-    def notify_cells_changed(self, *args):
-        """This function gives a notification of the changed cells."""
-        for curr_arg in args:
-            if curr_arg not in self.notification_functions:
-                self.notification_functions.append(curr_arg)
-            #TODO: Check for errors, don't add function if error returned
-            # if isinstance(update_value, Exception) or isinstance(update_value, CellError):
-            #     continue
-
-    
-
-
-
-            
+# def notify_cells_changed(self, *args):
+#     """This function gives a notification of the changed cells."""
+#     for curr_arg in args:
+#         if curr_arg not in self.notification_functions:
+#             self.notification_functions.append(curr_arg)
+#         #TODO: Check for errors, don't add function if error returned
+#         # if isinstance(update_value, Exception) or isinstance(update_value, CellError):
+#         #     continue
 
     def _base_10_to_alphabet(self, number):
         """Helper function: base 10 to alphabet

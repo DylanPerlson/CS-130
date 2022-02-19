@@ -304,7 +304,7 @@ class Workbook:
         """Return the number of spreadsheets in the workbook."""
         return self.number_sheets
 
-    def reorder_sheets(self, sheet_to_move, move_index):
+    def move_sheet(self, sheet_to_move, move_index):
         """Move the specified sheet to the specified index in the workbook's
         ordered sequence of sheets.  The index can range from 0 to
         workbook.num_sheets() - 1.  The index is interpreted as if the
@@ -327,6 +327,13 @@ class Workbook:
                 self.sheets.pop(e+1)
                 return
         raise KeyError()
+
+    def reorder_sheets(self, sheet_to_move, move_index):
+        """In the error messages, this function is referenced,
+        so to make sure that the API supports everything,
+        another function is added with the same functionality."""
+        self.move_sheet(sheet_to_move, move_index)
+        return
 
     def copy_sheet(self, sheet_to_copy):
         """Make a copy of the specified sheet, storing the copy at the end of the

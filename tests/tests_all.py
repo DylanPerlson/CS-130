@@ -21,7 +21,7 @@ def run_some_tests():
     for test_class in test_classes_to_run:
         suite = loader.loadTestsFromTestCase(test_class)
         suites_list.append(suite)
-        
+
     big_suite = unittest.TestSuite(suites_list)
 
     runner = unittest.TextTestRunner(verbosity=1)

@@ -94,18 +94,20 @@ class Project1(unittest.TestCase):
         wb.set_cell_contents(name,'A2','="Hello" & "World')
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
 
-    def test_string_comes_back_as_decimal(self):
+    def test_quoted_string(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name,'A1',"'100")
         wb.set_cell_contents(name,'A2','13.4')
+        wb.set_cell_contents(name,'A3',"' this is a string")
 
         self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal('13.4'))
-        self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal('100'))
+        self.assertEqual(wb.get_cell_value(name,'A1'),'100')
         self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
+        self.assertEqual(wb.get_cell_value(name,'A3')," this is a string")
 
         wb.set_cell_contents(name,'A3',"'-13.3")
-        self.assertEqual(wb.get_cell_value(name,'A3'),decimal.Decimal('-13.3'))
+        self.assertEqual(wb.get_cell_value(name,'A3'),'-13.3')
 
     def test_unset_cells_return_None(self):
         wb = Workbook()
@@ -278,8 +280,18 @@ class Project1(unittest.TestCase):
         with self.assertRaises(ValueError):
             wb.get_cell_contents(name1, 'A5A57')
 
+    def test_leading_whitespace(self):
+        """Test that leading whitespace remains when using a leading quote."""
+
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("first_sheet")
+        wb.set_cell_contents(name1, 'A1', "'   three spaces")
+        value = wb.get_cell_value(name1, 'A1')
+
+        self.assertEqual(value, "   three spaces")
+
     def test_whitespace_cell_contents(self):
-        """ test that leading and trailing whitespace is removed from contents """
+        """Test that leading and trailing whitespace is removed from contents."""
         wb = Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
 
@@ -291,12 +303,13 @@ class Project1(unittest.TestCase):
         content1 = wb.get_cell_contents("first_sheet", 'AA57')
         content2 = wb.get_cell_contents(name1, 'ba4')
         content3 = wb.get_cell_contents(name1, 'ba5')
+        value3 = wb.get_cell_value(name1, 'ba5')
         content4 = wb.get_cell_contents(name1, 'C23')
 
         self.assertEqual(content1, 'Lots of space in the back')
-        # TODO ^ not sure whether this must be a string or decimal.Decimal
         self.assertEqual(content2, '=54')
         self.assertEqual(content3, None)
+        # TODO self.assertEqual(value3, None)
         self.assertEqual(content4, None)
 
     def test_simple_formula_with_decimal(self):

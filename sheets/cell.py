@@ -17,8 +17,8 @@ class Cell():
         self.evaluated_value = None #TODO is this the way to use the evaluated value???
         self.value = None
         self.parsed_contents = ''
-        
-        
+
+
 
         # check that the cell is either a string or None
         if not isinstance(contents, str) and contents is not None:
@@ -32,13 +32,8 @@ class Cell():
         elif str(contents)[0] == '=':
             self.type = "FORMULA"
         elif str(contents)[0] == "'":
-            #if string is a number,
-            if self.is_float(str(contents[1:])):
-                self.type = "LITERAL"
-                self.value = decimal.Decimal(str(contents[1:]))
-            else:
-                self.type = "STRING"
-                self.value = str(contents[1:])
+            self.type = "STRING"
+            self.value = str(contents[1:].replace("''","'"))
         elif self.is_float(str(contents)):
             self.type = "LITERAL"
             self.value = decimal.Decimal(str(contents))
@@ -53,10 +48,10 @@ class Cell():
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
         sheet_location = sheet_instance.sheet_name + '!' + location
-        
+
         #if that cell has been changed just return the evaluated value
-        
-        
+
+
         if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
             return self.evaluated_value #TODO we need to change this
 
@@ -123,27 +118,27 @@ class Cell():
             return self.evaluated_value
 
         except RuntimeError or RecursionError:
-             
-            self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE, 
+
+            self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
             "Circular Reference", None)
-            return self.evaluated_value 
+            return self.evaluated_value
         except Exception as e: #TODO bad practice
             print(e)
-            self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE, 
+            self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE,
             "206: Invalid Cell Reference", None)
             return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
-       
+
 
         if self.evaluated_value is None and self.type == 'NONE': #this will always be none
             self.evaluated_value  = 0
             return self.evaluated_value
 
-        
+
         return self.evaluated_value
 
-        
+
     def is_float(self, element):
         """ helper fuction to determine if a value is a float """
         element = str(element)

@@ -620,7 +620,12 @@ class Workbook:
                     self._dfs_single_cell(reverse_depend, curr_cell_components[0], curr_cell_components[1], visited, components[i])
                 components.append([])
                 i = i + 1
+        
+        
+
         return components
+
+       
         
     def get_cell_value(self, sheet_name: str, location: str):
         """
@@ -986,7 +991,8 @@ class Workbook:
             for next_cell in self.check_circ_ref:
                 curr_cell_split = next_cell.split('!')
                 row, col = self._get_col_and_row(curr_cell_split[1])
-                self.sheets[sheet_name].cells[(row,col)].value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+                self.sheets[sheet_name].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+                #TODO DYLAN need to set it as not changed
             return
 
         for i in self.notification_functions:

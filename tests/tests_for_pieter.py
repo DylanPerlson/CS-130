@@ -32,6 +32,11 @@ class Pieter(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(sh, 'A3'), 2)
 
+    def test_named_and_unnamed_sheets(self):
+        wb = Workbook()
+        (_, sh) = wb.new_sheet()
+
+
 
 
 

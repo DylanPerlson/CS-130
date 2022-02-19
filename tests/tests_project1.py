@@ -142,6 +142,9 @@ class Project1(unittest.TestCase):
         with self.assertRaises(ValueError):
             wb.get_cell_value(name, 'a 5')
 
+        with self.assertRaises(ValueError):
+            wb.get_cell_value(name, 5)
+
         with self.assertRaises(KeyError):
             wb.get_cell_contents('non_existing_sheet', 'a5')
 

@@ -10,7 +10,7 @@ class Cell():
         self.contents = contents
         self.parse_necessary = True
         self.evaluated_value = None #TODO is this the way to use the evaluated value???
-
+        self.value = None
         # check that the cell is either a string or None
         if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')

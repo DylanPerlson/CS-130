@@ -500,14 +500,14 @@ class Workbook:
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
                 if contents is None or (not self._is_float(contents) and contents.strip() == ''):
-                    i.set_cell_contents(self, location, None)
+                    i.set_cell_contents(self, location.lower(), None)
                 elif self._is_float(contents):
-                    i.set_cell_contents(self, location, contents)
+                    i.set_cell_contents(self, location.lower(), contents)
                 else: #store normally
-                    i.set_cell_contents(self, location, contents.strip())
+                    i.set_cell_contents(self, location.lower(), contents.strip())
                 #completed task
                
-                curr_cell = sheet_name.lower() + '!' + location
+                curr_cell = sheet_name.lower() + '!' + location.lower()
 
                 #reset cells_change
                 self.cells_change = []
@@ -566,6 +566,9 @@ class Workbook:
         parent_dict = {}
         stack = []
         curr_cell = sheet_name + '!' + location
+        if curr_cell not in self.master_cell_dict.keys():
+            return stack
+        
         for next_cell in self.master_cell_dict[(curr_cell)]:
             next_cell_components = next_cell.split('!')
             if next_cell not in parent_dict:
@@ -650,15 +653,15 @@ class Workbook:
             if i.sheet_name.lower() == sheet_name.lower():
                 self._check_valid_cell(location)
                 workbook_instance = self
-                curr_cell = sheet_name.lower() + '!' + location
-                # if self.master_cell_dict[curr_cell] == []:
-                return i.get_cell_value(workbook_instance,location)
-                # else:
-                #     components = self.kosaraju(sheet_name.lower(), location)
-                #     for curr_compoent in components:
-                #         if len(curr_compoent) > 1:
-                #             for curr_cell in curr_compoent:
-                #                 curr_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
+                curr_cell = sheet_name + '!' + location
+                if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
+                    return i.get_cell_value(workbook_instance,location)
+                else:
+                    components = self.kosaraju(sheet_name.lower(), location)
+                    for curr_compoent in components:
+                        if len(curr_compoent) > 1:
+                            for next_cell in curr_compoent:
+                                next_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
 
             
         raise KeyError()
@@ -971,9 +974,20 @@ class Workbook:
 
         #circ ref
         #TODO what if it is not a circle but just mulitple place reference it? is that even possible???
+        # curr_cell_split = curr_cell.split('!')
+        # components = self.kosaraju(sheet_name.lower(), curr_cell_split[1].lower())
+        # for curr_compoent in components:
+        #     if len(curr_compoent) > 1:
+        #         for next_cell in curr_compoent:
+        #             next_cell.value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
+        #             self.check_circ_ref.append(next_cell)
         if curr_cell in self.check_circ_ref:
             #TODO CIRC ERRORS
-            print('circ error')
+            for next_cell in self.check_circ_ref:
+                curr_cell_split = next_cell.split('!')
+                row, col = self._get_col_and_row(curr_cell_split[1])
+                self.sheets[sheet_name].cells[(row,col)].value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+            return
 
         for i in self.notification_functions:
             split_cell_string = curr_cell.split('!')
@@ -986,6 +1000,7 @@ class Workbook:
         #Iterate up through dependent cells of our current cell
         if curr_cell in self.master_cell_dict.keys():
             dependents_list = self.master_cell_dict[curr_cell]
+            self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:      
                     split_cell_string = dependent.split('!')               
                     self._notify_helper(split_cell_string[0], dependent)

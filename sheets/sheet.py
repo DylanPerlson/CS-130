@@ -56,9 +56,9 @@ class Sheet:
                 for parent_cell in self._retrieve_cell_references(prev_contents):
                     # reminder our rows and cols are switch, but we need to keep it this way                    
                     #remove current cell
-                    removing_entry = self.sheet_name.lower() + '!' + location
+                    removing_entry = self.sheet_name + '!' + location
                     
-                    workbook_instance.master_cell_dict[(parent_cell)].remove(removing_entry)
+                    workbook_instance.master_cell_dict[(parent_cell)].remove(removing_entry.lower())
         
         self.cells[(row,col)] = Cell(contents)
        
@@ -79,11 +79,11 @@ class Sheet:
                     #add current cell
                     
                     #create the list if it does not exist
-                    if parent_cell not in workbook_instance.master_cell_dict:
-                        workbook_instance.master_cell_dict[(parent_cell)] = []
+                    if parent_cell.lower() not in workbook_instance.master_cell_dict:
+                        workbook_instance.master_cell_dict[(parent_cell.lower())] = []
 
                     appending_entry = self.sheet_name.lower()  + '!' + location
-                    workbook_instance.master_cell_dict[(parent_cell)].append(appending_entry)
+                    workbook_instance.master_cell_dict[(parent_cell.lower())].append(appending_entry.lower())
         
         
     def get_cell_contents(self, location):

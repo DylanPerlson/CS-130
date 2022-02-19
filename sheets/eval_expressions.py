@@ -1,18 +1,15 @@
-# object class for evaluating expressions
+"""object class for evaluating expressions"""
 
-from ast import arg
 import decimal
-from distutils.log import error
-import lark
-import decimal
+
 from lark import Transformer, Visitor
+
 from .cell_error import CellError, CellErrorType
 
 error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 
 def generate_error_object(error_arg):
-    """ 
-    Helper function to generate error objects when parsing formulas
+    """Helper function to generate error objects when parsing formulas
     Error literals are strings
     Might be creating cellerror objects
     """
@@ -33,7 +30,7 @@ def generate_error_object(error_arg):
 
     assert False, 'Unrecognized error literal'
 
-def _is_float(self, element):
+def _is_float(element):
     """ helper fuction to determine if a value is a float """
     element = str(element)
     try:
@@ -45,20 +42,21 @@ def _is_float(self, element):
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
-    elif curr_arg == None:
+    elif curr_arg is None:
         return 0
-    elif isinstance(curr_arg, str) and str(curr_arg)[0] == "'": # TODO edge case of trailing whitespace in front of quote
+    elif isinstance(curr_arg, str) and str(curr_arg)[0] == "'":
+        # TODO edge case of trailing whitespace in front of quote
         if _is_float(str(curr_arg[1:])):
             return decimal.Decimal(str(curr_arg[1:]))
         else:
             return CellError(CellErrorType.TYPE_ERROR, "String cannot be parsed into a number")
     else:
-        return CellError(CellErrorType.PARSE_ERROR, "Parse error")
+        return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
-    elif curr_arg == None:
+    elif curr_arg is None:
         return ''
     elif isinstance(curr_arg, decimal.Decimal):
         return str(curr_arg)
@@ -68,12 +66,18 @@ def _get_value_as_string(curr_arg):
 #Use this somewhere
 
 class RetrieveReferences(Visitor):
+    """This class is used to retrieve all cell references
+    It acts as a visitor on a lark object.
+    """
+
     def __init__(self, sheet_instance):
+        """Initializes class."""
         self.references = []
         self.sheet_instance = sheet_instance
         self.error_occurred = False
 
     def cell(self, args):
+        """The cell value is returned."""
         args = args.children
 
         # getting the appropriate sheet name and cell location
@@ -100,22 +104,27 @@ class RetrieveReferences(Visitor):
 
 class EvalExpressions(Transformer):
     """ used to evaluate an expression from the parsed formula: """
-    
+
     def __init__(self, workbook_instance, sheet_instance):
+        """Initializes class."""
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
-    
+
     def error(self, args):
+        """If an error is encountered, the error is propagated"""
         return generate_error_object(args[0])
 
     def number(self, args):
+        """If a number is encountered, it is put into the right format."""
         d = decimal.Decimal(args[0])
         return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
 
     def string(self, args):
+        """If a string is encountered, it is put into the right format."""
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
+        """Unitary operator is applied when encountered in parsed formula."""
         if isinstance(args[1], CellError):
             return args[1]
         if args[0] == '+':
@@ -126,19 +135,11 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected unary operator {args[0]}')
 
     def parens(self, args):
-        #if reference a cell error
+        """Parentheses are applied on the parsed formula."""
         return args[0]
 
     def add_expr(self, args):
-        # if (isinstance(args[0],decimal.Decimal) and not isinstance(args[2],decimal.Decimal)): 
-        #     newError = generate_error_object("#VALUE!")
-        #     return newError
-        # if (isinstance(args[2],decimal.Decimal) and not isinstance(args[0],decimal.Decimal) and ): 
-        #     newError = generate_error_object("#VALUE!")
-        #     return newError
-
-        #Error_literals only consider strings, not CellError object
-        # Make sure to account for both
+        """Additive operation is applied on parsed formula."""
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
         if isinstance(args0, CellError):
@@ -154,45 +155,14 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected addition operator {args[1]}')
 
     def mul_expr(self, args):
-        #if reference a cell error
-        # if type(args[0]) is CellError:
-        #     return args[0]
-        # if type(args[2]) is CellError:
-        #     return args[2]
-
-        # if (args[0] is None):
-        #     args[0] = 0
-        # if (args[2] is None):
-        #     args[2] = 0
-
+        """Multiplicative operation is applied on parsed formula."""
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
         if isinstance(args0, CellError):
             return args0
         if isinstance(args2, CellError):
             return args2
-        
-        # if args[1] == '/' and str(args[2]) == '0':
-        #     return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by 0", "division by zero")
-        
-        # print('isdigit1', str(args0).isdigit())
-        # print('isdigit2', str(args2).isdigit())
 
-        # if not str(args0).isdigit() or not str(args2).isdigit(): 
-
-        #     print('here3')
-        #     return generate_error_object("#VALUE!")
-        # if (str(args[2]).isdigit() and not str(args[0]).isdigit()): 
-        #     newError = generate_error_object("#VALUE!")
-        #     return newError
-        
-        # if (args[0] in error_literals or isinstance(args[0], CellError)):
-        #     newError = generate_error_object(args[0])
-        #     return newError
-        # if (args[2] in error_literals or isinstance(args[2], CellError)):
-        #     newError = generate_error_object(args[2])
-        #     return newError
-        
         if args[1] == '*':
             return args0 * args2
         elif args[1] == '/':
@@ -204,15 +174,7 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
 
     def concat_expr(self, args):
-        #if reference a cell error
-        # if type(args[0]) is CellError:
-        #     return args[0]
-        # if type(args[1]) is CellError:
-        #     return args[2]
-        # if(args[0] is None):
-        #     args[0] = ''
-        # if(args[1] is None):
-        #     args[1] = ''
+        """Concatenation operation is applied on parsed formula."""
         args0 = _get_value_as_string(args[0])
         args1 = _get_value_as_string(args[1])
 
@@ -221,19 +183,17 @@ class EvalExpressions(Transformer):
         if isinstance(args1, CellError):
             return args1
 
-        # if args[1] != '&':
-        #     raise Exception(f'Unexpected concatenation operator {args[1]}')
-
         return args0 + args1
 
     def cell(self, args):
-        
+        """The cell value is returned."""
+
         # if using the current sheet
-        if len(args) == 1:      
+        if len(args) == 1:
             sheet_name = self.sheet_instance.sheet_name
             cell = args[0]
         # if using a different sheet
-        elif len(args) == 2:    
+        elif len(args) == 2:
             # in case of quotes around sheet name
             if args[0][0] == "'" and args[0][-1] == "'":
                 sheet_name = args[0][1:-1]
@@ -248,6 +208,4 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
 
-        # if cell_value is None:
-        #    cell_value = 0 # TODO "" for string
         return self.workbook_instance.get_cell_value(sheet_name, cell)

@@ -1,0 +1,164 @@
+CS130 Project 3 - Design Document
+=================================
+
+Please answer all questions in this design document.  Note that the final
+feedback section is optional, and you are not required to answer it if you
+don't want to.
+
+Unanswered or incompletely answered questions, or answers that don't actually
+match the code/repository, will result in deductions.
+
+Answers don't have to be deeply detailed!  We are mainly looking for an
+overview or summary description of how your project works, and your team's
+experiences working on this project.
+
+Logistics (7 pts)
+-----------------
+
+L1.  [2pts] Enumerate all teammates here.
+
+Aaron Tran, Dylan Perlson, Pieter Van Santvliet
+
+L2.  [2pts] What did each teammate focus on during this project?
+
+Aaron - Invalid references, cell dependencies, cell errors, circular references
+Dylan - Moving/copying, cell dependencies, performance improvements, installing linter
+Pieter - bug fixes for previous projects, regression tests for previous projects,
+linting, create performance tests
+
+L3.  [3pts] Approximately how many hours did each teammate spend on the project?
+
+Everyone spent roughly 30 hours on the project.
+
+Spreadsheet Engine Design (10 pts)
+----------------------------------
+
+D1.  [3pts] Moving and copying regions of a sheet are very similar operations,
+     with only a few differences between them.  How did your team take advantage
+     of the similarity of these two operations to reduce the amount of code
+     required to provide this functionality?
+
+
+D2.  [3pts] Similarly, moving/copying regions of a sheet, and renaming a sheet,
+     both involve formula updates.  Was your team able to factor out common
+     aspects of these two operations to reduce the amount of code required to
+     implement these operations?  If so, what did you do?  If not, why not?
+
+
+D3.  [4pts] How does your implementation address the challenges of moving or
+     copying a region of cells where the source and target regions overlap?
+
+
+Static Code Analysis / Code Linting (10pts)
+-------------------------------------------
+
+L1.  [3pts] What code linter did your team use on your project?  Was this the
+     first CS130 project in which you used a linter?
+
+We used pylint, as recommended. We are quite satisfied with the amount of customization
+that is supported. We had already looked into the linter previously, but not extensively
+used the linter's feedback.
+
+L2.  [3pts] How did you automate the execution of your code linter?  Did
+     everyone in your team find it easy to run?
+
+We used the linter within Visual Studio Code. Because of that the whole process is very
+smooth (there is an easy tab that lists the outputs of the linter). Since we helped each
+other setting up the linter, everyone could easily get started with it.
+
+L3.  [4pts] Did the use of the linter improve your overall code quality and
+     correctness?  Give some specific details in your answer.  Were there any
+     serious issues you were previously unaware of?
+
+The linter definitely has hugely improved the overall code quality. It has not changed
+much about the operation of the code, but the code is significantly more accessible and
+clean.
+
+Especially the docstrings for functions made a huge difference: forcing us to describe
+what every function does, which is nice for others that want to use that function.
+
+Further, it has made the try: ... except: ... code much better. We were now forced to
+think about the different errors that might occur. That made us implement different
+strategies of error handling, something we had previously not done. (for example: the
+parsing code will now raise specific errors if non-parse errors are encountered,
+previously these errors would become cell values.)
+
+
+Performance Improvement (23 pts)
+--------------------------------
+
+In this project you must improve the performance of two central areas of your
+spreadsheet engine - cell updating and cycle detection.  In the previous project
+your team should have written some performance-testing code in preparation for
+this effort, and should have run it under a profiler to get an initial sense of
+where improvements can be made.  In this project you need to follow through on
+this setup, and address performance issues in your code.
+
+P1.  [9pts] Give a brief overview of 3-4 of the worst hot-spots you identified
+     in your performance testing and analysis.  For each one, describe how your
+     team was able to resolve it.
+
+1. We found that a lot of time is spent on parsing the formula (this was identified
+during the past project). We solved this partially by minimizing the amount of times
+parsing is necessary. Now, cells contents are only parsed once, and the parsing-product
+is stored for later use. Previously, one unchanging cell could be parsed multiple times
+under certain circumstances. This change decreased the execution time of our unit tests
+by 30%! :)
+
+2.
+
+P2.  [6pts] Did your team try anything to address performance issues and find
+     that it didn't improve things at all?  If so, were you able to identify why
+     the intended fix didn't produce the desired benefit?
+
+
+P3.  [4pts] How do you feel that your performance updates affected your code's
+     readability and maintainability?  Elaborate on your answer.
+
+1. This specific improvement slightly decreased readability and maintainability because
+it slightly complicated the algorithm, however, this influence was very minor.
+
+2.
+
+P4.  [4pts] Did your performance updates cause any regressions in functionality?
+     If so, briefly describe any issues that emerged.  How were these issues
+     identified (e.g. automated test failures, manual testing, etc.)?  How
+     quickly were issues identified?
+
+1. This fix did not cause any regressions, as indicated by our unit tests.
+
+2.
+
+
+Section F:  CS130 Project 3 Feedback [OPTIONAL]
+-----------------------------------------------
+
+These questions are OPTIONAL, and you do not need to answer them.  Your grade
+will not be affected by answering or not answering them.  Also, your grade will
+not be affected by negative feedback - we want to know what went poorly so that
+we can improve future versions of the course.
+
+F1.  What parts of the assignment did you find highly enjoyable?  Conversely,
+     what parts of the assignment did you find unenjoyable?
+
+The new functionalities seemed useful but were not necessarily enjoyable.
+Linting was quite fun.
+
+F2.  What parts of the assignment helped you learn more about software
+     engineering best-practices, or other useful development skills?
+     What parts were not helpful in learning these skills?
+
+The linting was very useful to learn more about best-practices, as was the
+performance testing.
+
+F3.  Were there any parts of the assignment that seemed _unnecessarily_ tedious?
+     (Some parts of software development are always tedious, of course.)
+
+Fixing earlier bugs was the bulk of how we spent our time. This is of course an
+important component of software engineering, but for a course this felt not
+particularly useful and unnecessarily tedious.
+
+F4.  Do you have any feedback and/or constructive criticism about how this
+     project can be made better in future iterations of CS130?
+
+More time to fix bugs of earlier projects.

@@ -1,10 +1,10 @@
-#Object file for Cell Errors
+"""Object file for Cell Errors"""
 
 import enum
 class CellErrorType(enum.Enum):
-    '''
+    """
     This enum specifies the kinds of errors that spreadsheet cells can hold.
-    '''
+    """
 
     # A formula doesn't parse successfully ("#ERROR!")
     PARSE_ERROR = 1
@@ -26,10 +26,10 @@ class CellErrorType(enum.Enum):
 
 
 class CellError:
-    '''
+    """
     This class represents an error value from user input, cell parsing, or
     evaluation.
-    '''
+    """
 
     def __init__(self, error_type, detail, exception = None):
         self._error_type = error_type
@@ -37,18 +37,18 @@ class CellError:
         self._exception = exception
 
     def get_type(self):
-        ''' The category of the cell error. '''
+        """ The category of the cell error. """
         return self._error_type
 
     def get_detail(self):
-        ''' More detail about the cell error. '''
+        """ More detail about the cell error. """
         return self._detail
 
     def get_exception(self):
-        '''
+        """
         If the cell error was generated from a raised exception, this is the
         exception that was raised.  Otherwise this will be None.
-        '''
+        """
         return self._exception
 
     def __str__(self):

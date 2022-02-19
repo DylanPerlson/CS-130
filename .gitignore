@@ -5,4 +5,13 @@ workspace.code-workspace
 **/*launch.json
 **/*.mypy_cache
 **/settings.json
+<<<<<<< HEAD
 cycle.py
+=======
+<<<<<<< HEAD
+**/.pylintrc
+**/.DS_Store
+=======
+cycle.py
+>>>>>>> db19ac19f9bcf0ebec3e4138cf66c21ec6d63590
+>>>>>>> 4ee97a56bb0c96df4466db85ed47b30abd5ecbd7

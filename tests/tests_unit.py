@@ -14,7 +14,7 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name,'A2',"hi")
             wb.set_cell_contents(name,'B2',"yo")
             wb.copy_cells(name,'A1','B3','A5')
-            
+
             self.assertEqual(wb.get_cell_value(name,'A1'),1)
             self.assertEqual(wb.get_cell_value(name,'A5'),1)
             self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
@@ -27,7 +27,7 @@ class TestWorkbook(unittest.TestCase):
             wb.set_cell_contents(name2,'A3','=A1+s1!B2')
             wb.set_cell_contents(name2,'B3','=$A1+2')
             wb.set_cell_contents(name2,'B4','=A$1+2')
-            
+
             wb.copy_cells(name2,'A1','B4','B3')
 
             self.assertEqual(wb.get_cell_contents(name2,'C5'),'=$A3+2')
@@ -38,14 +38,14 @@ class TestWorkbook(unittest.TestCase):
 
     def test_move_cells(self):
             wb = Workbook()
-            
+
             (_, name) = wb.new_sheet("s1")
             wb.set_cell_contents(name,'A1','1')
             wb.set_cell_contents(name,'A2',"hi")
             wb.set_cell_contents(name,'B2',"yo")
-            
+
             wb.move_cells(name,'A1','B3','A5')
-            
+
             self.assertEqual(wb.get_cell_value(name,'A1'),'None')
             self.assertEqual(wb.get_cell_value(name,'A5'),1)
             self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
@@ -71,25 +71,25 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name,'A1','2')
 
     def test_reorder_workbook(self):
-        wb = Workbook()    
+        wb = Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
         (_, name2) = wb.new_sheet("second_sheet")
         (_, name3) = wb.new_sheet("move_to_second_sheet")
 
         wb.reorder_sheets(name3, 1)
-        
+
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
-    
+
     def test_copy(self):
-        wb = Workbook()    
-        
+        wb = Workbook()
+
         (_, name1) = wb.new_sheet("first_sheet")
         (_, name2) = wb.new_sheet("second_sheet")
         wb.set_cell_contents(name1,'A1','1')
         wb.copy_sheet(name1)
-        
+
         self.assertEqual(3,len(wb.sheets))
         self.assertEqual(wb.sheets[0].cells.keys(),wb.sheets[2].cells.keys())
 
@@ -101,69 +101,69 @@ class TestWorkbook(unittest.TestCase):
         wb.rename_sheet('S1','new_name')
         self.assertEqual('new_name',wb.sheets[0].sheet_name)
         self.assertEqual('=new_name!A1+3',wb.get_cell_contents(name2,'A1'))
-        
+
         wb.set_cell_contents(name2,'A1',"='new_name'!A1+3")
         wb.rename_sheet('New_nAme','new_name2')
         self.assertEqual('=new_name2!A1+3',wb.get_cell_contents(name2,'A1'))
-    
+
         (_, name2) = wb.new_sheet("s3")
         wb.set_cell_contents(name2,'A1',"='new_name2'!A1 + 's3'!A1")
         wb.rename_sheet('new_name2','new?name')
         self.assertEqual("='new?name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
-        
+
         wb.set_cell_contents(name2,'A1',"='new?name'!A1 + 's3'!A1")
         wb.rename_sheet('new?name','3name')
         self.assertEqual("='3name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
-        
+
         with self.assertRaises(KeyError):
             wb.rename_sheet('foo','zoo')
 
         with self.assertRaises(ValueError):
             wb.rename_sheet('foo','')
         # normal replace and uneccesary '' works no, do errors and other req work now?
-    
+
     """ Performing unit tests on the sheets module. """
-    
+
     # def test_set_cell_as_error(self):
-    #     wb = Workbook()    
+    #     wb = Workbook()
     #     (_, name) = wb.new_sheet("sheet")
     #     a = CellError(CellErrorType.)
-    
+
 
     #def test_bad_ref(self):
-        #wb = Workbook()    
+        #wb = Workbook()
         #(_, name) = wb.new_sheet("sheet")
 
 
     def test_divide_by_zero(self):
-        wb = Workbook()    
+        wb = Workbook()
         (_, name) = wb.new_sheet("sheet")
-        wb.set_cell_contents(name,'A1','=3/0')   
+        wb.set_cell_contents(name,'A1','=3/0')
         wb.set_cell_contents(name,'A4','=-A1')
-        self.assertEqual(wb.get_cell_value(name,'A4').get_type(), CellErrorType.DIVIDE_BY_ZERO)  
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(), CellErrorType.DIVIDE_BY_ZERO)
         self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.DIVIDE_BY_ZERO)
         wb.set_cell_contents(name,'A2','=3/A3')
         wb.set_cell_contents(name,'A3','0')
         wb.set_cell_contents(name,'A5','=2+A1')
         self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.DIVIDE_BY_ZERO)
-    
+
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.DIVIDE_BY_ZERO)
-        
+
     # def test_string_errors(self):
-    #     wb = Workbook()    
+    #     wb = Workbook()
     #     (_, name) = wb.new_sheet("sheet")
     #     wb.set_cell_contents(name,'A1',3/0)
-        
+
 
         #with self.assertRaises(CellErrorType.PARSE_ERROR):
             #wb.set_cell_contents(name,'A1',"='hi'+3")
 
     def test_error_operations(self):
-        wb = Workbook()    
+        wb = Workbook()
         (_, name) = wb.new_sheet("sheet")
-        wb.set_cell_contents(name,'A1','=4 + #REF!')   
+        wb.set_cell_contents(name,'A1','=4 + #REF!')
         wb.set_cell_contents(name,'A4','=4 / #REF!')
-        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.BAD_REFERENCE)  
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.BAD_REFERENCE)
         self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.BAD_REFERENCE)
         wb.set_cell_contents(name,'A2','=4 * #REF!')
         wb.set_cell_contents(name,'A3','=(#REF!)')
@@ -175,48 +175,48 @@ class TestWorkbook(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.BAD_REFERENCE)
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.BAD_REFERENCE)
         self.assertEqual(wb.get_cell_value(name,'A7').get_type(),CellErrorType.BAD_REFERENCE)
-    
+
     def test_parse_errors(self):
-        wb = Workbook()    
+        wb = Workbook()
         (_, name) = wb.new_sheet("sheet")
-        wb.set_cell_contents(name,'A1','=3+')   
+        wb.set_cell_contents(name,'A1','=3+')
         wb.set_cell_contents(name,'A4','=1+(2/1')
-        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.PARSE_ERROR)  
+        self.assertEqual(wb.get_cell_value(name,'A4').get_type(),CellErrorType.PARSE_ERROR)
         self.assertEqual(wb.get_cell_value(name,'A1').get_type(), CellErrorType.PARSE_ERROR)
         wb.set_cell_contents(name,'A2','="Hello" & "World')
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
 
     # def test_set_error_cells(self):
-    #     wb = Workbook()    
+    #     wb = Workbook()
     #     (_, name) = wb.new_sheet("sheet")
-    #     wb.set_cell_contents(name,'A1','#ERROR!')   
+    #     wb.set_cell_contents(name,'A1','#ERROR!')
     #     wb.set_cell_contents(name,'A4','#CIRCREF!')
-    #     self.assertEqual(wb.get_cell_value(name,'A4'), CellErrorType.CIRCULAR_REFERENCE)  
+    #     self.assertEqual(wb.get_cell_value(name,'A4'), CellErrorType.CIRCULAR_REFERENCE)
     #     self.assertEqual(wb.get_cell_value(name,'A1'), CellErrorType.PARSE_ERROR)
     #     wb.set_cell_contents(name,'A2','REF!')
     #     self.assertEqual(wb.get_cell_value(name,'A2'),CellErrorType.BAD_REFERENCE)
 
-    def test_string_comes_back_as_decimal(self): 
-        wb = Workbook()    
+    def test_string_comes_back_as_decimal(self):
+        wb = Workbook()
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name,'A1',"'100")
         wb.set_cell_contents(name,'A2','13.4')
-        
+
         self.assertEqual(wb.get_cell_value(name,'A2'),decimal.Decimal('13.4'))
         self.assertEqual(wb.get_cell_value(name,'A1'),decimal.Decimal('100'))
         self.assertEqual(wb.get_cell_contents(name,'A1'),"'100")
 
         wb.set_cell_contents(name,'A3',"'-13.3")
         self.assertEqual(wb.get_cell_value(name,'A3'),decimal.Decimal('-13.3'))
-        
-    def test_unset_cells_return_None(self): 
-        wb = Workbook()    
+
+    def test_unset_cells_return_None(self):
+        wb = Workbook()
         (_, name) = wb.new_sheet("first_sheet")
         self.assertEqual(wb.get_cell_value(name,'A1'),None)
         self.assertEqual(wb.get_cell_contents(name,'A1'),None)
-        
+
     def test_empty_cells(self):
-        """ Testing whether empty cells return 0 or ''. """  
+        """ Testing whether empty cells return 0 or ''. """
         wb = Workbook()
         (_, name) = wb.new_sheet("first_sheet")
         wb.set_cell_contents(name, 'a1', '=a2+2')
@@ -594,13 +594,13 @@ class TestWorkbook(unittest.TestCase):
         with open('tests/json/save_testfile.json', 'w') as fp:
             wb.save_workbook(fp)
 
-    def test_load_workbook(self): 
+    def test_load_workbook(self):
         with open('tests/json/load_testfile.json') as fp:
             wb = Workbook.load_workbook(fp)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
-        print(wb.get_cell_value("first_sheet",'AAB3'))
-        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+        #print(wb.get_cell_value("first_sheet",'AAB3'))
+        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)
 
     def test_json_non_string_contents(self): # TODO seems to work
         with self.assertRaises(TypeError):
@@ -620,8 +620,8 @@ class TestWorkbook(unittest.TestCase):
                 wb = Workbook.load_workbook(fp)
 
     def test_json_no_contents(self):
-        ''' Test that a workbook with a single sheet and no contents
-        is saved correctly. '''
+        """ Test that a workbook with a single sheet and no contents
+        is saved correctly. """
         with open('tests/json/no_contents_testfile.json') as fp:
             wb = Workbook.load_workbook(fp)
 
@@ -711,12 +711,12 @@ class TestWorkbook(unittest.TestCase):
     #     wb.del_sheet("third_sheet")
     #     self.assertEqual(wb.num_sheets(), 0)
     #     self.assertEqual(wb.list_sheets(),[])
-    
+
 
     # def test_cell_errors(self): #make this a better parse error
     #     wb = Workbook()
     #     (_, name1) = wb.new_sheet("first_sheet")
-    
+
     #     wb.set_cell_contents(name1, 'B4', '=9/0')
     #     value1 = wb.get_cell_value("first_sheet", 'B4')
 
@@ -733,7 +733,7 @@ class TestWorkbook(unittest.TestCase):
         # value6 = wb.get_cell_value("first_sheet", 'B4')
 
         #Edge case that has to prioritize errors
-    
+
     def test_decimal(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
@@ -748,8 +748,8 @@ class TestWorkbook(unittest.TestCase):
         content1a = wb.get_cell_value("first_sheet", 'AA58')
         content2 = wb.get_cell_value(name2, 'ba4')
 
-        self.assertEqual(content1, decimal.Decimal(12)) 
-        self.assertEqual(content1a, decimal.Decimal(12)) 
+        self.assertEqual(content1, decimal.Decimal(12))
+        self.assertEqual(content1a, decimal.Decimal(12))
         self.assertEqual(content2, decimal.Decimal(10))
 
     def test_type_conversion(self):
@@ -776,7 +776,7 @@ class TestWorkbook(unittest.TestCase):
         (_, name1) = wb.new_sheet("first_sheet")
 
     #     self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
-    
+
         wb.set_cell_contents(name1, 'A3', '=5.0 & " should become 5"')
         self.assertEqual('5 should become 5', wb.get_cell_value(name1, 'A3'))
 
@@ -784,7 +784,7 @@ class TestWorkbook(unittest.TestCase):
     def test_from_import(self):
         import sys
         from sheets import *
-        
+
         self.assertTrue('Workbook' in sys.modules) """
 
     def test_decimal_trailing_zeros(self):
@@ -794,13 +794,13 @@ class TestWorkbook(unittest.TestCase):
 
         wb.set_cell_contents(name1, 'AA57', '12.0')
         self.assertEqual('12', str(wb.get_cell_value(name1, 'aa57')))
-    
+
         wb.set_cell_contents(name1, 'A1', '100')
         self.assertEqual('100', str(wb.get_cell_value(name1, 'A1')))
-    
+
         wb.set_cell_contents(name1, 'A2', '1000.50')
         self.assertEqual('1000.5', str(wb.get_cell_value(name1, 'A2')))
-    
+
         wb.set_cell_contents(name1, 'A3', '=12.0+1.00')
         self.assertEqual('13', str(wb.get_cell_value(name1, 'A3')))
 
@@ -826,7 +826,7 @@ class TestWorkbook(unittest.TestCase):
             wb = Workbook.load_workbook(fp)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
-        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)
 
     def test_limited_punctuation(self): # allowed: .?!,:;!@#$%^&*()-_
         wb = Workbook()
@@ -877,11 +877,11 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents("second_sheet", 'ba5', "'string" )
 
         content1 = wb.get_cell_contents("first_sheet", 'AA57')
-        
+
         content2 = wb.get_cell_contents(name2, 'ba4')
         content3 = wb.get_cell_contents(name2, 'ba5')
 
-        self.assertEqual(content1, '12') 
+        self.assertEqual(content1, '12')
         self.assertEqual(content2, '=10')
         self.assertEqual(content3, "'string")
 
@@ -905,7 +905,7 @@ class TestWorkbook(unittest.TestCase):
         content3 = wb.get_cell_contents(name1, 'ba5')
         content4 = wb.get_cell_contents(name1, 'C23')
 
-        self.assertEqual(content1, 'Lots of space in the back') 
+        self.assertEqual(content1, 'Lots of space in the back')
         # TODO ^ not sure whether this must be a string or decimal.Decimal
         self.assertEqual(content2, '=54')
         self.assertEqual(content3, None)
@@ -948,9 +948,9 @@ class TestWorkbook(unittest.TestCase):
         wb.set_cell_contents(name1, 'c4', '=aa57')
         wb.set_cell_contents(name2, 'c4', '=first_sheet!aa57')
         wb.set_cell_contents(name2, 'c5', "='first_sheet'!aa57")
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4')) 
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4')) 
-        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5')) 
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name1, 'c4'))
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c4'))
+        self.assertEqual(decimal.Decimal(5), wb.get_cell_value(name2, 'c5'))
 
     def test_extent(self):
         wb = Workbook()
@@ -982,6 +982,6 @@ class TestWorkbook(unittest.TestCase):
 
     def test_loading_bad_formula(self): # TODO
         pass
-        
+
 if __name__ == '__main__':
     unittest.main(verbosity=0)

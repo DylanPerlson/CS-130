@@ -6,25 +6,25 @@ import unittest
 
 class Project2(unittest.TestCase):
     def test_reorder_workbook(self):
-        wb = Workbook()    
+        wb = Workbook()
         (_, name1) = wb.new_sheet("first_sheet")
         (_, name2) = wb.new_sheet("second_sheet")
         (_, name3) = wb.new_sheet("move_to_second_sheet")
 
         wb.reorder_sheets(name3, 1)
-        
+
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")
         self.assertEqual(3,len(wb.sheets))
-    
+
     def test_copy(self):
-        wb = Workbook()    
-        
+        wb = Workbook()
+
         (_, name1) = wb.new_sheet("first_sheet")
         (_, name2) = wb.new_sheet("second_sheet")
         wb.set_cell_contents(name1,'A1','1')
         wb.copy_sheet(name1)
-        
+
         self.assertEqual(3,len(wb.sheets))
         self.assertEqual(wb.sheets[0].cells.keys(),wb.sheets[2].cells.keys())
 
@@ -36,20 +36,20 @@ class Project2(unittest.TestCase):
         wb.rename_sheet('S1','new_name')
         self.assertEqual('new_name',wb.sheets[0].sheet_name)
         self.assertEqual('=new_name!A1+3',wb.get_cell_contents(name2,'A1'))
-        
+
         wb.set_cell_contents(name2,'A1',"='new_name'!A1+3")
         wb.rename_sheet('New_nAme','newName2')
         self.assertEqual('=newName2!A1+3',wb.get_cell_contents(name2,'A1'))
-    
+
         #(_, name2) = wb.new_sheet("s3")
         #wb.set_cell_contents(name2,'A1',"='newName2'!A1 + 's3'!A1")
         #wb.rename_sheet('newName2','new?name')
         #self.assertEqual("='new?name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
-        
+
         # wb.set_cell_contents(name2,'A1',"='new?name'!A1 + 's3'!A1")
         # wb.rename_sheet('new?name','3name')
         # self.assertEqual("='3name'!A1 + s3!A1",wb.get_cell_contents(name2,'A1'))
-        
+
         with self.assertRaises(KeyError):
             wb.rename_sheet('foo','zoo')
 
@@ -78,7 +78,7 @@ class Project2(unittest.TestCase):
             wb = Workbook.load_workbook(fp)
 
         self.assertEqual('words', str(wb.get_cell_value("first_sheet", 'AA57')))
-        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)  
+        self.assertEqual(wb.get_cell_value("first_sheet",'AAB3').get_type(),CellErrorType.PARSE_ERROR)
 
     def test_json_non_string_contents(self): # TODO seems to work
         with self.assertRaises(TypeError):
@@ -98,8 +98,8 @@ class Project2(unittest.TestCase):
                 wb = Workbook.load_workbook(fp)
 
     def test_json_no_contents(self):
-        ''' Test that a workbook with a single sheet and no contents
-        is saved correctly. '''
+        """ Test that a workbook with a single sheet and no contents
+        is saved correctly. """
         with open('tests/json/no_contents_testfile.json') as fp:
             wb = Workbook.load_workbook(fp)
 

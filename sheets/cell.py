@@ -136,7 +136,7 @@ class Cell():
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
        
 
-        if self.evaluated_value is None: #this will always be none
+        if self.evaluated_value is None and self.type == 'NONE': #this will always be none
             self.evaluated_value  = 0
             return self.evaluated_value
 

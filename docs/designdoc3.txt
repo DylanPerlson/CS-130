@@ -28,7 +28,7 @@ linting, create performance tests
 
 L3.  [3pts] Approximately how many hours did each teammate spend on the project?
 
-Everyone spent roughly 30 hours on the project.
+Everyone spent roughly 40 hours on the project.
 
 Spreadsheet Engine Design (10 pts)
 ----------------------------------

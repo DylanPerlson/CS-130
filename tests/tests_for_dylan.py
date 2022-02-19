@@ -27,6 +27,7 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A1','=A2+A3')
         wb.set_cell_contents(name,'A2','=A3') # parent cells need to be notified of changes i believe\
         wb.set_cell_contents(name,'A3','5')
+        
         self.assertEqual(wb.get_cell_value(name,'A1'),10)
         
 
@@ -35,5 +36,5 @@ class Dylan(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print('Dylan--------')
+    #print('Dylan--------')
     unittest.main(verbosity=0)

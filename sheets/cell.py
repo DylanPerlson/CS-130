@@ -17,6 +17,7 @@ class Cell():
         self.evaluated_value = None #TODO is this the way to use the evaluated value???
         self.value = None
         self.parsed_contents = ''
+        self.circ_ref_count = 0
 
 
 

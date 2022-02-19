@@ -25,9 +25,9 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A2',"=A1")
         wb.set_cell_contents(name,'A1',"=A2")
 
-        print(wb.get_cell_value(name, 'A1'))
-        #assert wb.get_cell_value(name, 'A1') == CellErrorType.CIRCULAR_REFERENCE
-        #assert wb.get_cell_value(name, 'A2') == CellErrorType.CIRCULAR_REFERENCE
+        
+        self.assertEqual(wb.get_cell_value(name, 'A1').get_type(), CellErrorType.CIRCULAR_REFERENCE)
+        self.assertEqual(wb.get_cell_value(name, 'A2').get_type(), CellErrorType.CIRCULAR_REFERENCE)
 
         
 

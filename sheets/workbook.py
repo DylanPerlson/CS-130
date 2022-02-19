@@ -545,7 +545,10 @@ class Workbook:
 
                 #notify all the cells
                 self._notify_helper(sheet_name, curr_cell)
-
+                #reset all circ ref counters
+                for s in self.sheets:
+                    for c in s.cells:
+                        s.cells[c].circ_ref_count = 0
                 #after setting the new contents, get the cell value
                 
 
@@ -1043,7 +1046,11 @@ class Workbook:
                 row, col = self._get_col_and_row(curr_cell_split[1])
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
+                        # if (self.sheets[i].cells[(row,col)].circ_ref_count < 10): #CHECK IF WE LOOP alot
+                        #     self.sheets[i].cells[(row,col)].circ_ref_count += 1
+                        # if (self.sheets[i].cells[(row,col)].circ_ref_count > 10):
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
+                            # self.cell_changed_dict[next_cell] = False
                 #need to set it as not changed
                 self.cell_changed_dict[curr_cell.lower()] = False
             return
@@ -1062,7 +1069,7 @@ class Workbook:
             for dependent in dependents_list:      
                     split_cell_string = dependent.split('!')               
                     self._notify_helper(split_cell_string[0], dependent)
-            # self.check_circ_ref(curr_cell)
+            self.check_circ_ref.remove(curr_cell)
 
 # def notify_cells_changed(self, *args):
 #     """This function gives a notification of the changed cells."""

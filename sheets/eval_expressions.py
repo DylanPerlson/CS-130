@@ -44,10 +44,9 @@ def _get_value_as_number(curr_arg):
         return curr_arg
     elif curr_arg is None:
         return 0
-    elif isinstance(curr_arg, str) and str(curr_arg)[0] == "'":
-        # TODO edge case of trailing whitespace in front of quote
-        if _is_float(str(curr_arg[1:])):
-            return decimal.Decimal(str(curr_arg[1:]))
+    elif isinstance(curr_arg, str):
+        if _is_float(curr_arg):
+            return decimal.Decimal(curr_arg)
         else:
             return CellError(CellErrorType.TYPE_ERROR, "String cannot be parsed into a number")
     else:

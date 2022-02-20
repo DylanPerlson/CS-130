@@ -67,8 +67,8 @@ class Cell():
 
         self._check_if_changed(workbook_instance, sheet_location.lower())
 
-        if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
-            return self.evaluated_value #TODO we need to change this
+        # if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+        #     return self.evaluated_value #TODO we need to change this
 
 
 

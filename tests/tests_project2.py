@@ -11,7 +11,7 @@ class Project2(unittest.TestCase):
         (_, name2) = wb.new_sheet("second_sheet")
         (_, name3) = wb.new_sheet("move_to_second_sheet")
 
-        wb.reorder_sheets(name3, 1)
+        wb.move_sheet(name3, 1)
 
         self.assertEqual(wb.sheets[1].sheet_name, "move_to_second_sheet")
         self.assertEqual(wb.sheets[2].sheet_name, "second_sheet")

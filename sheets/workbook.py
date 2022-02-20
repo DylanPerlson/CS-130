@@ -584,7 +584,7 @@ class Workbook:
                
 
                 # now we need to notify all of our dependents
-                self._dependencies_changed_helper(sheet_name, location)
+                #self._dependencies_changed_helper(sheet_name, location)
                 #self.cell_changed_dict = dict.fromkeys( self.cell_changed_dict, True)
                 #print(self.master_cell_dict)
                 #print(self.cell_changed_dict)

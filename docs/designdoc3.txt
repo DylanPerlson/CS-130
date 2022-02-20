@@ -38,16 +38,27 @@ D1.  [3pts] Moving and copying regions of a sheet are very similar operations,
      of the similarity of these two operations to reduce the amount of code
      required to provide this functionality?
 
+We designed these functions so that the bulk of the functionality occurs only inside move cells.
+When a cell wants to be copied instead, it is passed through the same move_cells function with the 
+key difference being that the source cells are not deleted at the end of the proces.
 
 D2.  [3pts] Similarly, moving/copying regions of a sheet, and renaming a sheet,
      both involve formula updates.  Was your team able to factor out common
      aspects of these two operations to reduce the amount of code required to
      implement these operations?  If so, what did you do?  If not, why not?
 
+As previously mentioned, within the move_cells function we designed, we copy over all the cells
+regardless of if they are being moved or copied, and then afterwards delete the moved cells if the 
+function call origin was from move_cells and don't delete them if the origin was from copy_cells.
 
 D3.  [4pts] How does your implementation address the challenges of moving or
      copying a region of cells where the source and target regions overlap?
 
+Unfortunately, due to needing to fix other regression tests this functionality has not been implmented 
+at this time. With that in mind, the approach we were aiming to do is after calculating the absolute/relative
+cell references, if any of the old cell references was equivalent to one or more of the cells that they were being
+moved/copied to, we would go and change their content formulas such that the previous invalid cell reference would 
+be replaced by a #REF! literal as per the specs.
 
 Static Code Analysis / Code Linting (10pts)
 -------------------------------------------
@@ -105,12 +116,27 @@ is stored for later use. Previously, one unchanging cell could be parsed multipl
 under certain circumstances. This change decreased the execution time of our unit tests
 by 30%! :)
 
-2.
+2. Another key hotspot was attempting to check valid cells every time a function such as get_cell_value
+or set_cell_contents was called. Unfortunately, as we need to ensure every input was valid before performing
+any operation that could change the contents of the workbook there was no real way to reduce the amount of calls made.
+One thing we plan to look into in the future is streamlining the code within the function itself so that it's less intensive
+on computational time.
+
+3. Finally, get_cell_value was proving to be a signficant choke point in performance time in the code. This ties into the 
+fact that get_cell_value needs to parse formulas whenever it detects one, which ties back to issue #1 that we pointed out 
+previously. Similarly, changing how often we parsed the formula also sped up our unit test run time by 30% due to how 
+interconnected the two functions are.
 
 P2.  [6pts] Did your team try anything to address performance issues and find
      that it didn't improve things at all?  If so, were you able to identify why
      the intended fix didn't produce the desired benefit?
 
+One curious pattern that emerged as we went through and modified our code to perform better in performance 
+tests is that whenever performance tests improved, acceptance/unit test pass rates decreased
+and vice versa. We ultimately decided to prioritize rectifying the acceptance tests first since 
+we believed a slow program was better than a broken one (though not by much). We had to manually
+use the debugger to see why our new implementations did not behave as expected and for the most part were 
+able to root out the causes in bugs and resolved them accordingly.
 
 P3.  [4pts] How do you feel that your performance updates affected your code's
      readability and maintainability?  Elaborate on your answer.
@@ -118,7 +144,6 @@ P3.  [4pts] How do you feel that your performance updates affected your code's
 1. This specific improvement slightly decreased readability and maintainability because
 it slightly complicated the algorithm, however, this influence was very minor.
 
-2.
 
 P4.  [4pts] Did your performance updates cause any regressions in functionality?
      If so, briefly describe any issues that emerged.  How were these issues
@@ -127,7 +152,7 @@ P4.  [4pts] Did your performance updates cause any regressions in functionality?
 
 1. This fix did not cause any regressions, as indicated by our unit tests.
 
-2.
+2.  Issues were identified by manual testing rather quickly, although fixing them was a much bigger time investment.
 
 
 Section F:  CS130 Project 3 Feedback [OPTIONAL]

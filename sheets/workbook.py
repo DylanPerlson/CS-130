@@ -586,9 +586,8 @@ class Workbook:
 
 
 
-                #!!!DO NOT REMOVE THIS UNDER ANY CIRCUMSTANCES UNLESS
-                # CONSULTING WITH THE ENTIRE TEAM!!
-                self.get_cell_value(sheet_name, location)
+                #ORIGINALLY NEEDED TO HAVE THIS, NO LONGER NOW
+                #self.get_cell_value(sheet_name, location)
 
                 
                 #notify all the cells
@@ -643,7 +642,7 @@ class Workbook:
 
                 #check if there is a circ ref
                 if return_val == 'CircRef':
-                    #no need to update value bc we just want to know ot stop adding it
+                    #will need to update the value, bc it is going to be a None type
                     #self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
                     return return_val
 

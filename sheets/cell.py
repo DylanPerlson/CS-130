@@ -14,7 +14,7 @@ class Cell():
     def __init__ (self, contents):
         self.contents = contents
         self.parse_necessary = True
-        self.evaluated_value = None #TODO is this the way to use the evaluated value???
+        self.evaluated_value = None 
         self.value = None
         self.parsed_contents = ''
         self.not_changed = False
@@ -74,7 +74,6 @@ class Cell():
 
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
-        #TODO move this???
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
         self.not_changed = True
 
@@ -138,17 +137,17 @@ class Cell():
             self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
             "Circular Reference", None)
             return self.evaluated_value
-        except Exception as e: #TODO bad practice
-            print(e)
-            self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE,
-            "206: Invalid Cell Reference", None)
-            return self.evaluated_value
+        # except Exception as e:
+        #     print(e)
+        #     self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE,
+        #     "206: Invalid Cell Reference", None)
+        #     return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
 
 
         if self.evaluated_value is None and self.type == 'NONE': #this will always be none
-            self.evaluated_value  = 0
+            self.evaluated_value = 0
             return self.evaluated_value
 
 

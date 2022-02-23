@@ -15,7 +15,7 @@ class Cell():
     def __init__ (self, contents):
         self.contents = contents
         self.parse_necessary = True
-        self.evaluated_value = None 
+        self.evaluated_value = None
         self.value = None
         self.parsed_contents = ''
         self.not_changed = False
@@ -54,7 +54,7 @@ class Cell():
             self.value = str(contents)
 
     def _check_if_changed(self,workbook_instance, sheet_location):
-        
+
         #also if all of our dependencies were not change
         if sheet_location.lower() in workbook_instance.master_cell_dict:
             for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
@@ -66,10 +66,10 @@ class Cell():
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
         sheet_location = sheet_instance.sheet_name + '!' + location
-        
+
         #if that cell has been changed just return the evaluated value
 
-       
+
         #self._check_if_changed(workbook_instance, sheet_location.lower())
 
         # if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
@@ -84,7 +84,7 @@ class Cell():
 
         #None case
         if self.type == "NONE":
-            self.evaluated_value = 0
+            self.evaluated_value = None
             return self.evaluated_value
         # digit case
         elif self.type == "NUMBER": #str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
@@ -104,6 +104,9 @@ class Cell():
             if self.type != "FORMULA":
                 raise TypeError(f'Cell object has unrecognized type: {self.type}')
 
+        ### fyi: at this point, it is known that the cell contains a formula
+
+        # parsing the contents
         if self.parse_necessary:
             # trying to parse
             try:
@@ -123,47 +126,32 @@ class Cell():
                 self.evaluated_value = evaluation
                 return self.evaluated_value
         except ZeroDivisionError:
-            # Value you set is the cell error OBJECT
-            # String is what the user sees/inputs
-            # if get_cell_value evaluates to error, return value will be cell error object
-            # Can manually set cell error via #DIV/0! and so on
-            # set cell contents should only take strings
             self.evaluated_value = CellError(CellErrorType.DIVIDE_BY_ZERO,
             "Cannot divide by 0", ZeroDivisionError)
 
             return self.evaluated_value
-            # return the above error
-
         except TypeError:
             self.evaluated_value = CellError(CellErrorType.TYPE_ERROR,
             "Incompatible types for operation")
 
             return self.evaluated_value
-
         except NameError:
             self.evaluated_value = CellError(CellErrorType.BAD_NAME,
             "Unrecognized function name", NameError)
 
             return self.evaluated_value
-
-        except RuntimeError or RecursionError:
-
+        except(RuntimeError, RecursionError): # this happens if the error is either of those
             self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
             "Circular Reference", None)
+
             return self.evaluated_value
-        # except Exception as e:
-        #     print(e)
-        #     self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE,
-        #     "206: Invalid Cell Reference", None)
-        #     return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
 
-
-        if self.evaluated_value is None and self.type == 'NONE': #this will always be none
-            self.evaluated_value = 0
-            return self.evaluated_value
-
+        # why was this code here?? (Pieter)
+        # if self.evaluated_value is None and self.type == 'NONE': #this will always be none
+        #     self.evaluated_value = 0
+        #     return self.evaluated_value
 
         return self.evaluated_value
 

@@ -1,7 +1,6 @@
 """Object class for individual cell"""
 #from binascii import a2b_base64
 import decimal
-#from locale import ABDAY_1
 
 import lark
 
@@ -47,14 +46,40 @@ class Cell():
             self.value = str(contents)
 
     def _check_if_changed(self,workbook_instance, sheet_location):
-        
+        #TODO DONNIE - if it is a circ ref this breaks
         #also if all of our dependencies were not change
         if sheet_location.lower() in workbook_instance.master_cell_dict:
             for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
                 if i in workbook_instance.cell_changed_dict:
-                    self._check_if_changed(workbook_instance, i)
+
+                    #check if a circ ref is being found
+                    split_name = sheet_location.split('!')
+                    row, col = self._get_col_and_row(split_name[1])
+                    it = -1
+                    for sheet in workbook_instance.sheets:
+                        it += 1
+                        if sheet.sheet_name.lower() == split_name[0].lower():
+                            if isinstance(workbook_instance.sheets[it].cells[(row,col)].evaluated_value, CellError):
+                                if workbook_instance.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
+                                    #print('circ ref found')
+                                    return 'CircRef'
+
+                            #break out of for loop
+                            break
+                    
+
+                    return_val = self._check_if_changed(workbook_instance, i)
+                    #check if there is a circ reg
+                    if return_val == 'CircRef':
+                        self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
+                        return return_val
+
                     if workbook_instance.cell_changed_dict[i.lower()] == True:
                         self.not_changed = False
+                    
+                        
+                    
+
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
@@ -65,10 +90,12 @@ class Cell():
        
 
 
-        #self._check_if_changed(workbook_instance, sheet_location.lower())
+        return_val = self._check_if_changed(workbook_instance, sheet_location.lower())
 
-        # if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
-        #     return self.evaluated_value #TODO we need to change this
+        if return_val == 'CircRef':
+            return 
+        if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+            return self.evaluated_value #TODO we need to change this
 
 
 
@@ -173,3 +200,22 @@ class Cell():
             return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
         else:
             return d
+
+
+    def _get_col_and_row(self,location):
+        """Helper function to get absolute row/col of inputted location (AD42)."""
+        # be aware we did this backwards
+
+        for e,i in enumerate(location):
+            if i.isdigit():
+                row = location[:e]
+                #convert row letters to its row number
+                temp = 0
+                for j in range(1, len(row)+1):
+                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+
+                row = temp
+                col = int(location[e:])
+                break
+
+        return row, col #these should actually be swapped I think?

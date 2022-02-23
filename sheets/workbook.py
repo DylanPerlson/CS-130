@@ -166,7 +166,7 @@ class Workbook:
                                 if abs_loc[-1].isdigit():
                                     abs_row = True
 
-                                #TODO swap bc we implimented our helper wrong
+                                #swap bc we implimented our helper wrong
                                 abs_col, abs_row = abs_row, abs_col
 
                                 loc = ''.join(abs_loc)
@@ -189,7 +189,7 @@ class Workbook:
                                 replace_c = loc_col + delta_col
 
 
-                            #TODO swap bc we implimented our helper wrong
+                            #swap bc we implimented our helper wrong
                             replace_r, replace_c = replace_c, replace_r
 
                             if abs_row is True and abs_col is False:
@@ -370,12 +370,6 @@ class Workbook:
                     old_sheet = self.sheets[copy_index]
                     self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
 
-
-
-                    # for key in old_cells.keys():
-                    #     print(key)
-
-                    #     self.set_cell_contents(copy_sheet, key, old_cells[key].contents)
                     self.number_sheets = self.number_sheets + 1
                     return
                 else:
@@ -580,21 +574,26 @@ class Workbook:
 
 
                 #notify all the cells
+                #this will also set cell values to be circ ref
                 self._notify_helper(sheet_name, curr_cell)
                
 
                 # now we need to notify all of our dependents
-                #self._dependencies_changed_helper(sheet_name, location)
-                #self.cell_changed_dict = dict.fromkeys( self.cell_changed_dict, True)
-                #print(self.master_cell_dict)
-                #print(self.cell_changed_dict)
+                self._dependencies_changed_helper(sheet_name, location)
+               
+
+
+
+
+
                 #!!!DO NOT REMOVE THIS UNDER ANY CIRCUMSTANCES UNLESS
                 # CONSULTING WITH THE ENTIRE TEAM!!
                 self.get_cell_value(sheet_name, location)
 
                 
                 #notify all the cells
-                self._notify_helper(sheet_name, curr_cell)
+                #TODO is this commented out?
+                #self._notify_helper(sheet_name, curr_cell)
                 
                 #return is needed so we do not raise a key error
                 return
@@ -619,9 +618,34 @@ class Workbook:
         if sheet_location in self.master_cell_dict:
             self.cell_changed_dict[sheet_location.lower] = True
             for cells in self.master_cell_dict[sheet_location]:
-                    self.cell_changed_dict[cells.lower] = True
-                    splitting = cells.split('!')
-                    self._dependencies_changed_helper(splitting[0],splitting[1])
+
+                #check if a circ ref is being found
+                split_name = sheet_location.split('!')
+                row, col = self._get_col_and_row(split_name[1])
+                it = -1
+                for sheet in self.sheets:
+                    it += 1
+                    if sheet.sheet_name.lower() == split_name[0].lower():
+                        if isinstance(self.sheets[it].cells[(row,col)].evaluated_value, CellError):
+                            if self.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
+                                #print('circ ref found')
+                                return 'CircRef'
+
+                        #break out of for loop
+                        break
+                
+                    
+
+                #now we continue calling all of our own dependencies, and breaking if there was a circ ref
+                self.cell_changed_dict[cells.lower] = True
+                splitting = cells.split('!')
+                return_val = self._dependencies_changed_helper(splitting[0],splitting[1])
+
+                #check if there is a circ ref
+                if return_val == 'CircRef':
+                    #no need to update value bc we just want to know ot stop adding it
+                    #self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
+                    return return_val
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -1082,9 +1106,7 @@ class Workbook:
                 row, col = self._get_col_and_row(curr_cell_split[1])
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
-                        # if (self.sheets[i].cells[(row,col)].circ_ref_count < 10): #CHECK IF WE LOOP alot
-                        #     self.sheets[i].cells[(row,col)].circ_ref_count += 1
-                        # if (self.sheets[i].cells[(row,col)].circ_ref_count > 10):
+                        
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
                             # self.cell_changed_dict[next_cell] = False
                 #need to set it as not changed

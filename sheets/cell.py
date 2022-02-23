@@ -7,6 +7,7 @@ import lark
 
 from .cell_error import CellError, CellErrorType
 from .eval_expressions import EvalExpressions
+from .eval_expressions import generate_error_object
 
 
 class Cell():
@@ -18,8 +19,6 @@ class Cell():
         self.value = None
         self.parsed_contents = ''
         self.not_changed = False
-        
-
 
 
         # check that the cell is either a string or None
@@ -37,13 +36,21 @@ class Cell():
             self.type = "STRING"
             self.value = str(contents[1:].replace("''","'"))
         elif self.is_float(str(contents)):
-            self.type = "LITERAL"
+            self.type = "NUMBER"
             self.value = decimal.Decimal(str(contents))
-
+        elif isinstance(generate_error_object(contents, return_arg = True), CellError):
+            self.type = "ERROR"
+            self.value = generate_error_object(contents)
+        elif str(contents).lower() == "true" or str(contents).lower() == "false":
+            self.type = "BOOLEAN"
+            if str(contents).lower() == "true":
+                self.value = True
+            else:
+                self.value = False
         #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
         #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
         else:
-            self.type = "LITERAL"
+            self.type = "STRING"
             self.value = str(contents)
 
     def _check_if_changed(self,workbook_instance, sheet_location):
@@ -63,13 +70,10 @@ class Cell():
         #if that cell has been changed just return the evaluated value
 
        
-
-
         #self._check_if_changed(workbook_instance, sheet_location.lower())
 
         # if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
         #     return self.evaluated_value #TODO we need to change this
-
 
 
         #otherwise now we need to re-evaluate
@@ -77,18 +81,28 @@ class Cell():
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
         self.not_changed = True
 
+
         #None case
         if self.type == "NONE":
             self.evaluated_value = 0
             return self.evaluated_value
-        #digit case
-        elif str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
+        # digit case
+        elif self.type == "NUMBER": #str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
             self.evaluated_value = self.remove_trailing_zeros(self.value)
             return self.evaluated_value
         #string case
-        elif self.contents[0] == "'":
+        elif self.type == "STRING": #self.contents[0] == "'":
             self.evaluated_value = self.remove_trailing_zeros(self.value)
             return self.evaluated_value
+        elif self.type == "BOOLEAN":
+            self.evaluated_value = self.value
+            return self.evaluated_value
+        elif self.type == "ERROR":
+            self.evaluated_value = self.value
+            return self.evaluated_value
+        else:
+            if self.type != "FORMULA":
+                raise TypeError(f'Cell object has unrecognized type: {self.type}')
 
         if self.parse_necessary:
             # trying to parse

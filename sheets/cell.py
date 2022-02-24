@@ -16,7 +16,7 @@ class Cell():
         self.evaluated_value = None #TODO is this the way to use the evaluated value???
         self.value = None
         self.parsed_contents = ''
-        self.not_changed = False
+        #self.not_changed = True
         
 
 
@@ -46,7 +46,8 @@ class Cell():
             self.value = str(contents)
 
     def _check_if_changed(self,workbook_instance, sheet_location):
-        #TODO DONNIE - if it is a circ ref this breaks
+        #TODO DYLAN SPPED UP
+        #TODO takes 60% of our time NEEDS TO BE SPEED UP
         #also if all of our dependencies were not change
         if sheet_location.lower() in workbook_instance.master_cell_dict:
             for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
@@ -74,8 +75,8 @@ class Cell():
                         self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
                         return return_val
 
-                    if workbook_instance.cell_changed_dict[i.lower()] == True:
-                        self.not_changed = False
+                    # if workbook_instance.cell_changed_dict[i.lower()] == True:
+                    #     self.not_changed = False
                     
                         
                     
@@ -94,16 +95,15 @@ class Cell():
 
         if return_val == 'CircRef':
             return self.evaluated_value
-        if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
-            return self.evaluated_value #TODO we need to change this
+        if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+            return self.evaluated_value 
 
 
 
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
-        #TODO move this???
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
-        self.not_changed = True
+        #self.not_changed = True
 
         #None case
         if self.type == "NONE":
@@ -202,6 +202,8 @@ class Cell():
             return d
 
 
+    #TODO DYLAN SPEED UP
+    #TODO we need to see if we can remove this function now, we call it so many times now, just pass the values
     def _get_col_and_row(self,location):
         """Helper function to get absolute row/col of inputted location (AD42)."""
         # be aware we did this backwards

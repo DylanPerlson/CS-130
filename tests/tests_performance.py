@@ -87,7 +87,7 @@ def test_fibonacci():
     wb.set_cell_contents(sheet, 'A1', '1')
     wb.set_cell_contents(sheet, 'A2', '1')
 
-    length = 23
+    length = 26
 
     for i in range(3, length+1):
         location = 'A'+str(i)

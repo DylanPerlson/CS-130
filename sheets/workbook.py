@@ -212,7 +212,7 @@ class Workbook:
 
 
                         else:
-                            print('problem')
+                            #print('problem')
                             raise ValueError()
 
 
@@ -613,7 +613,7 @@ class Workbook:
         #for each dependent, tell it that is has changed
         #and then tell their dependents
         # if sheet_location in self.master_cell_dict:
-
+        
         if sheet_location in self.master_cell_dict:
             self.cell_changed_dict[sheet_location.lower] = True
             for cells in self.master_cell_dict[sheet_location]:
@@ -642,8 +642,6 @@ class Workbook:
 
                 #check if there is a circ ref
                 if return_val == 'CircRef':
-                    #will need to update the value, bc it is going to be a None type
-                    #self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
                     return return_val
 
 
@@ -1105,9 +1103,8 @@ class Workbook:
                 row, col = self._get_col_and_row(curr_cell_split[1])
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
-                        
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                            # self.cell_changed_dict[next_cell] = False
+                        self.cell_changed_dict[next_cell] = True
                 #need to set it as not changed
                 self.cell_changed_dict[curr_cell.lower()] = False
             return

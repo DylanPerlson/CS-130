@@ -93,7 +93,7 @@ class Cell():
         return_val = self._check_if_changed(workbook_instance, sheet_location.lower())
 
         if return_val == 'CircRef':
-            return 
+            return self.evaluated_value
         if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
             return self.evaluated_value #TODO we need to change this
 
@@ -166,7 +166,7 @@ class Cell():
             "Circular Reference", None)
             return self.evaluated_value
         except Exception as e: #TODO bad practice
-            print(e)
+            
             self.evaluated_value = CellError(CellErrorType.BAD_REFERENCE,
             "206: Invalid Cell Reference", None)
             return self.evaluated_value

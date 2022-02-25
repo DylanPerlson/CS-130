@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr
+?expression : add_expr | concat_expr | bool_expr // (bool_expr is new)
 
 //========================================
 // Arithmetic expressions
@@ -22,6 +22,16 @@
 ?mul_expr : (mul_expr MUL_OP)? unary_op
 
 ?unary_op : ADD_OP? base
+
+//========================================
+// (new) Boolean expressions
+
+?bool_expr : BOOL_OP_MANY "(" [ bool ["," (bool)]* ] ")"
+      | BOOL_OP_1 "(" [ bool ] ")"
+      | BOOL_OP_2 "(" [ bool "," bool ] ")"
+
+?bool : BOOL_LIT -> bool_lit
+      | bool_expr
 
 //========================================
 // String concatenation
@@ -72,3 +82,12 @@ QUOTED_SHEET_NAME: /\'[^']*\'/
 NUMBER: /([0-9]+(\.[0-9]*)?)|(\.[0-9]+)/
 
 STRING: /\"[^"]*\"/
+
+// (new) This is supposed to add boolean operators (and, or, etc.)
+BOOL_OP_MANY: ("AND" | "OR" | "XOR")
+BOOL_OP_1: ("NOT" | "ISBLANK" | "ISERROR")
+BOOL_OP_2: ("EXACT")
+
+// (new) This is supposed to add a boolean as a type (case insensitive)
+// BOOL: (BOOL_LIT | bool_expr)
+BOOL_LIT: ("true"i | "false"i)

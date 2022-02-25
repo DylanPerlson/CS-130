@@ -13,7 +13,7 @@ class Dylan(unittest.TestCase):
 
 
     # def test_reference_change(self):
-        
+
     #     wb = Workbook()
     #     (_, name) = wb.new_sheet("s1")
     #     wb.set_cell_contents(name,'A1','5')
@@ -27,9 +27,9 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A1','=A2+A3')
         wb.set_cell_contents(name,'A2','=A3') # parent cells need to be notified of changes i believe\
         wb.set_cell_contents(name,'A3','5')
-        print('topilogical works')
+        print('topological works')
         self.assertEqual(wb.get_cell_value(name,'A1'),10)
-        
+
 
 
 

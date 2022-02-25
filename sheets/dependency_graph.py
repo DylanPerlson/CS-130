@@ -20,50 +20,50 @@ class DependencyGraph:
         if v not in self.graph.keys() and v not in self.graph.values():
             self.num_nodes += 1
         self.graph[u].append(v)
- 
+
     # A recursive function used by topologicalSort
     def topological_sort_util(self,v,visited,stack):
         # Mark the current node as visited.
         visited[v] = True
- 
+
         # Recur for all the cells adjacent to this vertex
         for i in self.graph[v]:
             if visited[i] == False:
                 self.topologicalSortUtil(i,visited,stack)
- 
+
         # Push current vertex to stack which stores result
         stack.insert(0,v)
- 
+
     # The function to do Topological Sort. It uses recursive
     # topologicalSortUtil()
     def topological_sort(self):
         # Mark all the vertices as not visited
         visited = [False]*self.num_nodes
         stack =[]
- 
+
         # Call the recursive helper function to store Topological
         # Sort starting from all vertices one by one
         for i in range(self.num_nodes):
             if visited[i] == False:
                 self.topologicalSortUtil(i,visited,stack)
- 
+
         # Print contents of stack
         return stack
-    
-# create a new Dictionary   
-# with all the keys from master cell dict 
+
+# create a new Dictionary
+# with all the keys from master cell dict
 
 
 # visited_dict = curly
 # for key in master_cell_dict.keys:
 #     visited_dict[key] = False
 
-#     pick the current node we are getting the value from as the starting node 
-#     do a dfs on the start node 
+#     pick the current node we are getting the value from as the starting node
+#     do a dfs on the start node
 
-#     and at every node mark visited dict to true  
+#     and at every node mark visited dict to true
 
-#     if we ever reach a visited dict that is true 
+#     if we ever reach a visited dict that is true
 
 #     then return circ ref
 
@@ -89,7 +89,7 @@ class DependencyGraph:
 
 
     # def fill_order(self,v,visited, stack):
-    #     """ Mark the current node as visited """ 
+    #     """ Mark the current node as visited """
 
     #     visited[v]= True
     #     #Recur for all the vertices adjacent to this vertex
@@ -97,7 +97,7 @@ class DependencyGraph:
     #         if visited[i]==False:
     #             self.fill_order(i, visited, stack)
     #     stack = stack.append(v)
-    
+
     # def get_transpose(self):
     #     """ Function that returns reverse (or transpose) of this graph """
 
@@ -115,7 +115,7 @@ class DependencyGraph:
     #     The main function that finds and prints all strongly
     #     connected components whilst performing topological sort
     #     """
-        
+
     #     circ_ref_cells = []
     #     stack = []
     #     # Mark all the vertices as not visited (For first DFS)
@@ -127,7 +127,7 @@ class DependencyGraph:
 
     #     # Create a reversed graph
     #     gr = self.get_transpose()
-         
+
     #     # Mark all the vertices as not visited (For second DFS)
     #     visited = [False] * (self.num_cells)
 

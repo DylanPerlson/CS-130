@@ -8,16 +8,16 @@ def test_long_reference_chain():
     (_,name) = wb.new_sheet("sheet")
     wb.set_cell_contents(name, 'A1', '1')
     length = 1000
-    
+
     for i in range(1, length):
         location_letter = wb._base_10_to_alphabet(i)
         location_letter_prev = wb._base_10_to_alphabet(i-1)
         location = str(location_letter)+str(1)
         location_prev = str(location_letter_prev)+str(1)
-        
+
         wb.set_cell_contents(name, location, '=1+'+location_prev)
-        
-    
+
+
     assert wb.get_cell_value(name, location) == length
 
 def test_very_connected_ref_chain(): # TODO implement later

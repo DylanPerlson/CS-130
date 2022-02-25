@@ -60,7 +60,7 @@ class Sheet:
                 #notify parent cells to remove this cell from their dependents list
                 #parent_cell sheet_name!A1
                 for parent_cell in self._retrieve_cell_references(prev_contents):
-                    # reminder our rows and cols are switch, but we need to keep it this way                    
+                    # reminder our rows and cols are switch, but we need to keep it this way
                     #remove current cell
                     removing_entry = self.sheet_name.lower() + '!' + location
 
@@ -76,14 +76,14 @@ class Sheet:
         elif curr_cell.type == "FORMULA":
             prev_contents = curr_cell.contents
 
-            
+
             #tell dependents that they need to re-evaluate again
             sheet_location = self.sheet_name.lower()+'!'+location.lower()
             workbook_instance.cell_changed_dict[sheet_location] = True
             if sheet_location in workbook_instance.master_cell_dict:
                 for dependents in workbook_instance.master_cell_dict[sheet_location]:
                     workbook_instance.cell_changed_dict[dependents.lower()] = True
-                    
+
 
             parent_cells = self._retrieve_cell_references(prev_contents)
             if isinstance(parent_cells, CellError):
@@ -101,8 +101,8 @@ class Sheet:
                     appending_entry = self.sheet_name.lower()  + '!' + location.lower()
                     #add this cell to our parents dependency list
                     workbook_instance.master_cell_dict[(parent_cell.lower())].append(appending_entry.lower())
-                    
-        
+
+
     def get_cell_contents(self, location):
         """Function that gets the contents of the cell."""
         row, col = self._get_col_and_row(location)

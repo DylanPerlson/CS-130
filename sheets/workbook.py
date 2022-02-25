@@ -342,16 +342,16 @@ class Workbook:
         original sheet name's case), incrementing the number until a unique
         name is found.  As usual, "uniqueness" is determined in a
         case-insensitive manner.
-        
+
         The sheet name match is case-insensitive; the text must match but the
         case does not have to.
-        
+
         The copy should be added to the end of the sequence of sheets in the
         workbook.  Like new_sheet(), this function returns a tuple with two
         elements:  (0-based index of copy in workbook, copy sheet name).  This
         allows the function to report the new sheet's name and index in the
         sequence of sheets.
-        
+
         If the specified sheet name is not found, a KeyError is raised.
         """
 
@@ -581,7 +581,7 @@ class Workbook:
 
                 #notify all the cells
                 self._notify_helper(sheet_name, curr_cell)
-               
+
 
                 # now we need to notify all of our dependents
                 #self._dependencies_changed_helper(sheet_name, location)
@@ -592,10 +592,10 @@ class Workbook:
                 # CONSULTING WITH THE ENTIRE TEAM!!
                 self.get_cell_value(sheet_name, location)
 
-                
+
                 #notify all the cells
                 self._notify_helper(sheet_name, curr_cell)
-                
+
                 #return is needed so we do not raise a key error
                 return
 

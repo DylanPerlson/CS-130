@@ -17,7 +17,7 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A1','2')
         wb.set_cell_contents(name,'A4', '=A3')
         wb.set_cell_contents(name,'A1', '5')
-    
+
     def test_circular_references(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -29,7 +29,7 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A1').get_type(), CellErrorType.CIRCULAR_REFERENCE)
         self.assertEqual(wb.get_cell_value(name, 'A2').get_type(), CellErrorType.CIRCULAR_REFERENCE)
 
-        
+
 
 
 if __name__ == '__main__':

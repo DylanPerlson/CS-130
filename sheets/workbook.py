@@ -766,9 +766,9 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        row,col = self._get_col_and_row(location)
-        if row > MAX_ROW or col > MAX_COL:
-            return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
+        # row,col = self._get_col_and_row(location)
+        # if row > MAX_ROW or col > MAX_COL:
+        #     return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
@@ -796,10 +796,9 @@ class Workbook:
             return False
 
         #this is reverse but is still be good
-        #TODO should we have this and should it be a value error??
-        # row, col = self._get_col_and_row(location)
-        # if row > MAX_ROW or col > MAX_COL:
-        #     raise ValueError()
+        row, col = self._get_col_and_row(location)
+        if row > MAX_ROW or col > MAX_COL:
+            raise ValueError()
 
         digits = False
         for c in location:
@@ -1029,7 +1028,6 @@ class Workbook:
                 updated_cells.append((new_name, s.cells[key]))
 
         #need to update sheetname in cell dependencies
-        #TODO fix rename and circ ref
 
 
         #create a list of keys to change bc cannot change during
@@ -1039,7 +1037,6 @@ class Workbook:
             #everything should already be lower so not an issue
             old_name = old_name.lower()
 
-            #TODO just hope no sheetname is also a cell value, dont think donnie is that mean
             #the value is a list so need to iterate through the list
             for _,i in enumerate(value):
                 i = i.replace(old_name,new_name.lower())

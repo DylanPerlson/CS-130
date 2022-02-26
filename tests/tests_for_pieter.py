@@ -49,6 +49,13 @@ class Pieter(unittest.TestCase):
         self.assertEqual(3,len(wb.sheets))
         self.assertEqual(wb.list_sheets(), [name1, name3, name2])
 
+    def test_error_as_cell_value(self):
+        wb = Workbook()
+        (_, sh) = wb.new_sheet()
+        wb.set_cell_contents(sh, 'A1', '#REF!')
+
+        self.assertEqual(wb.get_cell_value(sh,'A1').get_type(), CellErrorType.BAD_REFERENCE)
+
 
 
 

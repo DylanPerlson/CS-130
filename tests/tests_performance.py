@@ -21,7 +21,7 @@ def test_long_reference_chain():
     assert wb.get_cell_value(name, location) == length
     #print(wb.get_cell_value(name, location))
 
-def test_very_connected_ref_chain(): # TODO dimplement later
+def test_very_connected_ref_chain(): # TODO implement later
     pass
 
 def test_cell_with_many_deps():

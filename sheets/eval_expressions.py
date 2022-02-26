@@ -8,7 +8,7 @@ from .cell_error import CellError, CellErrorType
 
 error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 
-def generate_error_object(error_arg):
+def generate_error_object(error_arg, return_arg = False):
     """Helper function to generate error objects when parsing formulas
     Error literals are strings
     Might be creating cellerror objects
@@ -28,7 +28,12 @@ def generate_error_object(error_arg):
     elif error_arg == '#NAME?':
         return CellError(CellErrorType.BAD_NAME, "Unrecognized function name")
 
-    assert False, 'Unrecognized error literal'
+    # assert False, 'Unrecognized error literal'
+
+    if return_arg:
+        return
+
+    assert return_arg, 'Unrecognized error literal'
 
 def _is_float(element):
     """ helper fuction to determine if a value is a float """

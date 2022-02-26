@@ -312,7 +312,7 @@ class Project1(unittest.TestCase):
         self.assertEqual(content1, 'Lots of space in the back')
         self.assertEqual(content2, '=54')
         self.assertEqual(content3, None)
-        # TODO self.assertEqual(value3, None)
+        # self.assertEqual(value3, None) # TODO fix empty cells issue; is 'None' instead of None
         self.assertEqual(content4, None)
 
     def test_simple_formula_with_decimal(self):
@@ -386,7 +386,8 @@ class Project1(unittest.TestCase):
         wb.set_cell_contents(name, 'D14', None)
         self.assertEqual((0,0),wb.get_sheet_extent(name))
 
-        self.assertEqual(wb.get_cell_value(name,'ZZZZ99999').get_type(),CellErrorType.BAD_REFERENCE)
+        with self.assertRaises(ValueError):
+            wb.get_cell_value(name,'ZZZZ99999')
 
     def test_naming_sheets_and_workbooks(self):
         wb1 = Workbook()

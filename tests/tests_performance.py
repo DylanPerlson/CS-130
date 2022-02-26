@@ -7,7 +7,7 @@ def test_long_reference_chain():
 
     (_,name) = wb.new_sheet("sheet")
     wb.set_cell_contents(name, 'A1', '1')
-    length = 1000
+    length = 100
     
     for i in range(1, length):
         location_letter = wb._base_10_to_alphabet(i)
@@ -19,6 +19,7 @@ def test_long_reference_chain():
         
     
     assert wb.get_cell_value(name, location) == length
+    #print(wb.get_cell_value(name, location))
 
 def test_very_connected_ref_chain(): # TODO dimplement later
     pass
@@ -87,7 +88,7 @@ def test_fibonacci():
     wb.set_cell_contents(sheet, 'A1', '1')
     wb.set_cell_contents(sheet, 'A2', '1')
 
-    length = 25
+    length = 50
 
     for i in range(3, length+1):
         location = 'A'+str(i)

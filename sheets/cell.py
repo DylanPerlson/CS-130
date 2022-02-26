@@ -45,38 +45,44 @@ class Cell():
             self.type = "LITERAL"
             self.value = str(contents)
 
-    def _check_if_changed(self,workbook_instance, sheet_location):
-        #TODO DYLAN SPPED UP
-        #TODO takes 60% of our time NEEDS TO BE SPEED UP
-        #also if all of our dependencies were not change
-        if sheet_location.lower() in workbook_instance.master_cell_dict:
-            for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
-                if i in workbook_instance.cell_changed_dict:
+    # def _check_if_changed(self,workbook_instance, sheet_location):
+    #     #TODO DYLAN SPPED UP
+    #     #TODO takes 60% of our time NEEDS TO BE SPEED UP
+    #     #also if all of our dependencies were not change
+    #     if sheet_location.lower() in workbook_instance.master_cell_dict:
+    #         for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
 
-                    #check if a circ ref is being found
-                    split_name = sheet_location.split('!')
-                    row, col = self._get_col_and_row(split_name[1])
-                    it = -1
-                    for sheet in workbook_instance.sheets:
-                        it += 1
-                        if sheet.sheet_name.lower() == split_name[0].lower():
-                            if isinstance(workbook_instance.sheets[it].cells[(row,col)].evaluated_value, CellError):
-                                if workbook_instance.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
-                                    #print('circ ref found')
-                                    return 'CircRef'
 
-                            #break out of for loop
-                            break
+    #             #TODO this part is probably very slow bc we iterate a lot of things
+    #             #am i iterating unecessary stuff?
+    #             if i in workbook_instance.cell_changed_dict:
+
+    #                 #check if a circ ref is being found
+    #                 split_name = sheet_location.split('!')
+    #                 row, col = self._get_col_and_row(split_name[1])
+    #                 it = -1
+    #                 for sheet in workbook_instance.sheets:
+    #                     it += 1
+    #                     if sheet.sheet_name.lower() == split_name[0].lower():
+    #                         if isinstance(workbook_instance.sheets[it].cells[(row,col)].evaluated_value, CellError):
+    #                             if workbook_instance.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
+    #                                 #print('circ ref found')
+    #                                 return 'CircRef'
+
+    #                         #break out of for loop
+    #                         break
                     
 
-                    return_val = self._check_if_changed(workbook_instance, i)
-                    #check if there is a circ reg
-                    if return_val == 'CircRef':
-                        self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
-                        return return_val
+    #                 return_val = self._check_if_changed(workbook_instance, i)
+    #                 #check if there is a circ ref
 
-                    # if workbook_instance.cell_changed_dict[i.lower()] == True:
-                    #     self.not_changed = False
+    #                 #TODO Dylan look here. the moment I catch a circ ref we exit it all right?
+    #                 if return_val == 'CircRef':
+    #                     self.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference", None)
+    #                     return return_val
+
+    #                 # if workbook_instance.cell_changed_dict[i.lower()] == True:
+    #                 #     self.not_changed = False
                     
                         
                     
@@ -89,12 +95,15 @@ class Cell():
         #if that cell has been changed just return the evaluated value
 
        
+        #START HERE
+        #TODO do I even need to run this? should it just already say if it wa updated due to what we run during 
+        #set cell contents
+        #return_val = self._check_if_changed(workbook_instance, sheet_location.lower())
 
 
-        return_val = self._check_if_changed(workbook_instance, sheet_location.lower())
-
-        if return_val == 'CircRef':
-            return self.evaluated_value
+        #AND THEN AFTER ABOVE just check if we have a circ ref, or maybe even before hand????
+        # if return_val == 'CircRef':
+        #     return self.evaluated_value
         if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
             return self.evaluated_value 
 

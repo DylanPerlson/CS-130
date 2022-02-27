@@ -16,15 +16,18 @@ class Pieter(unittest.TestCase):
     #     content1 = wb.get_cell_value(sh, 'A1')
 
     #     self.assertEqual(content1, "one quote: '")
+
     def test_lark_bool(self):
         wb = Workbook()
         (_,sh) = wb.new_sheet()
 
-        # wb.set_cell_contents(sh, 'a1', '=5')
-        wb.set_cell_contents(sh, 'a1', '=AND(true , false, OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
-        wb.set_cell_contents(sh, 'a1', '=5+5*4')
+        wb.set_cell_contents(sh, 'a1', '=AND(5 < 6 , tester(true,false,6), OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
+        # print(wb.get_cell_value(sh, 'A1').pretty())
 
-        print(wb.get_cell_value(sh, 'A1'))
+        wb.set_cell_contents(sh, 'a1', '=5 + 5')
+        # print(wb.get_cell_value(sh, 'A1').pretty())
+
+
 
 
 

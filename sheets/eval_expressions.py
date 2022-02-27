@@ -213,3 +213,17 @@ class EvalExpressions(Transformer):
         cell = cell.replace("$","")
 
         return self.workbook_instance.get_cell_value(sheet_name, cell)
+
+    #### METHODS FOR BOOLEAN STUFF:
+
+    # def bool_lit(self, args):
+    #     pass
+
+    # def bool_oper(self, args):
+    #     pass
+
+    # def bool_func(self, args):
+        # pseudocode:
+        #     import some new module
+        #     pass args to module
+        #     return the solution

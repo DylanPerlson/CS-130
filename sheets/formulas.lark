@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr | bool_expr // (bool_expr is new)
+?expression : add_expr | concat_expr | bool_func // (bool_func is new)
 
 //========================================
 // Arithmetic expressions
@@ -26,12 +26,16 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_expr : BOOL_OP_MANY "(" [ bool ["," (bool)]* ] ")"
-      | BOOL_OP_1 "(" [ bool ] ")"
-      | BOOL_OP_2 "(" [ bool "," bool ] ")"
+?bool_func : BOOL_FUNC "(" [ bool ["," (bool)]* ] ")"
+      // | BOOL_FUNC_1 "(" [ bool ] ")"
+      // | BOOL_FUNC_2 "(" [ bool "," bool ] ")"
+
+?bool_oper : base BOOL_OP base
 
 ?bool : BOOL_LIT -> bool_lit
-      | bool_expr
+      | bool_func
+      | bool_oper
+      | base
 
 //========================================
 // String concatenation
@@ -83,11 +87,15 @@ NUMBER: /([0-9]+(\.[0-9]*)?)|(\.[0-9]+)/
 
 STRING: /\"[^"]*\"/
 
-// (new) This is supposed to add boolean operators (and, or, etc.)
-BOOL_OP_MANY: ("AND" | "OR" | "XOR")
-BOOL_OP_1: ("NOT" | "ISBLANK" | "ISERROR")
-BOOL_OP_2: ("EXACT")
+// (new) This is supposed to add boolean functions (and, or, etc.)
+BOOL_FUNC: /[A-Za-z_][A-Za-z0-9_]*/ // TODO check whether this supports everything
+// ("AND" | "OR" | "XOR")
+// BOOL_FUNC_1: ("NOT" | "ISBLANK" | "ISERROR")
+// BOOL_FUNC_2: ("EXACT")
 
 // (new) This is supposed to add a boolean as a type (case insensitive)
-// BOOL: (BOOL_LIT | bool_expr)
+// BOOL: (BOOL_LIT | bool_func)
 BOOL_LIT: ("true"i | "false"i)
+
+// (new) this is supposed to add boolean operators (=, <, >, etc.)
+BOOL_OP: ("=" | "==" | "<>" | "!=" | ">" | "<" | ">=" | "<=")

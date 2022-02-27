@@ -1085,14 +1085,14 @@ class Workbook:
 
         return row, col
 
-    def add_notification_function(self, new_func):
+    def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
-    def notify_cells_changed(self, *args):
-        for curr_arg in args:
-            if curr_arg not in self.notification_functions:
-                self.notification_functions.append(curr_arg)
+    # def notify_cells_changed(self, *args):
+    #     for curr_arg in args:
+    #         if curr_arg not in self.notification_functions:
+    #             self.notification_functions.append(curr_arg)
 
     def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
         """add all of our cells to the evaluate again list if it is not in it already"""

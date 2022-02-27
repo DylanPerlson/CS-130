@@ -578,7 +578,8 @@ class Workbook:
                
 
                 
-                
+                #get the cell value so that we do not get a recursion depth error when getting long chains
+                i.get_cell_value(self,location.lower()) 
                 #return is needed so we do not raise a key error
                 return
 

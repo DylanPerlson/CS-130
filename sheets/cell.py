@@ -56,6 +56,8 @@ class Cell():
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
+        #DELTE THIS. THIS IS TESTING PERFORMANCE
+        
         sheet_location = sheet_instance.sheet_name + '!' + location
 
         if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:

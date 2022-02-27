@@ -7,7 +7,26 @@ def test_long_reference_chain():
 
     (_,name) = wb.new_sheet("sheet")
     wb.set_cell_contents(name, 'A1', '1')
-    length = 200
+    length = 100
+    
+    for i in range(2, length+1):
+        location = 'A'+str(i)
+        location_prev = 'A'+str(i-1)
+        
+        wb.set_cell_contents(name, location, '=1+'+location_prev)
+        wb.get_cell_value(name, location)
+        
+    print(wb.get_cell_value(name, location))
+    assert wb.get_cell_value(name, location) == length
+    #print(wb.get_cell_value(name, location))
+
+
+def test_long_reference_chain_letters():
+    wb = Workbook()
+
+    (_,name) = wb.new_sheet("sheet")
+    wb.set_cell_contents(name, 'A1', '1')
+    length = 300
     
     for i in range(1, length):
         location_letter = wb._base_10_to_alphabet(i)
@@ -17,7 +36,7 @@ def test_long_reference_chain():
         wb.set_cell_contents(name, location, '=1+'+location_prev)
         #wb.get_cell_value(name, location)
         
-    #print(wb.get_cell_value(name, location))
+    print(wb.get_cell_value(name, location))
     #assert wb.get_cell_value(name, location) == length
     #print(wb.get_cell_value(name, location))
 
@@ -134,6 +153,7 @@ if __name__ == '__main__':
     pr.enable()
 
     test_long_reference_chain()
+    #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong

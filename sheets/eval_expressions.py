@@ -216,11 +216,40 @@ class EvalExpressions(Transformer):
 
     #### METHODS FOR BOOLEAN STUFF:
 
-    # def bool_lit(self, args):
-    #     pass
+    def bool_lit(self, args):
+        print(args[0].lower())
+        if args[0].lower() == "true":
+            print('here')
+            return True
+        elif args[0].lower() == "false":
+            return False
+        else:
+            return CellError(CellErrorType.PARSE_ERROR,
+            f"Boolean value is not recognized: {args[0]}")
 
-    # def bool_oper(self, args):
-    #     pass
+    def bool_oper(self, args):
+        operation = args[1]
+        args0 = args[0]
+        args2 = args[2]
+
+        if operation == "=" or operation == "==":
+            pass
+
+        elif operation == "<>" or operation == "!=":
+            pass
+
+        elif operation == ">":
+            pass
+
+        elif operation == "<":
+            pass
+
+        elif operation == ">=":
+            pass
+
+        elif operation == "<=":
+            pass
+
 
     # def bool_func(self, args):
         # pseudocode:

@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr | bool_func // (bool_func is new)
+?expression : add_expr | concat_expr | bool_func | bool // (bool_func, bool are new)
 
 //========================================
 // Arithmetic expressions
@@ -50,6 +50,7 @@
       | NUMBER                  -> number
       | STRING                  -> string
       | "(" expression ")"      -> parens
+      | bool // (new)
 
 cell : (_sheetname "!")? CELLREF
 

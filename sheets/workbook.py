@@ -575,6 +575,8 @@ class Workbook:
 
                 #notify all the cells
                 #this will also set cell values to be circ ref
+                for i in self.notification_functions:
+                    i(self, curr_cell)
                 self._notify_helper(sheet_name, curr_cell)
                
 
@@ -1086,6 +1088,11 @@ class Workbook:
     def add_notification_function(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
+
+    def notify_cells_changed(self, *args):
+        for curr_arg in args:
+            if curr_arg not in self.notification_functions:
+                self.notification_functions.append(curr_arg)
 
     def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
         """add all of our cells to the evaluate again list if it is not in it already"""

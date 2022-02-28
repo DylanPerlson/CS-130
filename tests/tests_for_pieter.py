@@ -85,10 +85,10 @@ class Pieter(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=true == false')
         self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
 
-        # wb.set_cell_contents(sh, 'b1', 'hello')
-        # wb.set_cell_contents(sh, 'b2', "' world")
-        # wb.set_cell_contents(sh, 'a1', '=b1 = B2 & " world"')
-        # self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
+        wb.set_cell_contents(sh, 'b1', 'hello world')
+        wb.set_cell_contents(sh, 'b2', "hello")
+        wb.set_cell_contents(sh, 'a1', '=b1 = B2 & " world"')
+        self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
 
 

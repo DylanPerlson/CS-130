@@ -26,16 +26,16 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_func : BOOL_FUNC "(" [ bool ["," (bool)]* ] ")"
+?bool_func : BOOL_FUNC "(" [ base ["," (base)]* ] ")"
       // | BOOL_FUNC_1 "(" [ bool ] ")"
       // | BOOL_FUNC_2 "(" [ bool "," bool ] ")"
 
-?bool_oper : base BOOL_OP base
+?bool_oper : expression BOOL_OP expression // bool oper takes lowest precedence
 
 ?bool : BOOL_LIT -> bool_lit
       | bool_func
       | bool_oper
-      | base
+      // | base
 
 //========================================
 // String concatenation

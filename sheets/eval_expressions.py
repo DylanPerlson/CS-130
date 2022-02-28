@@ -286,17 +286,6 @@ class EvalExpressions(Transformer):
             else:
                 return args0 != args2
 
-        # elif    operation == ">" or \
-        #         operation == ">" or \
-        #         operation == ">=" or \
-        #         operation == "<=":
-        #     if isinstance(args0, str) and isinstance(args2, str):
-        #         return eval(args0.lower() + operation + args2.lower())
-        #     elif type(args0) is not type(args2):
-        #         (args0, args2) = _order_types(args0, args2)
-
-        #     return eval(str(args0) + operation + str(args2))
-
         elif operation == ">" or \
                 operation == "<" or \
                 operation == ">=" or \
@@ -311,40 +300,6 @@ class EvalExpressions(Transformer):
 
         else:
             pass # TODO something
-
-        '''elif operation == ">":
-            if isinstance(args0, str) and isinstance(args2, str):
-                return args0.lower() > args2.lower()
-            elif type(args0) is not type(args2):
-                (args0, args2) = _order_types(args0, args2)
-
-            return args0 > args2
-
-        elif operation == "<":
-            if isinstance(args0, str) and isinstance(args2, str):
-                return args0.lower() < args2.lower()
-            elif type(args0) is not type(args2):
-                (args0, args2) = _order_types(args0, args2)
-
-            return args0 < args2
-
-        elif operation == ">=":
-            if isinstance(args0, str) and isinstance(args2, str):
-                return args0.lower() >= args2.lower()
-            elif type(args0) is not type(args2):
-                (args0, args2) = _order_types(args0, args2)
-
-            return args0 >= args2
-
-        elif operation == "<=":
-            if isinstance(args0, str) and isinstance(args2, str):
-                return args0.lower() <= args2.lower()
-            elif type(args0) is not type(args2):
-                (args0, args2) = _order_types(args0, args2)
-
-            return args0 <= args2'''
-
-
 
 
     # def bool_func(self, args):

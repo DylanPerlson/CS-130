@@ -574,7 +574,7 @@ class Workbook:
 
 
                 #look for circular references
-                self.circ_ref_finder(sheet_name, curr_cell)
+                self._notify_helper(sheet_name, curr_cell)
                
 
                 
@@ -661,7 +661,7 @@ class Workbook:
     #Helper function to carry out depth for search for whole dependency graph
     def _dfs_helper(self, sheet_name, location, parent_dict, stack):
         curr_cell = sheet_name + '!' + location
-        cur_cell = curr_cell.lower()
+        curr_cell = curr_cell.lower()
         for next_cell in self.master_cell_dict[curr_cell]:
             if next_cell not in parent_dict:
                 parent_dict[next_cell] = curr_cell
@@ -1063,14 +1063,14 @@ class Workbook:
 
         return row, col
 
-    def add_notification_function(self, new_func):
+    def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
-    def circ_ref_finder(self, sheet_name, curr_cell, call_origin = None):
+    def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
         """add all of our cells to the evaluate again list if it is not in it already
         
-        This function finds circ references
+        This function finds circ references as well as notifying all of the functions when a cell changes
         """
        
         
@@ -1105,7 +1105,7 @@ class Workbook:
                     
                     #tell all of the cells that they have changed
                     self.cell_changed_dict[dependent] = True
-                    self.circ_ref_finder(split_cell_string[0], dependent)
+                    self._notify_helper(split_cell_string[0], dependent)
                     
             self.check_circ_ref.remove(curr_cell)
 

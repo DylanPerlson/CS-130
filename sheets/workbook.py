@@ -42,6 +42,7 @@ class Workbook:
 
         self.check_circ_ref = []
         self.evaluate_again = []
+        self.notifying_cells = []
 
 
     def move_cells(self, sheet_name, start_location,
@@ -572,10 +573,20 @@ class Workbook:
 
 
 
-
-                #look for circular references
+                #these are the cells that will be passed onto the notification functions
+                #needs to be reset each call
+                self.notifying_cells = []
+                #and add the current cell
+                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                #look for circular references and get the list of changed cells
                 self._notify_helper(sheet_name, curr_cell)
-               
+
+                #now we notify all of the functions of the cells that were changed
+                for func in self.notification_functions:
+                    #split_cell_string = curr_cell.split('!')
+                    func(self, self.notifying_cells)
+                   
+                
 
                 
                 #get the cell value so that we do not get a recursion depth error when getting long chains
@@ -1082,19 +1093,12 @@ class Workbook:
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                        self.cell_changed_dict[next_cell] = True
-                        #TODO Dylan should we just return here?
+                        break
 
-                #need to set it as not changed
-                self.cell_changed_dict[curr_cell.lower()] = False
+                
             return
 
-        for i in self.notification_functions:
-            split_cell_string = curr_cell.split('!')
-            if split_cell_string[0].lower() == sheet_name.lower():
-                i(self, split_cell_string[1])
-            else:
-                i(self,curr_cell)
+        
 
     #Iterate up through dependent cells of our current cell
         if curr_cell in self.master_cell_dict:
@@ -1105,6 +1109,9 @@ class Workbook:
                     
                     #tell all of the cells that they have changed
                     self.cell_changed_dict[dependent] = True
+                    #add the cell to list of cells to be notified of
+                    self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+                    #recurse
                     self._notify_helper(split_cell_string[0], dependent)
                     
             self.check_circ_ref.remove(curr_cell)

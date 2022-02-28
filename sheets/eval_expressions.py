@@ -67,6 +67,34 @@ def _get_value_as_string(curr_arg):
     else:
         return CellError(CellErrorType.TYPE_ERROR, "Argument is not a string")
 
+def _get_value_as_bool(curr_arg):
+    if isinstance(curr_arg, CellError) or isinstance(curr_arg, bool):
+        return curr_arg
+    elif curr_arg is None:
+        return False
+    else:
+        return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
+
+def _order_types(a):
+    if isinstance(a, bool):
+        return 3 # highest priority
+    elif isinstance(a, str):
+        return 2 # second highest priority
+    elif isinstance(a, decimal.Decimal):
+        return 1 # lowest priority
+    else:
+        return 0
+
+def _compare(a, op, b):
+    if op ==  '<':
+        return a < b
+    elif op ==  '>':
+        return a > b
+    elif op ==  '<=':
+        return a <= b
+    elif op ==  '>=':
+        return a >= b
+
 #Use this somewhere
 
 class RetrieveReferences(Visitor):
@@ -217,9 +245,7 @@ class EvalExpressions(Transformer):
     #### METHODS FOR BOOLEAN STUFF:
 
     def bool_lit(self, args):
-        print(args[0].lower())
         if args[0].lower() == "true":
-            print('here')
             return True
         elif args[0].lower() == "false":
             return False
@@ -232,23 +258,93 @@ class EvalExpressions(Transformer):
         args0 = args[0]
         args2 = args[2]
 
+
+        # TODO error propagation
+
+        if args0 is None and args2 is None:
+            pass # TODO implement this (look at the specs)
+
+        if args0 is None: # TODO same for args2
+            if isinstance(args2, str):
+                args0 = _get_value_as_string(args0)
+            elif isinstance(args2, decimal.Decimal):
+                args0 = _get_value_as_number(args0)
+            elif isinstance(args2, bool):
+                args0 = _get_value_as_bool(args0)
+            else:
+                pass # TODO
+
         if operation == "=" or operation == "==":
-            pass
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() == args2.lower()
+            else:
+                return args0 == args2
 
         elif operation == "<>" or operation == "!=":
-            pass
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() != args2.lower()
+            else:
+                return args0 != args2
 
-        elif operation == ">":
-            pass
+        # elif    operation == ">" or \
+        #         operation == ">" or \
+        #         operation == ">=" or \
+        #         operation == "<=":
+        #     if isinstance(args0, str) and isinstance(args2, str):
+        #         return eval(args0.lower() + operation + args2.lower())
+        #     elif type(args0) is not type(args2):
+        #         (args0, args2) = _order_types(args0, args2)
+
+        #     return eval(str(args0) + operation + str(args2))
+
+        elif operation == ">" or \
+                operation == "<" or \
+                operation == ">=" or \
+                operation == "<=":
+            if isinstance(args0, str) and isinstance(args2, str):
+                return _compare(args0.lower(), operation, args2.lower())
+            elif type(args0) is not type(args2):
+                args0 = _order_types(args0)
+                args2 = _order_types(args2)
+
+            return _compare(args0, operation, args2)
+
+        else:
+            pass # TODO something
+
+        '''elif operation == ">":
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() > args2.lower()
+            elif type(args0) is not type(args2):
+                (args0, args2) = _order_types(args0, args2)
+
+            return args0 > args2
 
         elif operation == "<":
-            pass
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() < args2.lower()
+            elif type(args0) is not type(args2):
+                (args0, args2) = _order_types(args0, args2)
+
+            return args0 < args2
 
         elif operation == ">=":
-            pass
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() >= args2.lower()
+            elif type(args0) is not type(args2):
+                (args0, args2) = _order_types(args0, args2)
+
+            return args0 >= args2
 
         elif operation == "<=":
-            pass
+            if isinstance(args0, str) and isinstance(args2, str):
+                return args0.lower() <= args2.lower()
+            elif type(args0) is not type(args2):
+                (args0, args2) = _order_types(args0, args2)
+
+            return args0 <= args2'''
+
+
 
 
     # def bool_func(self, args):

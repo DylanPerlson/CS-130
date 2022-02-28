@@ -1102,7 +1102,11 @@ class Workbook:
             self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
+                    
+                    #tell all of the cells that they have changed
+                    self.cell_changed_dict[dependent] = True
                     self.circ_ref_finder(split_cell_string[0], dependent)
+                    
             self.check_circ_ref.remove(curr_cell)
 
 #

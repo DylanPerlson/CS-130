@@ -5,6 +5,7 @@ import json
 from sheets.cell_error import CellError, CellErrorType
 
 from .sheet import Sheet
+import lark
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -44,6 +45,8 @@ class Workbook:
         self.check_circ_ref = []
         self.evaluate_again = []
         self.notifying_cells = []
+
+        self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 
 
     def move_cells(self, sheet_name, start_location,
@@ -146,7 +149,7 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e]._retrieve_cell_references(copy_dict[(r,c)])
+                            cell_list = self.sheets[e]._retrieve_cell_references(self, copy_dict[(r,c)])
 
                     for i in cell_list:
 
@@ -580,8 +583,10 @@ class Workbook:
                 #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #look for circular references and get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell) #TODO DTP make this not recursive
 
+                #TODO DTP make this not recursive, this may not be the 
+                #MAY NOT BE THE RECURSIVE ISSUE
+                self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
                 #now we notify all of the functions of the cells that were changed
                 for func in self.notification_functions:
                     #split_cell_string = curr_cell.split('!')
@@ -589,9 +594,8 @@ class Workbook:
 
 
 
-                #TODO DTP remove this get cell val after remove recursion issue
-                #get the cell value so that we do not get a recursion depth error when getting long chains
-                #i.get_cell_value(self,location.lower())
+                #keep this here so that we do not get recursion issues
+                i.get_cell_value(self,location.lower())
                 #return is needed so we do not raise a key error
                 return
 
@@ -767,10 +771,7 @@ class Workbook:
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
-                self._check_valid_cell(location)
                 workbook_instance = self
-                curr_cell = sheet_name + '!' + location
-                #if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
                 return i.get_cell_value(workbook_instance,location)
 
         #else raise a key error

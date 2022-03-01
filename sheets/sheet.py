@@ -68,8 +68,10 @@ class Sheet:
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
         
         #add all of the new cells to the master cell dict
+
+        
         workbook_instance.master_cell_dict[sheet_location] = []
-        for parent_cell in self._retrieve_cell_references(new_cell.contents):            
+        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):            
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell.lower())
                 
       
@@ -93,14 +95,14 @@ class Sheet:
         else:
             return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance, location)
 
-    def _retrieve_cell_references(self, contents):
+    def _retrieve_cell_references(self, workbook_instance, contents):
         """Helper function that returns the references in a cell's formula."""
         #add none case (Dylan)
         if contents is None:
             return []
-        parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         try:
-            formula = parser.parse(contents)
+            formula = workbook_instance.parser.parse(contents)
         except lark.exceptions.LarkError:
             # should not need a parse error here for this current use case (Dylan)
             return []

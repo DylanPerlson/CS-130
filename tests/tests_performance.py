@@ -7,7 +7,7 @@ def test_long_reference_chain():
 
     (_,name) = wb.new_sheet("sheet")
     wb.set_cell_contents(name, 'A1', '1')
-    length = 50
+    length = 100
 
     for i in range(2, length+1):
         location = 'A'+str(i)
@@ -162,4 +162,4 @@ if __name__ == '__main__':
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(3)
+    stats.sort_stats('cumtime').print_stats(5)

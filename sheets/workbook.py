@@ -42,6 +42,7 @@ class Workbook:
 
         self.check_circ_ref = []
         self.evaluate_again = []
+        self.notifying_cells = []
 
 
     def move_cells(self, sheet_name, start_location,
@@ -166,7 +167,7 @@ class Workbook:
                                 if abs_loc[-1].isdigit():
                                     abs_row = True
 
-                                # bc we implimented our helper wrong
+                                #swap bc we implimented our helper wrong
                                 abs_col, abs_row = abs_row, abs_col
 
                                 loc = ''.join(abs_loc)
@@ -189,7 +190,7 @@ class Workbook:
                                 replace_c = loc_col + delta_col
 
 
-                            # bc we implimented our helper wrong
+                            #swap bc we implimented our helper wrong
                             replace_r, replace_c = replace_c, replace_r
 
                             if abs_row is True and abs_col is False:
@@ -212,7 +213,7 @@ class Workbook:
 
 
                         else:
-                            print('problem')
+                            #print('problem')
                             raise ValueError()
 
 
@@ -370,12 +371,6 @@ class Workbook:
                     old_sheet = self.sheets[copy_index]
                     self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
 
-
-
-                    # for key in old_cells.keys():
-                    #     print(key)
-
-                    #     self.set_cell_contents(copy_sheet, key, old_cells[key].contents)
                     self.number_sheets = self.number_sheets + 1
                     return
                 else:
@@ -578,24 +573,24 @@ class Workbook:
 
 
 
-
-                #notify all the cells
+                #these are the cells that will be passed onto the notification functions
+                #needs to be reset each call
+                self.notifying_cells = []
+                #and add the current cell
+                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                #look for circular references and get the list of changed cells
                 self._notify_helper(sheet_name, curr_cell)
 
-
-                # now we need to notify all of our dependents
-                #self._dependencies_changed_helper(sheet_name, location)
-                #self.cell_changed_dict = dict.fromkeys( self.cell_changed_dict, True)
-                #print(self.master_cell_dict)
-                #print(self.cell_changed_dict)
-                #!!!DO NOT REMOVE THIS UNDER ANY CIRCUMSTANCES UNLESS
-                # CONSULTING WITH THE ENTIRE TEAM!!
-                self.get_cell_value(sheet_name, location)
+                #now we notify all of the functions of the cells that were changed
+                for func in self.notification_functions:
+                    #split_cell_string = curr_cell.split('!')
+                    func(self, self.notifying_cells)
 
 
-                #notify all the cells
-                self._notify_helper(sheet_name, curr_cell)
 
+
+                #get the cell value so that we do not get a recursion depth error when getting long chains
+                i.get_cell_value(self,location.lower())
                 #return is needed so we do not raise a key error
                 return
 
@@ -608,20 +603,43 @@ class Workbook:
 
 
 
-    def _dependencies_changed_helper(self, sheet_name, location):
-        sheet_location = sheet_name + '!' + location
-        sheet_location = sheet_location.lower()
+    # def _dependencies_changed_helper(self, sheet_name, location):
+    #     sheet_location = sheet_name + '!' + location
+    #     sheet_location = sheet_location.lower()
 
-        #for each dependent, tell it that is has changed
-        #and then tell their dependents
-        # if sheet_location in self.master_cell_dict:
+    #     #for each dependent, tell it that is has changed
+    #     #and then tell their dependents
+    #     # if sheet_location in self.master_cell_dict:
 
-        if sheet_location in self.master_cell_dict:
-            self.cell_changed_dict[sheet_location.lower] = True
-            for cells in self.master_cell_dict[sheet_location]:
-                    self.cell_changed_dict[cells.lower] = True
-                    splitting = cells.split('!')
-                    self._dependencies_changed_helper(splitting[0],splitting[1])
+    #     if sheet_location in self.master_cell_dict:
+    #         self.cell_changed_dict[sheet_location.lower] = True
+    #         for cells in self.master_cell_dict[sheet_location]:
+
+    #             #check if a circ ref is being found
+    #             split_name = sheet_location.split('!')
+    #             row, col = self._get_col_and_row(split_name[1])
+    #             it = -1
+    #             for sheet in self.sheets:
+    #                 it += 1
+    #                 if sheet.sheet_name.lower() == split_name[0].lower():
+    #                     if isinstance(self.sheets[it].cells[(row,col)].evaluated_value, CellError):
+    #                         if self.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
+    #                             #print('circ ref found')
+    #                             return 'CircRef'
+
+    #                     #break out of for loop
+    #                     break
+
+
+
+    #             #now we continue calling all of our own dependencies, and breaking if there was a circ ref
+    #             self.cell_changed_dict[cells.lower] = True
+    #             splitting = cells.split('!')
+    #             return_val = self._dependencies_changed_helper(splitting[0],splitting[1])
+
+    #             #check if there is a circ ref
+    #             if return_val == 'CircRef':
+    #                 return return_val
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -654,7 +672,7 @@ class Workbook:
     #Helper function to carry out depth for search for whole dependency graph
     def _dfs_helper(self, sheet_name, location, parent_dict, stack):
         curr_cell = sheet_name + '!' + location
-        cur_cell = curr_cell.lower()
+        curr_cell = curr_cell.lower()
         for next_cell in self.master_cell_dict[curr_cell]:
             if next_cell not in parent_dict:
                 parent_dict[next_cell] = curr_cell
@@ -756,14 +774,8 @@ class Workbook:
                 curr_cell = sheet_name + '!' + location
                 #if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
                 return i.get_cell_value(workbook_instance,location)
-                # else: Tempt comment out this
-                #     components = self.kosaraju(sheet_name.lower(), location)
-                #     for curr_compoent in components:
-                #         if len(curr_compoent) > 1:
-                #             for next_cell in curr_compoent:
-                #                 next_cell.evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular Reference")
-                #                ### self.cell_changed_dict[sheet_name.lower()+'!'+location] = False
 
+        #else raise a key error
         raise KeyError()
 
     def _check_valid_cell (self, location):
@@ -1062,16 +1074,17 @@ class Workbook:
 
         return row, col
 
-    def add_notification_function(self, new_func):
+    def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
     def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
-        """add all of our cells to the evaluate again list if it is not in it already"""
-        # if curr_cell not in self.evaluate_again:
-        #     self.evaluate_again.append(curr_cell)
+        """add all of our cells to the evaluate again list if it is not in it already
 
-        #if call_origin == "get_cell_value":
+        This function finds circ references as well as notifying all of the functions when a cell changes
+        """
+
+
         if curr_cell in self.check_circ_ref:
             # CIRC ERRORS
             for next_cell in self.check_circ_ref:
@@ -1079,21 +1092,13 @@ class Workbook:
                 row, col = self._get_col_and_row(curr_cell_split[1])
                 for i in range(len(self.sheets)):
                     if self.sheets[i].sheet_name.lower() == sheet_name.lower():
-                        # if (self.sheets[i].cells[(row,col)].circ_ref_count < 10): #CHECK IF WE LOOP alot
-                        #     self.sheets[i].cells[(row,col)].circ_ref_count += 1
-                        # if (self.sheets[i].cells[(row,col)].circ_ref_count > 10):
                         self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                            # self.cell_changed_dict[next_cell] = False
-                #need to set it as not changed
-                self.cell_changed_dict[curr_cell.lower()] = False
+                        break
+
+
             return
 
-        for i in self.notification_functions:
-            split_cell_string = curr_cell.split('!')
-            if split_cell_string[0].lower() == sheet_name.lower():
-                i(self, split_cell_string[1])
-            else:
-                i(self,curr_cell)
+
 
     #Iterate up through dependent cells of our current cell
         if curr_cell in self.master_cell_dict:
@@ -1101,7 +1106,14 @@ class Workbook:
             self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
+
+                    #tell all of the cells that they have changed
+                    self.cell_changed_dict[dependent] = True
+                    #add the cell to list of cells to be notified of
+                    self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+                    #recurse
                     self._notify_helper(split_cell_string[0], dependent)
+
             self.check_circ_ref.remove(curr_cell)
 
 #

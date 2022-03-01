@@ -1,7 +1,6 @@
 """Object class for individual cell"""
 #from binascii import a2b_base64
 import decimal
-#from locale import ABDAY_1
 
 import lark
 
@@ -18,7 +17,9 @@ class Cell():
         self.evaluated_value = None
         self.value = None
         self.parsed_contents = ''
-        self.not_changed = False
+        
+        
+
 
 
         # check that the cell is either a string or None
@@ -53,33 +54,20 @@ class Cell():
             self.type = "STRING"
             self.value = str(contents)
 
-    def _check_if_changed(self,workbook_instance, sheet_location):
-
-        #also if all of our dependencies were not change
-        if sheet_location.lower() in workbook_instance.master_cell_dict:
-            for i in workbook_instance.master_cell_dict[sheet_location.lower()]:
-                if i in workbook_instance.cell_changed_dict:
-                    self._check_if_changed(workbook_instance, i)
-                    if workbook_instance.cell_changed_dict[i.lower()] == True:
-                        self.not_changed = False
-
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
+        #DELTE THIS. THIS IS TESTING PERFORMANCE
+        
         sheet_location = sheet_instance.sheet_name + '!' + location
 
-        #if that cell has been changed just return the evaluated value
-
-
-        #self._check_if_changed(workbook_instance, sheet_location.lower())
-
-        # if self.not_changed == True and workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
-        #     return self.evaluated_value #TODO we need to change this
+        if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+            return self.evaluated_value 
 
 
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
-        self.not_changed = True
+        #self.not_changed = True
 
 
         #None case
@@ -143,7 +131,6 @@ class Cell():
         except(RuntimeError, RecursionError): # this happens if the error is either of those
             self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
             "Circular Reference", None)
-
             return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)

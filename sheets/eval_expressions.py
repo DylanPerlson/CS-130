@@ -2,7 +2,7 @@
 
 import decimal
 
-from lark import Transformer, Visitor
+from lark import Transformer, Visitor, Token
 
 from .cell_error import CellError, CellErrorType
 
@@ -135,7 +135,7 @@ class RetrieveReferences(Visitor):
 
 
 class EvalExpressions(Transformer):
-    """ used to evaluate an expression from the parsed formula: """
+    """Used to evaluate an expression from the parsed formula:"""
 
     def __init__(self, workbook_instance, sheet_instance):
         """Initializes class."""
@@ -302,8 +302,16 @@ class EvalExpressions(Transformer):
             pass # TODO something
 
 
-    # def bool_func(self, args):
+    def bool_func(self, args):
         # pseudocode:
         #     import some new module
         #     pass args to module
         #     return the solution
+
+        for i, arg in enumerate(args):
+            if isinstance(arg, Token):
+                args[i] = args[i].value
+
+        # args is now a nice list with the entries
+
+        return

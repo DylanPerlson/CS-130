@@ -35,7 +35,7 @@ class Workbook:
         self.number_sheets = 0
         self.notification_functions = []
         self.user_defined_functions = []
-        self.master_cell_dict = {}
+        self.master_cell_dict = {} #master_cell_dict[child] = [list of parent cells/ cells that reference child]
         self.cell_changed_dict = {}
         self.visited_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
@@ -580,7 +580,7 @@ class Workbook:
                 #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #look for circular references and get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell)
+                self._notify_helper(sheet_name, curr_cell) #TODO DTP make this not recursive
 
                 #now we notify all of the functions of the cells that were changed
                 for func in self.notification_functions:
@@ -589,9 +589,9 @@ class Workbook:
 
 
 
-
+                #TODO DTP remove this get cell val after remove recursion issue
                 #get the cell value so that we do not get a recursion depth error when getting long chains
-                i.get_cell_value(self,location.lower())
+                #i.get_cell_value(self,location.lower())
                 #return is needed so we do not raise a key error
                 return
 
@@ -764,9 +764,6 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        # row,col = self._get_col_and_row(location)
-        # if row > MAX_ROW or col > MAX_COL:
-        #     return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():

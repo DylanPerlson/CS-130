@@ -34,6 +34,7 @@ class Workbook:
         self.sheets = []
         self.number_sheets = 0
         self.notification_functions = []
+        self.user_defined_functions = []
         self.master_cell_dict = {}
         self.cell_changed_dict = {}
         self.visited_cell_dict = {}
@@ -1073,6 +1074,14 @@ class Workbook:
                 break
 
         return row, col
+    
+    def add_user_function(self, new_func):
+        self.user_defined_functions.append(new_func)
+    
+    def run_user_function(self, function, arguments):
+        if function not in self.user_defined_functions:
+            raise KeyError
+
 
     def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""

@@ -25,10 +25,12 @@ class Aaron(unittest.TestCase):
         print('.')
         wb.set_cell_contents(name,'A1','1') 
         wb.set_cell_contents(name,'A2',"hi")
-        wb.set_cell_contents(name,'A3',"=A1 + 2")  #just a3 here
+        wb.set_cell_contents(name,'A3',"=A1 + 2")  
         wb.set_cell_contents(name,'A1','2')
+        print('2 above')
         wb.set_cell_contents(name,'A4', '=A3')
         wb.set_cell_contents(name,'A1', '5')
+        print('3 above')
 
     def test_circular_references(self):
         wb = Workbook()

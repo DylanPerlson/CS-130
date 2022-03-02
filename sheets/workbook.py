@@ -6,6 +6,8 @@ from sheets.cell_error import CellError, CellErrorType
 
 from .sheet import Sheet
 import lark
+import sys
+
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -48,6 +50,7 @@ class Workbook:
         self.children_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        sys.setrecursionlimit(100000)
 
 
     def move_cells(self, sheet_name, start_location,

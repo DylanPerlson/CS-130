@@ -315,10 +315,14 @@ class EvalExpressions(Transformer):
                 args[i] = args[i].value
 
         function_key = args[0]
+        if len(args) == 1 and function_key != "VERSION":
+            return CellError(CellErrorType.TYPE_ERROR, "At least 1 argument must be present")
+
         args = args[1:]
 
         if function_key not in self.workbook_instance.function_directory.keys():
-            raise Exception(f'"{function_key}" not recognized as function') # TODO CellError should be passed instead
+            return CellError(CellErrorType.BAD_NAME, f'"{function_key}" not recognized as function')
+            #raise Exception(f'"{function_key}" not recognized as function') # TODO CellError should be passed instead
 
         function_val = self.workbook_instance.function_directory[function_key]
         # function = 'and_func' # only for testing

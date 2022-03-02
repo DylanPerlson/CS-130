@@ -18,12 +18,19 @@ class Pieter(unittest.TestCase):
     #     self.assertEqual(content1, "one quote: '")
 
     # # look at the print output to run this test
-    # def test_lark_func_parsing(self):
-    #     wb = Workbook()
-    #     (_,sh) = wb.new_sheet()
+    def test_lark_func_parsing(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
 
-    #     wb.set_cell_contents(sh, 'a1', '=AND(5 < 6 , tester(True,false,6), OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
-    #     print(wb.get_cell_value(sh, 'A1').pretty())
+        wb.set_cell_contents(sh, 'a1', '=AND(5 < 6 , XOR(True,false,6), OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
+        print(wb.get_cell_value(sh, 'A1'))
+
+    def test_lark_func_dir(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'a1', '=AND(true, false)')
+        print(wb.get_cell_value(sh, 'A1'))
 
     def test_lark_bool_lit(self):
         wb = Workbook()

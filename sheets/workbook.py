@@ -45,6 +45,21 @@ class Workbook:
         self.evaluate_again = []
         self.notifying_cells = []
 
+        self.function_directory =   {
+            'AND': 'and_func',
+            'OR': 'or_func',
+            'NOT': 'not_func',
+            'XOR': 'xor_func',
+            'EXACT': 'exact_func',
+            'IF': 'if_func',
+            'IFERROR': 'irerror_func',
+            'CHOOSE': 'choose_func',
+            'ISBLANK': 'isblank_func',
+            'ISERROR': 'iserror_func',
+            'VERSION': 'version_func',
+            'INDIRECT': 'indirect_func'
+            }
+
 
     def move_cells(self, sheet_name, start_location,
             end_location, to_location, to_sheet = None):
@@ -1074,10 +1089,10 @@ class Workbook:
                 break
 
         return row, col
-    
+
     def add_user_function(self, new_func):
         self.user_defined_functions.append(new_func)
-    
+
     def run_user_function(self, function, arguments):
         if function not in self.user_defined_functions:
             raise KeyError

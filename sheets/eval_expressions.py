@@ -5,6 +5,7 @@ import decimal
 from lark import Transformer, Visitor, Token
 
 from .cell_error import CellError, CellErrorType
+from .functions import Functions
 
 error_literals = ['#REF!', '#ERROR!', '#CIRCREF!', '#VALUE!', '#DIV/0!', '#NAME?']
 
@@ -141,6 +142,7 @@ class EvalExpressions(Transformer):
         """Initializes class."""
         self.workbook_instance = workbook_instance
         self.sheet_instance = sheet_instance
+        self.functions = Functions()
 
     def error(self, args):
         """If an error is encountered, the error is propagated"""
@@ -312,6 +314,16 @@ class EvalExpressions(Transformer):
             if isinstance(arg, Token):
                 args[i] = args[i].value
 
+        function = args[0]
+        args = args[1:]
+
+        if function not in self.workbook_instance.function_directory.keys():
+            raise Exception(f'{function} not recognized as function') # TODO CellError should be passed instead
+
+        function_dir = self.workbook_instance.function_directory[function]
+        # function = 'and_func' # only for testing
+
+
         # args is now a nice list with the entries
 
-        return
+        return self.functions(function_dir, args)

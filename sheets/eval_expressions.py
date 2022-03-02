@@ -55,8 +55,10 @@ def _get_value_as_number(curr_arg):
             return decimal.Decimal(curr_arg)
         else:
             return CellError(CellErrorType.TYPE_ERROR, "String cannot be parsed into a number")
-    else:
-        return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
+    elif isinstance(curr_arg, bool):
+        return int(curr_arg)
+
+    return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
@@ -65,16 +67,28 @@ def _get_value_as_string(curr_arg):
         return ''
     elif isinstance(curr_arg, decimal.Decimal):
         return str(curr_arg)
-    else:
-        return CellError(CellErrorType.TYPE_ERROR, "Argument is not a string")
+    elif isinstance(curr_arg, bool):
+        return str(curr_arg).upper()
+
+    return CellError(CellErrorType.TYPE_ERROR, "Argument is not a string")
 
 def _get_value_as_bool(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, bool):
         return curr_arg
     elif curr_arg is None:
         return False
-    else:
-        return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
+    elif isinstance(curr_arg, str):
+        if curr_arg.lower() == 'true':
+            return True
+        elif curr_arg.lower() == 'false':
+            return False
+    elif isinstance(curr_arg, decimal.Decimal):
+        if curr_arg == 0:
+            return False
+        else:
+            return True
+
+    return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
 
 def _order_types(a):
     if isinstance(a, bool):
@@ -260,21 +274,34 @@ class EvalExpressions(Transformer):
         args0 = args[0]
         args2 = args[2]
 
-
-        # TODO error propagation
+        if isinstance(args0, CellError) and isinstance(args2, CellError):
+            pass # TODO return error with highest priority
+        elif isinstance(args0, CellError):
+            return args0
+        elif isinstance(args2, CellError):
+            return args2
 
         if args0 is None and args2 is None:
-            pass # TODO implement this (look at the specs)
+            if operation in ['=', '==', '>=', '<=']:
+                return True
+            else:
+                return False
 
-        if args0 is None: # TODO same for args2
+        if args0 is None:
             if isinstance(args2, str):
                 args0 = _get_value_as_string(args0)
             elif isinstance(args2, decimal.Decimal):
                 args0 = _get_value_as_number(args0)
             elif isinstance(args2, bool):
                 args0 = _get_value_as_bool(args0)
-            else:
-                pass # TODO
+
+        if args2 is None:
+            if isinstance(args2, str):
+                args2 = _get_value_as_string(args2)
+            elif isinstance(args2, decimal.Decimal):
+                args2 = _get_value_as_number(args2)
+            elif isinstance(args2, bool):
+                args2 = _get_value_as_bool(args2)
 
         if operation == "=" or operation == "==":
             if isinstance(args0, str) and isinstance(args2, str):

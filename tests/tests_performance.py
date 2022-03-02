@@ -14,9 +14,9 @@ def test_long_reference_chain():
         location_prev = 'A'+str(i-1)
 
         wb.set_cell_contents(name, location, '=1+'+location_prev)
-        wb.get_cell_value(name, location)
+        #wb.get_cell_value(name, location)
 
-    print(wb.get_cell_value(name, location))
+    #print(wb.get_cell_value(name, location))
     assert wb.get_cell_value(name, location) == length
     #print(wb.get_cell_value(name, location))
 
@@ -107,7 +107,7 @@ def test_fibonacci():
     wb.set_cell_contents(sheet, 'A1', '1')
     wb.set_cell_contents(sheet, 'A2', '1')
 
-    length = 50
+    length = 200
 
     for i in range(3, length+1):
         location = 'A'+str(i)
@@ -162,4 +162,4 @@ if __name__ == '__main__':
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(3)
+    stats.sort_stats('cumtime').print_stats(5)

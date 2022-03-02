@@ -56,7 +56,6 @@ class Cell():
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
-        #DELTE THIS. THIS IS TESTING PERFORMANCE
         
         sheet_location = sheet_instance.sheet_name + '!' + location
 
@@ -67,7 +66,7 @@ class Cell():
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
-        #self.not_changed = True
+      
 
 
         #None case
@@ -98,8 +97,10 @@ class Cell():
         if self.parse_necessary:
             # trying to parse
             try:
-                parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-                self.parsed_contents = parser.parse(self.contents)
+                # only needs to happen once 
+                #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+                #self.parsed_contents = workbook_instance.parser.parse(self.contents)
+                self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
@@ -157,6 +158,7 @@ class Cell():
         helper function to remove trailing zeros from decimal.Decimal()
         from: https://docs.python.org/3/library/decimal.html#decimal-faq
         """
+        #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
             return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
         else:

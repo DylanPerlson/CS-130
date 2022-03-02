@@ -52,7 +52,7 @@ class Workbook:
             'XOR': 'xor_func',
             'EXACT': 'exact_func',
             'IF': 'if_func',
-            'IFERROR': 'irerror_func',
+            'IFERROR': 'iferror_func',
             'CHOOSE': 'choose_func',
             'ISBLANK': 'isblank_func',
             'ISERROR': 'iserror_func',
@@ -794,7 +794,7 @@ class Workbook:
         #else raise a key error
         raise KeyError()
 
-    def _check_valid_cell (self, location):
+    def _check_valid_cell(self, location):
         """Check if the cell location is valid """
         if not isinstance(location, str):
             return False

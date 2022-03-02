@@ -14,12 +14,12 @@ class Functions:
     def and_func(self, args):
         if args[0] is None or args[1] is None:
             return CellError(CellErrorType.BAD_REFERENCE, "Invalid arguments")
-        return args[0] and args[1]
+        return all(args)
 
     def or_func(self, args):
         if args[0] is None or args[1] is None:
             return CellError(CellErrorType.BAD_REFERENCE, "Invalid arguments")
-        return args[0] or args[1]
+        return any(args)
 
     def not_func(self, args):
         if args[0] is None:
@@ -30,7 +30,9 @@ class Functions:
     def xor_func(self, args):
         if args[0] is None or args[1] is None:
             return CellError(CellErrorType.BAD_REFERENCE, "Invalid arguments")
-        return args[0] and args[1]
+        for i, arg in enumerate(args):
+            args[i] = int(arg)
+        return # TODO
 
     #String match
     def exact_func(self, args):

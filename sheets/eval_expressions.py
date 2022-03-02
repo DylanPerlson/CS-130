@@ -314,16 +314,16 @@ class EvalExpressions(Transformer):
             if isinstance(arg, Token):
                 args[i] = args[i].value
 
-        function = args[0]
+        function_key = args[0]
         args = args[1:]
 
-        if function not in self.workbook_instance.function_directory.keys():
-            raise Exception(f'{function} not recognized as function') # TODO CellError should be passed instead
+        if function_key not in self.workbook_instance.function_directory.keys():
+            raise Exception(f'"{function_key}" not recognized as function') # TODO CellError should be passed instead
 
-        function_dir = self.workbook_instance.function_directory[function]
+        function_val = self.workbook_instance.function_directory[function_key]
         # function = 'and_func' # only for testing
 
 
         # args is now a nice list with the entries
 
-        return self.functions(function_dir, args)
+        return self.functions(function_val, args)

@@ -45,6 +45,7 @@ class Workbook:
         self.check_circ_ref = []
         self.evaluate_again = []
         self.notifying_cells = []
+        self.children_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
 
@@ -575,8 +576,7 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-
-
+                
                 #these are the cells that will be passed onto the notification functions
                 #needs to be reset each call
                 self.notifying_cells = []
@@ -594,8 +594,11 @@ class Workbook:
 
 
 
-                #keep this here so that we do not get recursion issues
-                i.get_cell_value(self,location.lower())
+                #keep this here so that we do not get recursion issues, but it breaks topological?
+                #i.get_cell_value(self,location.lower())
+                #tell parents that there is a change
+                # for d in self.master_cell_dict[curr_cell]:
+                #     self.cell_changed_dict[d] = True
                 #return is needed so we do not raise a key error
                 return
 
@@ -1108,14 +1111,15 @@ class Workbook:
 
 
     #Iterate up through dependent cells of our current cell
-        if curr_cell in self.master_cell_dict:
-            dependents_list = self.master_cell_dict[curr_cell]
+        if curr_cell in self.children_dict:
+            dependents_list = self.children_dict[curr_cell]
             self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
 
                     #tell all of the cells that they have changed
                     self.cell_changed_dict[dependent] = True
+                    
                     #add the cell to list of cells to be notified of
                     self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
                     #recurse

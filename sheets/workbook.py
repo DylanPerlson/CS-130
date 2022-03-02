@@ -595,7 +595,7 @@ class Workbook:
 
 
                 #keep this here so that we do not get recursion issues, but it breaks topological?
-                #i.get_cell_value(self,location.lower())
+                i.get_cell_value(self,location.lower())
                 #tell parents that there is a change
                 # for d in self.master_cell_dict[curr_cell]:
                 #     self.cell_changed_dict[d] = True

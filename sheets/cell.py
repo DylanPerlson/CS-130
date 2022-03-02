@@ -160,6 +160,16 @@ class Cell():
         """
         #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
-            return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
+            d = str(d)
+            d_split = d.split('.') 
+            #case of no decimal points
+            if len(d_split) == 1:
+                return decimal.Decimal(d)
+            #case of decimal
+            else:
+                d_split[1] = d_split[1].rstrip('0')
+                d = d_split[0] + '.' + d_split[1]
+                return decimal.Decimal(d)
         else:
             return d
+            

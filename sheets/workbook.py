@@ -34,7 +34,6 @@ class Workbook:
         self.sheets = []
         self.number_sheets = 0
         self.notification_functions = []
-        self.user_defined_functions = []
         self.master_cell_dict = {}
         self.cell_changed_dict = {}
         self.visited_cell_dict = {}

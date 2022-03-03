@@ -195,7 +195,7 @@ class EvalExpressions(Transformer):
         args2 = _get_value_as_number(args[2])
         # Determine return error based on priority in cell_error.py
         if isinstance(args0, CellError) and isinstance(args2, CellError):
-            if args0 < args2:
+            if args0.get_type().value < args2.get_type().value:
                 return args0
             else:
                 return args2
@@ -217,7 +217,7 @@ class EvalExpressions(Transformer):
         args2 = _get_value_as_number(args[2])
         # Determine return error based on priority in cell_error.py
         if isinstance(args0, CellError) and isinstance(args2, CellError):
-            if args0 < args2:
+            if args0.get_type().value < args2.get_type().value:
                 return args0
             else:
                 return args2
@@ -244,7 +244,7 @@ class EvalExpressions(Transformer):
 
         # Determine return error based on priority in cell_error.py
         if isinstance(args0, CellError) and isinstance(args1, CellError):
-            if args0 < args1:
+            if args0.get_type().value < args1.get_type().value:
                 return args0
             else:
                 return args1

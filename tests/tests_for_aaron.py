@@ -86,6 +86,21 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A3'), False)
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
+    
+    def test_error_priority(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A2','=#ERROR! * #REF!')
+        wb.set_cell_contents(name,'A3','=#REF! * #ERROR!')
+        wb.set_cell_contents(name,'A5','=#REF! + #NAME?')
+        wb.set_cell_contents(name,'A6','=#DIV/0! + #VALUE!')
+        wb.set_cell_contents(name,'A7','=#VALUE! & #ERROR!')
+
+        self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A3').get_type(),CellErrorType.PARSE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.BAD_REFERENCE)
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A7').get_type(),CellErrorType.PARSE_ERROR)
 
 
 

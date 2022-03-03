@@ -26,7 +26,7 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_func : BOOL_FUNC "(" [ base ["," (base)]* ] ")"
+?bool_func : BOOL_FUNC "(" [ base ["," (base)]* ] ")" -> bool_func
       // | BOOL_FUNC_1 "(" [ bool ] ")"
       // | BOOL_FUNC_2 "(" [ bool "," bool ] ")"
 

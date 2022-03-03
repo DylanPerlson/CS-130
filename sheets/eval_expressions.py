@@ -168,7 +168,7 @@ class EvalExpressions(Transformer):
         """If a number is encountered, it is put into the right format."""
         d = decimal.Decimal(args[0])
         return self.remove_trailing_zeros(d)
-        
+
 
     def string(self, args):
         """If a string is encountered, it is put into the right format."""
@@ -298,7 +298,10 @@ class EvalExpressions(Transformer):
         args2 = args[2]
 
         if isinstance(args0, CellError) and isinstance(args2, CellError):
-            pass # TODO return error with highest priority
+            if args0 < args2:
+                return args0
+            else:
+                return args2
         elif isinstance(args0, CellError):
             return args0
         elif isinstance(args2, CellError):
@@ -353,12 +356,12 @@ class EvalExpressions(Transformer):
         else:
             pass # TODO something
 
-    
+
     def remove_trailing_zeros(self, d):
         #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
             d = str(d)
-            d_split = d.split('.') 
+            d_split = d.split('.')
             #case of no decimal points
             if len(d_split) == 1:
                 return decimal.Decimal(d)

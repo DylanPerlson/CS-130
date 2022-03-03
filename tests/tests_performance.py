@@ -14,9 +14,9 @@ def test_long_reference_chain():
         location_prev = 'A'+str(i-1)
 
         wb.set_cell_contents(name, location, '=1+'+location_prev)
-        wb.get_cell_value(name, location)
+        #wb.get_cell_value(name, location)
 
-    print(wb.get_cell_value(name, location))
+    #print(wb.get_cell_value(name, location))
     assert wb.get_cell_value(name, location) == length
     #print(wb.get_cell_value(name, location))
 
@@ -107,7 +107,7 @@ def test_fibonacci():
     wb.set_cell_contents(sheet, 'A1', '1')
     wb.set_cell_contents(sheet, 'A2', '1')
 
-    length = 50
+    length = 3
 
     for i in range(3, length+1):
         location = 'A'+str(i)
@@ -116,8 +116,9 @@ def test_fibonacci():
         wb.set_cell_contents(sheet, location, '=' + location_prev1 + '+' + location_prev2)
 
     cell_value = wb.get_cell_value(sheet, location)
-    fibo_output = _fibonacci(length)
-    assert cell_value == fibo_output, f'get_cell_value should be {fibo_output}, but is {cell_value}'
+    print(cell_value)
+    #print(fibo_output)
+    #assert cell_value == fibo_output, f'get_cell_value should be {fibo_output}, but is {cell_value}'
 
 # helper function for nth Fibonacci number
 def _fibonacci(n):
@@ -152,14 +153,14 @@ if __name__ == '__main__':
     pr = cProfile.Profile()
     pr.enable()
 
-    test_long_reference_chain()
+    #test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    #test_fibonacci()
+    test_fibonacci()
     # test_cell_cycle()
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(3)
+    stats.sort_stats('cumtime').print_stats(5)

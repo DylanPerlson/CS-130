@@ -5,6 +5,9 @@ import json
 from sheets.cell_error import CellError, CellErrorType
 
 from .sheet import Sheet
+import lark
+import sys
+
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -34,7 +37,8 @@ class Workbook:
         self.sheets = []
         self.number_sheets = 0
         self.notification_functions = []
-        self.master_cell_dict = {}
+        self.user_defined_functions = []
+        self.master_cell_dict = {} #master_cell_dict[child] = [list of parent cells/ cells that reference child]
         self.cell_changed_dict = {}
         self.visited_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
@@ -43,6 +47,10 @@ class Workbook:
         self.check_circ_ref = []
         self.evaluate_again = []
         self.notifying_cells = []
+        self.children_dict = {}
+
+        self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        sys.setrecursionlimit(100000)
 
         self.function_directory =   {
             'AND': 'and_func',
@@ -160,7 +168,7 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e]._retrieve_cell_references(copy_dict[(r,c)])
+                            cell_list = self.sheets[e]._retrieve_cell_references(self, copy_dict[(r,c)])
 
                     for i in cell_list:
 
@@ -586,16 +594,17 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-
-
+                
                 #these are the cells that will be passed onto the notification functions
                 #needs to be reset each call
                 self.notifying_cells = []
                 #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #look for circular references and get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell)
 
+                #TODO DTP make this not recursive, this may not be the 
+                #MAY NOT BE THE RECURSIVE ISSUE
+                self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
                 #now we notify all of the functions of the cells that were changed
                 for func in self.notification_functions:
                     #split_cell_string = curr_cell.split('!')
@@ -603,9 +612,11 @@ class Workbook:
 
 
 
-
-                #get the cell value so that we do not get a recursion depth error when getting long chains
+                #keep this here so that we do not get recursion issues, but it breaks topological?
                 i.get_cell_value(self,location.lower())
+                #tell parents that there is a change
+                # for d in self.master_cell_dict[curr_cell]:
+                #     self.cell_changed_dict[d] = True
                 #return is needed so we do not raise a key error
                 return
 
@@ -778,16 +789,10 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        # row,col = self._get_col_and_row(location)
-        # if row > MAX_ROW or col > MAX_COL:
-        #     return CellError(CellErrorType.BAD_REFERENCE, 'bad reference')
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
-                self._check_valid_cell(location)
                 workbook_instance = self
-                curr_cell = sheet_name + '!' + location
-                #if curr_cell not in self.master_cell_dict: #self.master_cell_dict[curr_cell] == []:
                 return i.get_cell_value(workbook_instance,location)
 
         #else raise a key error
@@ -1124,14 +1129,15 @@ class Workbook:
 
 
     #Iterate up through dependent cells of our current cell
-        if curr_cell in self.master_cell_dict:
-            dependents_list = self.master_cell_dict[curr_cell]
+        if curr_cell in self.children_dict:
+            dependents_list = self.children_dict[curr_cell]
             self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
 
                     #tell all of the cells that they have changed
                     self.cell_changed_dict[dependent] = True
+                    
                     #add the cell to list of cells to be notified of
                     self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
                     #recurse

@@ -26,8 +26,10 @@ class Cell():
         if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
 
+        #TODO return 0 for NONE
+
         # Determine Cell Type
-        if str(contents) == "" or str(contents).isspace():
+        elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
             self.content = None
             self.value = None
@@ -56,7 +58,6 @@ class Cell():
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
-        #DELTE THIS. THIS IS TESTING PERFORMANCE
         
         sheet_location = sheet_instance.sheet_name + '!' + location
 
@@ -67,7 +68,7 @@ class Cell():
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
-        #self.not_changed = True
+      
 
 
         #None case
@@ -98,8 +99,10 @@ class Cell():
         if self.parse_necessary:
             # trying to parse
             try:
-                parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-                self.parsed_contents = parser.parse(self.contents)
+                # only needs to happen once 
+                #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+                #self.parsed_contents = workbook_instance.parser.parse(self.contents)
+                self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
@@ -110,6 +113,10 @@ class Cell():
         try:
             evaluation =\
                 EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
+                #TODO DTP FIX THIS
+            if evaluation is None:
+                self.evaluated_value = decimal.Decimal('0')
+                return self.evaluated_value
             if isinstance(evaluation, CellError):
                 self.evaluated_value = evaluation
                 return self.evaluated_value
@@ -153,11 +160,17 @@ class Cell():
             return False
 
     def remove_trailing_zeros(self, d):
-        """
-        helper function to remove trailing zeros from decimal.Decimal()
-        from: https://docs.python.org/3/library/decimal.html#decimal-faq
-        """
         if isinstance(d,decimal.Decimal):
-            return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
+            d = str(d)
+            d_split = d.split('.') 
+            #case of no decimal points
+            if len(d_split) == 1:
+                return decimal.Decimal(d)
+            #case of decimal
+            else:
+                d_split[1] = d_split[1].rstrip('0')
+                d = d_split[0] + '.' + d_split[1]
+                return decimal.Decimal(d)
         else:
             return d
+            

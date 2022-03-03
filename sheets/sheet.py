@@ -43,66 +43,51 @@ class Sheet:
     def set_cell_contents(self, workbook_instance, location, contents):
         """Set the contents of the specified cell on this sheet."""
 
-        #first we need to remove any parent dependents if it exists
+        #check if we are trying to get an out of bound cell
         row, col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError()
 
+        #update the cell extent
         if row > self.extent[0]:
             self.extent[0] = row
         if col > self.extent[1]:
             self.extent[1] = col
 
+
+        #stash old cell 
+        prev_cell = None
         if (row,col) in self.cells:
-            curr_cell = self.cells[(row,col)]
-            if curr_cell.type == "FORMULA":
-                prev_contents = curr_cell.contents
-                #notify parent cells to remove this cell from their dependents list
-                #parent_cell sheet_name!A1
-                for parent_cell in self._retrieve_cell_references(prev_contents):
-                    # reminder our rows and cols are switch, but we need to keep it this way
-                    #remove current cell
-                    removing_entry = self.sheet_name.lower() + '!' + location
+            prev_cell = self.cells[(row,col)]
 
-                    workbook_instance.master_cell_dict[(parent_cell.lower())].remove(removing_entry.lower())
-
-        self.cells[(row,col)] = Cell(contents)
+        #update cell 
+        new_cell = Cell(contents)
+        self.cells[(row,col)] = new_cell
 
 
-        #notify the parent cells to add this cell as a dependent
-        curr_cell = self.cells[(row,col)]
-        if curr_cell in ERROR_LITERALS:
-            return
-        elif curr_cell.type == "FORMULA":
-            prev_contents = curr_cell.contents
+        sheet_location = self.sheet_name.lower() + '!' + location.lower()
+        
+        #add all of the new cells to the master cell dict
+
+        
+        
 
 
-            #tell dependents that they need to re-evaluate again
-            sheet_location = self.sheet_name.lower()+'!'+location.lower()
-            workbook_instance.cell_changed_dict[sheet_location] = True
-            if sheet_location in workbook_instance.master_cell_dict:
-                for dependents in workbook_instance.master_cell_dict[sheet_location]:
-                    workbook_instance.cell_changed_dict[dependents.lower()] = True
-
-
-            parent_cells = self._retrieve_cell_references(prev_contents)
-            if isinstance(parent_cells, CellError):
-                return
-            else:
-                #notify parent cells to remove this cell from their dependents list
-                for parent_cell in parent_cells:
-                    # reminder our rows and cols are switch, but we need to keep it this way
-                    #add current cell
-
-                    #create the list if it does not exist
-                    if parent_cell.lower() not in workbook_instance.master_cell_dict:
-                        workbook_instance.master_cell_dict[(parent_cell.lower())] = []
-
-                    appending_entry = self.sheet_name.lower()  + '!' + location.lower()
-                    #add this cell to our parents dependency list
-                    workbook_instance.master_cell_dict[(parent_cell.lower())].append(appending_entry.lower())
-
-
+        # I believe I did this incorrectly
+        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):  
+            parent_cell = parent_cell.lower()
+            workbook_instance.children_dict[parent_cell] = []
+        workbook_instance.master_cell_dict[sheet_location] = []
+        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):  
+            parent_cell = parent_cell.lower()
+            
+            workbook_instance.children_dict[parent_cell].append(sheet_location)
+            workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
+            
+          
+                
+      
+       
     def get_cell_contents(self, location):
         """Function that gets the contents of the cell."""
         row, col = self._get_col_and_row(location)
@@ -122,15 +107,20 @@ class Sheet:
         else:
             return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance, location)
 
-    def _retrieve_cell_references(self, contents):
+    def _retrieve_cell_references(self, workbook_instance, contents):
         """Helper function that returns the references in a cell's formula."""
-        parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        #add none case (Dylan)
+        if contents is None:
+            return []
+        #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         try:
-            formula = parser.parse(contents)
+            formula = workbook_instance.parser.parse(contents)
         except lark.exceptions.LarkError:
-            return CellError(CellErrorType.PARSE_ERROR,
-            'Unable to parse formula',
-            lark.exceptions.LarkError)
+            # should not need a parse error here for this current use case (Dylan)
+            return []
+            # return CellError(CellErrorType.PARSE_ERROR,
+            # 'Unable to parse formula',
+            # lark.exceptions.LarkError)
 
         ref = RetrieveReferences(self)
         ref.visit(formula)

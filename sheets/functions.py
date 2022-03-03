@@ -22,15 +22,15 @@ class Functions:
     def xor_func(self, args):
         # for i, arg in enumerate(args):
         #     args[i] = int(arg)
-        
+
         odd_count = 0
         for i in len(args):
             if args[i] == True:
                 odd_count = odd_count + 1
-        
+
         if odd_count % 2 != 0:
             return True
-        return False 
+        return False
 
     #String match
     def exact_func(self, args):
@@ -43,7 +43,7 @@ class Functions:
     #Conditional functions
     def if_func(self, args): # previously: cond, value1, value2 = None):
         if len(args) < 2 or len(args) > 3:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments") 
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         cond = args[0]
         value1 = args[1]
 
@@ -62,7 +62,7 @@ class Functions:
 
     def iferror_func(self, args): # previously: value1, value2 = None):
         if len(args) < 1 or len(args) > 2:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments") 
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         value1 = args[0]
 
         try:
@@ -77,7 +77,7 @@ class Functions:
         elif isinstance(value1, CellError) and value2 is not None:
             return value2
         return False
-    
+
     def choose(self, args):
         if len(args) < 2:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")

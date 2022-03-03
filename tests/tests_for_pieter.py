@@ -9,6 +9,8 @@ D = Decimal # D(1) is now equivalent to decimal.Decimal(1)
 
 class Pieter(unittest.TestCase):
     pass
+
+
     # TODO is this supposed to be supported
     # def test_double_quote_literal(self):
     #     wb = Workbook()
@@ -28,7 +30,17 @@ class Pieter(unittest.TestCase):
     #     wb.set_cell_contents(sh, 'a1', '=AND(true, false)')
     #     print(wb.get_cell_value(sh, 'A1'))
 
+    # # this test is in aarons file as well
+    # def test_exact(self):
+    #     wb = Workbook()
+    #     (_, name) = wb.new_sheet("s1")
+    #     wb.set_cell_contents(name,'A3','=EXACT("hello", "HELLO")')
+    #     wb.set_cell_contents(name,'A4','=EXACT("Hello","Hello")')
+    #     wb.set_cell_contents(name,'A5','=EXACT("Hello", "hElLo")')
 
+    #     self.assertEqual(wb.get_cell_value(name, 'A3'), False)
+    #     self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+    #     self.assertEqual(wb.get_cell_value(name, 'A5'), False)
 
 
 

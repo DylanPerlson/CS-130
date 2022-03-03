@@ -11,7 +11,7 @@ class Aaron(unittest.TestCase):
     #     def on_cells_changed(workbook, changed_cells):
     #         print(f'Cell(s) changed:  {changed_cells}')
     #     wb.notify_cells_changed(on_cells_changed)
-        
+
     #     wb.set_cell_contents(name,'A1','1')
     #     wb.set_cell_contents(name,'A2',"=A1")
     #     wb.set_cell_contents(name,'A1',"5")
@@ -23,9 +23,9 @@ class Aaron(unittest.TestCase):
             print(f'Cell(s) changed:  {changed_cells}')
         wb.notify_cells_changed(on_cells_changed)
         print('.')
-        wb.set_cell_contents(name,'A1','1') 
+        wb.set_cell_contents(name,'A1','1')
         wb.set_cell_contents(name,'A2',"hi")
-        wb.set_cell_contents(name,'A3',"=A1 + 2")  
+        wb.set_cell_contents(name,'A3',"=A1 + 2")
         wb.set_cell_contents(name,'A1','2')
         print('2 above')
         wb.set_cell_contents(name,'A4', '=A3')
@@ -40,7 +40,7 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A1',"=A2")
         self.assertEqual(wb.get_cell_value(name, 'A1').get_type(), CellErrorType.CIRCULAR_REFERENCE)
         self.assertEqual(wb.get_cell_value(name, 'A2').get_type(), CellErrorType.CIRCULAR_REFERENCE)
-    
+
     def test_and(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -53,7 +53,7 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), False)
-    
+
     def test_or(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -66,7 +66,7 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), True)
-    
+
     def test_not(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -75,13 +75,13 @@ class Aaron(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name, 'A3'), False)
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
-    
+
     def test_exact(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        wb.set_cell_contents(name,'A3',"=EXACT(hello, HELLO)")
-        wb.set_cell_contents(name,'A4',"=EXACT(Hello,Hello)")
-        wb.set_cell_contents(name,'A5',"=EXACT(Hello, hElLo)")
+        wb.set_cell_contents(name,'A3','=EXACT("hello", "HELLO")')
+        wb.set_cell_contents(name,'A4','=EXACT("Hello","Hello")')
+        wb.set_cell_contents(name,'A5','=EXACT("Hello", "hElLo")')
 
         self.assertEqual(wb.get_cell_value(name, 'A3'), False)
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)

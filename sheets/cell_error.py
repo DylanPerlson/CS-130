@@ -51,6 +51,9 @@ class CellError:
         """
         return self._exception
 
+    # def get_priority(self):
+    #     if self._error_type
+
     def __str__(self):
         return f'ERROR[{self._error_type}, "{self._detail}"]'
 

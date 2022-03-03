@@ -26,8 +26,10 @@ class Cell():
         if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
 
+        #TODO return 0 for NONE
+
         # Determine Cell Type
-        if str(contents) == "" or str(contents).isspace():
+        elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
             self.content = None
             self.value = None
@@ -111,6 +113,10 @@ class Cell():
         try:
             evaluation =\
                 EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
+                #TODO DTP FIX THIS
+            if evaluation is None:
+                self.evaluated_value = decimal.Decimal('0')
+                return self.evaluated_value
             if isinstance(evaluation, CellError):
                 self.evaluated_value = evaluation
                 return self.evaluated_value
@@ -154,11 +160,6 @@ class Cell():
             return False
 
     def remove_trailing_zeros(self, d):
-        """
-        helper function to remove trailing zeros from decimal.Decimal()
-        from: https://docs.python.org/3/library/decimal.html#decimal-faq
-        """
-        #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
             d = str(d)
             d_split = d.split('.') 

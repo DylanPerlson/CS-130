@@ -45,11 +45,12 @@ def _is_float(element):
     except ValueError:
         return False
 
+#TODO DTP FIX THIS
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
     elif curr_arg is None:
-        return 0
+        return decimal.Decimal('0')
     elif isinstance(curr_arg, str):
         if _is_float(curr_arg):
             return decimal.Decimal(curr_arg)
@@ -58,6 +59,7 @@ def _get_value_as_number(curr_arg):
     else:
         return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
+#TODO DTP fix
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
@@ -151,7 +153,8 @@ class EvalExpressions(Transformer):
     def number(self, args):
         """If a number is encountered, it is put into the right format."""
         d = decimal.Decimal(args[0])
-        return d.quantize(decimal.Decimal(1)) if d == d.to_integral() else d.normalize()
+        return self.remove_trailing_zeros(d)
+        
 
     def string(self, args):
         """If a string is encountered, it is put into the right format."""
@@ -303,6 +306,22 @@ class EvalExpressions(Transformer):
         else:
             pass # TODO something
 
+    
+    def remove_trailing_zeros(self, d):
+        #are big numbers getting rounded wrong?? DTP
+        if isinstance(d,decimal.Decimal):
+            d = str(d)
+            d_split = d.split('.') 
+            #case of no decimal points
+            if len(d_split) == 1:
+                return decimal.Decimal(d)
+            #case of decimal
+            else:
+                d_split[1] = d_split[1].rstrip('0')
+                d = d_split[0] + '.' + d_split[1]
+                return decimal.Decimal(d)
+        else:
+            return d
 
     def bool_func(self, args):
         # pseudocode:

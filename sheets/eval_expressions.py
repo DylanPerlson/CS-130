@@ -176,6 +176,12 @@ class EvalExpressions(Transformer):
         """Additive operation is applied on parsed formula."""
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
+        # Determine return error based on priority in cell_error.py
+        if isinstance(args0, CellError) and isinstance(args2, CellError):
+            if args0 < args2:
+                return args0
+            else:
+                return args2
         if isinstance(args0, CellError):
             return args0
         if isinstance(args2, CellError):
@@ -192,6 +198,13 @@ class EvalExpressions(Transformer):
         """Multiplicative operation is applied on parsed formula."""
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
+        # Determine return error based on priority in cell_error.py
+        if isinstance(args0, CellError) and isinstance(args2, CellError):
+            if args0 < args2:
+                return args0
+            else:
+                return args2
+
         if isinstance(args0, CellError):
             return args0
         if isinstance(args2, CellError):
@@ -211,6 +224,13 @@ class EvalExpressions(Transformer):
         """Concatenation operation is applied on parsed formula."""
         args0 = _get_value_as_string(args[0])
         args1 = _get_value_as_string(args[1])
+
+        # Determine return error based on priority in cell_error.py
+        if isinstance(args0, CellError) and isinstance(args1, CellError):
+            if args0 < args1:
+                return args0
+            else:
+                return args1
 
         if isinstance(args0, CellError):
             return args0

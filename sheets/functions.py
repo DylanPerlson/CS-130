@@ -77,6 +77,15 @@ class Functions:
         elif isinstance(value1, CellError) and value2 is not None:
             return value2
         return False
+    
+    def choose(self, args):
+        if len(args) < 2:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+        choose_index = args[0]
+        choices = args[1:]
+        if choose_index < 1 or choose_index > len(choices) or not isinstance(choose_index, int):
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid index argument")
+        return choices[choose_index - 1]
 
     #Informational errors
     def isblank_func(self, args):

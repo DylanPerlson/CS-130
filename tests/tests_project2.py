@@ -64,11 +64,11 @@ class Project2(unittest.TestCase):
         wb.set_cell_contents(name1, 'AAA3', '=12+4')
         wb.set_cell_contents(name1, 'JNE41', 'more words')
 
-        (_, name1) = wb.new_sheet("2nd_sheet")
+        (_, name2) = wb.new_sheet("2nd_sheet")
 
-        wb.set_cell_contents(name1, 'aa57', '12.0')
-        wb.set_cell_contents(name1, 'AAA3', '=12.0+1.00')
-        wb.set_cell_contents(name1, 'JNE41', '100')
+        wb.set_cell_contents(name2, 'aa57', '12.0')
+        wb.set_cell_contents(name2, 'AAA3', '=12.0+1.00')
+        wb.set_cell_contents(name2, 'JNE41', '100')
 
         with open('tests/json/save_testfile.json', 'w') as fp:
             wb.save_workbook(fp)

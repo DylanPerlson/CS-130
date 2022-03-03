@@ -1,3 +1,4 @@
+from html.entities import name2codepoint
 import os; os.system('clear')
 import context
 from sheets import *
@@ -144,23 +145,103 @@ def _fibonacci(n):
             b = c
         return b
 
+def test_load_wkbk():
+    wb = Workbook()
+    (_, name1) = wb.new_sheet("fiRst_sheet")
 
+    wb.set_cell_contents(name1, 'AA57', 'words')
+    wb.set_cell_contents(name1, 'AAA3', '=12+4')
+    wb.set_cell_contents(name1, 'JNE41', 'more words')
+    for i in range(2, 100):
+        location = 'A'+str(i)
+        location_prev1 = 'A'+str(i-1)
+        location_prev2 = 'A'+str(i-2)
+        wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
+
+    (_, name2) = wb.new_sheet("2nd_sheet")
+
+    wb.set_cell_contents(name2, 'aa57', '12.0')
+    wb.set_cell_contents(name2, 'AAA3', '=12.0+1.00')
+    wb.set_cell_contents(name2, 'JNE41', '100')
+    
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+    with open('tests/json/save_testfile.json', 'w') as fp:
+        wb.save_workbook(fp)
+    with open('tests/json/load_testfile.json') as fp:
+        wb2 = Workbook.load_workbook(fp)
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
+
+def test_rename_sheet():
+    wb = Workbook()
+    (_, name1) = wb.new_sheet("fiRst_sheet")
+
+    wb.set_cell_contents(name1, 'AA57', 'words')
+    wb.set_cell_contents(name1, 'AAA3', '=12+4')
+    wb.set_cell_contents(name1, 'JNE41', 'more words')
+    for i in range(2, 100):
+        location = 'A'+str(i)
+        location_prev1 = 'A'+str(i-1)
+        location_prev2 = 'A'+str(i-2)
+        wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
+
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+    wb.rename_sheet(name1,'new_sheet')
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
+
+def test_move_cells():
+    wb = Workbook()
+    (_, name1) = wb.new_sheet("fiRst_sheet")
+
+    wb.set_cell_contents(name1, 'AA57', 'words')
+    wb.set_cell_contents(name1, 'AAA3', '=12+4')
+    wb.set_cell_contents(name1, 'JNE41', 'more words')
+    for i in range(2, 100):
+        location = 'A'+str(i)
+        location_prev1 = 'A'+str(i-1)
+        location_prev2 = 'A'+str(i-2)
+        wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
+
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+    wb.move_cells(name1,'A1','B100','C100')
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
 
 if __name__ == '__main__':
     import cProfile
     from pstats import Stats
 
-    pr = cProfile.Profile()
-    pr.enable()
+    # pr = cProfile.Profile()
+    # pr.enable()
 
     #test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    test_fibonacci()
+    #test_fibonacci()
     # test_cell_cycle()
+    
+    #test_load_wkbk()
+    #test_rename_sheet() # breaking??
+    test_move_cells() #this is slow
 
-    pr.disable()
-    stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(5)
+    # pr.disable()
+    # stats = Stats(pr)
+    # stats.sort_stats('cumtime').print_stats(5)

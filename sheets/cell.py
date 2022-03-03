@@ -99,9 +99,6 @@ class Cell():
         if self.parse_necessary:
             # trying to parse
             try:
-                # only needs to happen once 
-                #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-                #self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
             except lark.exceptions.LarkError:

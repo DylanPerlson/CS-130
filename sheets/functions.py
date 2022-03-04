@@ -1,4 +1,5 @@
 from sheets.cell_error import CellError, CellErrorType
+# from .__init__ import version # gives circular error
 
 class Functions:
     def __init__(self):
@@ -103,4 +104,6 @@ class Functions:
         return False
 
     def version_func(self, args):
-        return None #sheet.version
+        if len(args) != 0:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+        return '1.2.0' #sheet.version

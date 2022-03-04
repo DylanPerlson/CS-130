@@ -55,39 +55,39 @@ class Sheet:
             self.extent[1] = col
 
 
-        #stash old cell 
+        #stash old cell
         prev_cell = None
         if (row,col) in self.cells:
             prev_cell = self.cells[(row,col)]
 
-        #update cell 
+        #update cell
         new_cell = Cell(contents)
         self.cells[(row,col)] = new_cell
 
 
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
-        
+
         #add all of the new cells to the master cell dict
 
-        
-        
+
+
 
 
         # I believe I did this incorrectly
-        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):  
+        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
             parent_cell = parent_cell.lower()
             workbook_instance.children_dict[parent_cell] = []
         workbook_instance.master_cell_dict[sheet_location] = []
-        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):  
+        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
             parent_cell = parent_cell.lower()
-            
+
             workbook_instance.children_dict[parent_cell].append(sheet_location)
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
-            
-          
-                
-      
-       
+
+
+
+
+
     def get_cell_contents(self, location):
         """Function that gets the contents of the cell."""
         row, col = self._get_col_and_row(location)

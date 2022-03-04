@@ -1,6 +1,7 @@
 import context
 from sheets import *
 from decimal import Decimal
+from sheets import version
 import unittest
 
 import os; os.system('clear')
@@ -8,7 +9,7 @@ import os; os.system('clear')
 D = Decimal # D(1) is now equivalent to decimal.Decimal(1)
 
 class Pieter(unittest.TestCase):
-    pass
+    # pass
 
 
     # TODO is this supposed to be supported
@@ -42,6 +43,12 @@ class Pieter(unittest.TestCase):
     #     self.assertEqual(wb.get_cell_value(name, 'A4'), True)
     #     self.assertEqual(wb.get_cell_value(name, 'A5'), False)
 
+    def test_version_func(self):
+        wb = Workbook()
+        (_, sh) = wb.new_sheet()
+        wb.set_cell_contents(sh,'A1','=VERSION()')
+
+        self.assertEqual(version, wb.get_cell_value(sh, 'A1'))
 
 
 

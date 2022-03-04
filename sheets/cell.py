@@ -17,8 +17,8 @@ class Cell():
         self.evaluated_value = None
         self.value = None
         self.parsed_contents = ''
-        
-        
+
+
 
 
 
@@ -58,17 +58,17 @@ class Cell():
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
-        
+
         sheet_location = sheet_instance.sheet_name + '!' + location
 
         if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
-            return self.evaluated_value 
+            return self.evaluated_value
 
 
         #otherwise now we need to re-evaluate
         #set changed to False, because we will evaluate it now
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
-      
+
 
 
         #None case
@@ -99,7 +99,7 @@ class Cell():
         if self.parse_necessary:
             # trying to parse
             try:
-                # only needs to happen once 
+                # only needs to happen once
                 #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
                 #self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
@@ -112,7 +112,7 @@ class Cell():
         # trying to evaluate
         try:
             evaluation =\
-                EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
+                    EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
                 #TODO DTP FIX THIS
             if evaluation is None:
                 self.evaluated_value = decimal.Decimal('0')
@@ -162,7 +162,7 @@ class Cell():
     def remove_trailing_zeros(self, d):
         if isinstance(d,decimal.Decimal):
             d = str(d)
-            d_split = d.split('.') 
+            d_split = d.split('.')
             #case of no decimal points
             if len(d_split) == 1:
                 return decimal.Decimal(d)
@@ -173,4 +173,4 @@ class Cell():
                 return decimal.Decimal(d)
         else:
             return d
-            
+

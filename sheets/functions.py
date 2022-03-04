@@ -1,6 +1,9 @@
 from sheets.cell_error import CellError, CellErrorType
 # from .__init__ import version # gives circular error
 
+def _is_integer(d):
+    return d == d.to_integral_value()
+
 class Functions:
     def __init__(self):
         pass
@@ -79,14 +82,14 @@ class Functions:
             return value2
         return False
 
-    def choose(self, args):
-        if len(args) < 2:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+    def choose_func(self, args):
+        if len(args) <= 2:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {len(args)}")
         choose_index = args[0]
         choices = args[1:]
-        if choose_index < 1 or choose_index > len(choices) or not isinstance(choose_index, int):
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid index argument")
-        return choices[choose_index - 1]
+        if choose_index < 1 or choose_index > len(choices) or not _is_integer(choose_index):
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid index argument: {choose_index}")
+        return choices[int(choose_index) - 1]
 
     #Informational errors
     def isblank_func(self, args):

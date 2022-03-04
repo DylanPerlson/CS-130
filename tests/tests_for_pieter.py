@@ -1,7 +1,6 @@
 import context
 from sheets import *
 from decimal import Decimal
-from sheets import version
 import unittest
 
 import os; os.system('clear')
@@ -30,6 +29,7 @@ class Pieter(unittest.TestCase):
     #     print(wb.get_cell_value(sh, 'A1'))
     #     wb.set_cell_contents(sh, 'a1', '=AND(true, false)')
     #     print(wb.get_cell_value(sh, 'A1'))
+
 
 
 

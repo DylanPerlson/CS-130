@@ -3,6 +3,7 @@ from sheets import *
 import decimal
 import unittest
 from sheets import version
+from sheets import cell
 
 
 class Project3(unittest.TestCase):
@@ -174,6 +175,9 @@ class Project3(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=IF(false, 5, "abc")')
         self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
 
+        wb.set_cell_contents(sh, 'a1', '=IF("something else", 5, "abc")')
+        self.assertEqual(CellErrorType.TYPE_ERROR, wb.get_cell_value(sh, 'A1').get_type())
+
     def test_iferror_func(self):
         wb = Workbook()
         (_,sh) = wb.new_sheet()
@@ -193,6 +197,16 @@ class Project3(unittest.TestCase):
         wb.set_cell_contents(sh, 'B1', '=1/0')
         wb.set_cell_contents(sh, 'a1', '=IFERROR(B1, "abc")')
         self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
+
+    def test_iserror_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'a1', '=ISERROR(true)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=ISERROR(#REF!)')
+        self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
 
 
 if __name__ == '__main__':

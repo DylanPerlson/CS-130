@@ -45,7 +45,7 @@ def _is_float(element):
     except ValueError:
         return False
 
-#TODO DTP FIX THIS
+#TODO (Dylan) DTP FIX THIS
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
@@ -61,7 +61,7 @@ def _get_value_as_number(curr_arg):
 
     return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
-#TODO DTP fix
+#TODO (Dylan) DTP fix
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
@@ -358,7 +358,7 @@ class EvalExpressions(Transformer):
             return _compare(args0, operation, args2)
 
         else:
-            pass # TODO something
+            CellError(CellErrorType.TYPE_ERROR, f"Invalid operator: {operation}")
 
 
     def remove_trailing_zeros(self, d):

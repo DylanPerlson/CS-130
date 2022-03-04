@@ -44,7 +44,7 @@ class Project3(unittest.TestCase):
         wb.set_cell_contents(name,'B2',"yo")
         wb.move_cells(name,'A1','B3','A5')
 
-        # self.assertEqual(wb.get_cell_value(name,'A1'),None) # TODO fix empty cells issue
+        # self.assertEqual(wb.get_cell_value(name,'A1'),None) # TODO empty cells issue
         self.assertEqual(wb.get_cell_value(name,'A5'),1)
         self.assertEqual(wb.get_cell_value(name,'A6'),"hi")
         self.assertEqual(wb.get_cell_value(name,'B6'),"yo")

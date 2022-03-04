@@ -6,19 +6,19 @@ from sheets import *
 def test_long_reference_chain():
     wb = Workbook()
     (_,name) = wb.new_sheet("sheet")
-    
-    
+
+
     length = 200
     pr = cProfile.Profile()
     pr.enable()
-    
+
 
     for i in range(2, length+1):
         location = 'A'+str(i)
         location_prev = 'A'+str(i-1)
 
         wb.set_cell_contents(name, location, '=1+'+location_prev)
-    
+
 
     wb.set_cell_contents(name, 'A1', '1')
 
@@ -26,7 +26,7 @@ def test_long_reference_chain():
     stats = Stats(pr)
     stats.sort_stats('cumtime').print_stats(5)
     #print(wb.get_cell_value(name, location))
-    
+
     assert wb.get_cell_value(name, location) == length
 
 
@@ -49,8 +49,6 @@ def test_long_reference_chain_letters():
     #assert wb.get_cell_value(name, location) == length
     #print(wb.get_cell_value(name, location))
 
-def test_very_connected_ref_chain(): # TODO implement later
-    pass
 
 def test_cell_with_many_deps():
     wb = Workbook()
@@ -113,7 +111,7 @@ def test_fibonacci():
     wb = Workbook()
 
     (_,sheet) = wb.new_sheet()
-    
+
 
     length = 100
 
@@ -127,7 +125,7 @@ def test_fibonacci():
     pr.enable()
     wb.set_cell_contents(sheet, 'A1', '1')
     wb.set_cell_contents(sheet, 'A2', '1')
-    
+
     pr.disable()
     stats = Stats(pr)
     stats.sort_stats('cumtime').print_stats(5)
@@ -179,7 +177,7 @@ def test_load_wkbk():
     wb.set_cell_contents(name2, 'aa57', '12.0')
     wb.set_cell_contents(name2, 'AAA3', '=12.0+1.00')
     wb.set_cell_contents(name2, 'JNE41', '100')
-    
+
 
     pr = cProfile.Profile()
     pr.enable()
@@ -255,7 +253,7 @@ if __name__ == '__main__':
     #test_significant_cell_change() #I think that this test might be wrong
     #test_fibonacci()
     # test_cell_cycle()
-    
+
     #test_load_wkbk()
     test_rename_sheet() # breaking??
     #test_move_cells() #this is slow

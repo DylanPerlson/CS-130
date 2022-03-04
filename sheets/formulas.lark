@@ -89,7 +89,7 @@ NUMBER: /([0-9]+(\.[0-9]*)?)|(\.[0-9]+)/
 STRING: /\"[^"]*\"/
 
 // (new) This is supposed to add boolean functions (and, or, etc.)
-BOOL_FUNC: /[A-Za-z_][A-Za-z0-9_]*/ // TODO check whether this supports everything
+BOOL_FUNC: /[A-Za-z_][A-Za-z0-9_]*/
 UNQUOTED_STRING: /[A-Za-z_][A-Za-z0-9_]*/
 // ("AND" | "OR" | "XOR")
 // BOOL_FUNC_1: ("NOT" | "ISBLANK" | "ISERROR")

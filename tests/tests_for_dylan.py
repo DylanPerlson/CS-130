@@ -32,23 +32,26 @@ class Dylan(unittest.TestCase):
     def test_fib_failure(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
-        wb.set_cell_contents(name,'A3','=A1+A2')  
-        wb.set_cell_contents(name,'A4','=A2+A3') 
-        wb.set_cell_contents(name,'A5','=A3+A4') 
+
+        wb.set_cell_contents(name,'A3','=A1+A2')
+        wb.set_cell_contents(name,'A4','=A2+A3')
+        wb.set_cell_contents(name,'A5','=A3+A4')
         wb.set_cell_contents(name,'A1','1')
         wb.set_cell_contents(name,'A2','1')
-        
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
-        print(wb.sheets[0].cells[(1,4)].evaluated_value)
-        print(wb.sheets[0].cells[(1,5)].evaluated_value)
-        print(wb.get_cell_value(name,'A3'))
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
+
+        # TODO commented test code: print output
+        # (Pieter) this code has print output and no assertions
+        # so I commented it out for better test runs
+        # print(wb.sheets[0].cells[(1,3)].evaluated_value)
+        # print(wb.sheets[0].cells[(1,4)].evaluated_value)
+        # print(wb.sheets[0].cells[(1,5)].evaluated_value)
+        # print(wb.get_cell_value(name,'A3'))
+        # print(wb.sheets[0].cells[(1,3)].evaluated_value)
+        # print(wb.sheets[0].cells[(1,3)].evaluated_value)
+        # print(wb.sheets[0].cells[(1,4)].evaluated_value)
+        # print(wb.sheets[0].cells[(1,5)].evaluated_value)
+
         self.assertEqual(wb.get_cell_value(name,'A5'),5)
-        
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
-        print(wb.sheets[0].cells[(1,4)].evaluated_value)
-        print(wb.sheets[0].cells[(1,5)].evaluated_value)
         self.assertEqual(wb.get_cell_value(name,'A4'),3)
         self.assertEqual(wb.get_cell_value(name,'A3'),2)
     # def test_tarjan(self):
@@ -68,9 +71,9 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name1,'A4','=A2+A3')
         wb.set_cell_contents(name2,'A1',"=s1!A1+A2")
         wb.rename_sheet('S1','new_name')
-        
 
-        
+
+
 
 
 
@@ -89,7 +92,7 @@ class Dylan(unittest.TestCase):
         # wb.set_cell_contents(name,'A4', '=A3')
         # wb.set_cell_contents(name,'A1', '5')
         # print('3 above')
-        
+
 
 
 

@@ -30,6 +30,12 @@ class Pieter(unittest.TestCase):
     #     wb.set_cell_contents(sh, 'a1', '=AND(true, false)')
     #     print(wb.get_cell_value(sh, 'A1'))
 
+    # def test_indirect_func(self):
+    #     wb = Workbook()
+    #     (_,sh) = wb.new_sheet()
+    #     (_,sh2) = wb.new_sheet()
+
+
 
 
 

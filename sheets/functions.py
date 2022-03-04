@@ -1,8 +1,9 @@
 from sheets.cell_error import CellError, CellErrorType
-# from .__init__ import version # gives circular error
+
 
 def _is_integer(d):
     return d == d.to_integral_value()
+
 
 class Functions:
     def __init__(self):
@@ -113,15 +114,11 @@ class Functions:
 
     def indirect_func(self, args):
         """The cell value is returned."""
-        # print(args)
-        # sheet_instance()
         if len(args) != 3:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
 
         workbook_instance = args[1]
         sheet_instance = args[2]
-        # args = args[0]
-
 
         args = args[0].split('!')
 
@@ -144,5 +141,11 @@ class Functions:
 
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
+        try:
+            value = (workbook_instance.get_cell_value(sheet_name, cell))
+        except UnboundLocalError: # in case of a string
+            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
-        return workbook_instance.get_cell_value(sheet_name, cell)
+        if value is None:
+            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+        return value

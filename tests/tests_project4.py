@@ -243,6 +243,21 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'A1', '=INDIRECT("' + sh2 + '!B1")')
         self.assertEqual(wb.get_cell_value(sh2, 'B1'), wb.get_cell_value(sh, 'A1'))
 
+        # errors
+
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B2")')
+        self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
+        wb.set_cell_contents(sh2, 'B1', '=CHOOSE(3, 1, 2, 3)')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("' + sh2 + '!B2")')
+        self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("something")')
+        self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("true")')
+        self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

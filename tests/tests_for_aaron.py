@@ -56,7 +56,7 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), False)
-        self.assertEqual(wb.get_cell_value(name, 'A7').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A7'), False)
         self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
 
     def test_or(self):
@@ -73,7 +73,7 @@ class Aaron(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), True)
-        self.assertEqual(wb.get_cell_value(name, 'A7').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A7'), False)
         self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
 
     def test_not(self):

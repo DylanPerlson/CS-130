@@ -110,3 +110,6 @@ class Functions:
         if len(args) != 0:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
         return '1.2.0' #sheet.version
+
+    def indirect_func(self, args):
+        pass

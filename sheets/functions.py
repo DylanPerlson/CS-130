@@ -94,7 +94,7 @@ class Functions:
     #Informational errors
     def isblank_func(self, args):
         if len(args) != 1:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         if args[0] is None:
             return True
         return False

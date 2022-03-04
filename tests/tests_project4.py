@@ -127,6 +127,30 @@ class Project3(unittest.TestCase):
         wb.set_cell_contents(sh,'A1','=CHOOSE(5,1.5,2.5,true,  false  , B1, B2, B3, "last")')
         self.assertEqual(CellErrorType.DIVIDE_BY_ZERO, wb.get_cell_value(sh, 'A1').get_type())
 
+    def test_isblank_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'B1', '=5')
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK()')
+        self.assertEqual(CellErrorType.TYPE_ERROR, wb.get_cell_value(sh, 'A1').get_type())
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK(1,1)')
+        self.assertEqual(CellErrorType.TYPE_ERROR, wb.get_cell_value(sh, 'A1').get_type())
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK(B1)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK(B2)')
+        self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK(0)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK(False)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

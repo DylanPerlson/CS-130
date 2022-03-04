@@ -11,7 +11,7 @@ class Pieter(unittest.TestCase):
     pass
 
 
-    # TODO is this supposed to be supported
+    # TODO is should be supported but isn't
     # def test_double_quote_literal(self):
     #     wb = Workbook()
     #     (_, sh) = wb.new_sheet()
@@ -25,8 +25,8 @@ class Pieter(unittest.TestCase):
     #     wb = Workbook()
     #     (_,sh) = wb.new_sheet()
 
-    #     wb.set_cell_contents(sh, 'a1', '=AND(5 < 6 , XOR(True,false,6), OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
     #     print(wb.get_cell_value(sh, 'A1'))
+    #     wb.set_cell_contents(sh, 'a1', '=AND(5 < 6 , XOR(True,false,6), OR(NOT(EXACT(true, false)), XOR(true, false, true)))')
     #     wb.set_cell_contents(sh, 'a1', '=AND(true, false)')
     #     print(wb.get_cell_value(sh, 'A1'))
 
@@ -34,7 +34,6 @@ class Pieter(unittest.TestCase):
     #     wb = Workbook()
     #     (_,sh) = wb.new_sheet()
     #     (_,sh2) = wb.new_sheet()
-
 
 
 

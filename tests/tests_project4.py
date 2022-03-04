@@ -258,6 +258,19 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'A1', '=INDIRECT("true")')
         self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
 
+        # edge cases
+
+        wb.set_cell_contents(sh, 'B1', '=4')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'B1', '=4')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT(B1)')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'A1', '=EXACT(#REF!,#ERROR!)')
+        self.assertEqual(CellErrorType.PARSE_ERROR, wb.get_cell_value(sh, 'A1').get_type())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

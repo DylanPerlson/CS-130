@@ -1,11 +1,12 @@
 import unittest
+
+from tests_for_aaron import Aaron
+from tests_for_dylan import Dylan
+from tests_for_pieter import Pieter
 from tests_project1 import Project1
 from tests_project2 import Project2
 from tests_project3 import Project3
 from tests_project4 import Project4
-from tests_for_aaron import Aaron
-from tests_for_dylan import Dylan
-from tests_for_pieter import Pieter
 
 import os; os.system('clear')
 

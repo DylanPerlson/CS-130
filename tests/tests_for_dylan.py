@@ -41,14 +41,44 @@ class Dylan(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A5'),5)
         self.assertEqual(wb.get_cell_value(name,'A4'),3)
         self.assertEqual(wb.get_cell_value(name,'A3'),2)
-    def test_tarjan(self):
+    # def test_tarjan(self):
+    #     wb = Workbook()
+    #     (_, name) = wb.new_sheet("s1")
+    #     wb.set_cell_contents(name,'A1','1')
+    #     wb.set_cell_contents(name,'A2','1')
+    #     wb.set_cell_contents(name,'A3','1')
+    #     wb.set_cell_contents(name,'A4','=A2')
+    #     wb.set_cell_contents(name,'A2','=A4')
+
+    def test_rename_dependents(self):
         wb = Workbook()
-        (_, name) = wb.new_sheet("s1")
-        wb.set_cell_contents(name,'A1','1')
-        wb.set_cell_contents(name,'A2','1')
-        wb.set_cell_contents(name,'A3','1')
-        wb.set_cell_contents(name,'A4','=A2')
-        wb.set_cell_contents(name,'A2','=A4')
+        (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
+        wb.set_cell_contents(name1,'A3','=A1+A2')
+        wb.set_cell_contents(name1,'A4','=A2+A3')
+        wb.set_cell_contents(name2,'A1',"=s1!A1+A2")
+        wb.rename_sheet('S1','new_name')
+        
+
+        
+
+
+
+
+
+        # (_, name) = wb.new_sheet("s1")
+        # def on_cells_changed(workbook, changed_cells):
+        #     print(f'Cell(s) changed:  {changed_cells}')
+        # wb.notify_cells_changed(on_cells_changed)
+        # print('.')
+        # wb.set_cell_contents(name,'A1','1')
+        # wb.set_cell_contents(name,'A2',"hi")
+        # wb.set_cell_contents(name,'A3',"=A1 + 2")
+        # wb.set_cell_contents(name,'A1','2')
+        # print('2 above')
+        # wb.set_cell_contents(name,'A4', '=A3')
+        # wb.set_cell_contents(name,'A1', '5')
+        # print('3 above')
         
 
 

@@ -929,7 +929,7 @@ class Workbook:
 
         #need to update sheetname in cell dependencies
 
-
+        #TODO DTP
         #create a list of keys to change bc cannot change during
         change_keys = []
         for key, value in self.master_cell_dict.items():
@@ -943,15 +943,15 @@ class Workbook:
             #if old name is in the key now replace
             if old_name in key:
                 change_keys.append(key)
-        old_key = key
+        
 
         #change all the necesarry key values
         for key in change_keys:
-            new_cell = old_key.replace(old_name,new_name)
+            new_cell = key.replace(old_name,new_name)
             #create the new entry
-            self.master_cell_dict[new_cell] = self.master_cell_dict[old_key]
+            self.master_cell_dict[new_cell] = self.master_cell_dict[key]
             #delete the old entry
-            self.master_cell_dict.pop(old_key)
+            self.master_cell_dict.pop(key)
 
 
 

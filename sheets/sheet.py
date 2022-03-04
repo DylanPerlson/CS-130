@@ -112,7 +112,7 @@ class Sheet:
         #add none case (Dylan)
         if contents is None:
             return []
-        #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+
         try:
             formula = workbook_instance.parser.parse(contents)
         except lark.exceptions.LarkError:

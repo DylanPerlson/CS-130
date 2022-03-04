@@ -29,15 +29,27 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A3','5')
         self.assertEqual(wb.get_cell_value(name,'A1'),10)
 
-    # def test_fib_failure(self):
-    #     wb = Workbook()
-    #     (_, name) = wb.new_sheet("s1")
-    #     wb.set_cell_contents(name,'A1','1')
-    #     #wb.set_cell_contents(name,'A2','1')
-    #     #wb.set_cell_contents(name,'A3','=A1+A2')
-    #     print(wb.get_cell_value(name,'A3'))
-    #     wb.set_cell_contents(name,'A4','=A2') #THIS SHOULD BE ZERO NOT NONE NONE NEEDS TO BE ZERO
-
+    def test_fib_failure(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        
+        wb.set_cell_contents(name,'A3','=A1+A2')  
+        wb.set_cell_contents(name,'A4','=A2+A3') 
+        wb.set_cell_contents(name,'A5','=A3+A4') 
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2','1')
+        self.assertEqual(wb.get_cell_value(name,'A5'),5)
+        self.assertEqual(wb.get_cell_value(name,'A4'),3)
+        self.assertEqual(wb.get_cell_value(name,'A3'),2)
+    def test_tarjan(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2','1')
+        wb.set_cell_contents(name,'A3','1')
+        wb.set_cell_contents(name,'A4','=A2')
+        wb.set_cell_contents(name,'A2','=A4')
+        
 
 
 

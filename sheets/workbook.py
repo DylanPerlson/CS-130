@@ -44,7 +44,7 @@ class Workbook:
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
 
-        self.check_circ_ref = []
+        self.circ_refs = []
         self.evaluate_again = []
         self.notifying_cells = []
         self.children_dict = {}
@@ -52,6 +52,7 @@ class Workbook:
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         sys.setrecursionlimit(100000)
 
+        self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',
             'OR': 'or_func',
@@ -594,17 +595,17 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
+                #reset list of circ refs
+                self.circ_refs = []
 
-                #these are the cells that will be passed onto the notification functions
-                #needs to be reset each call
+                self._tarjan()
+                # #these are the cells that will be passed onto the notification functions
+                # #needs to be reset each call
                 self.notifying_cells = []
-                #and add the current cell
+                # #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
-                #look for circular references and get the list of changed cells
-
-                #TODO DTP make this not recursive, this may not be the
-                #MAY NOT BE THE RECURSIVE ISSUE
-                self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
+                #get the list of changed cells
+                self._notify_helper(sheet_name, curr_cell)
                 #now we notify all of the functions of the cells that were changed
                 for func in self.notification_functions:
                     #split_cell_string = curr_cell.split('!')
@@ -620,52 +621,10 @@ class Workbook:
                 #return is needed so we do not raise a key error
                 return
 
-
-
-
-
         #no sheet found
         raise KeyError()
 
 
-
-    # def _dependencies_changed_helper(self, sheet_name, location):
-    #     sheet_location = sheet_name + '!' + location
-    #     sheet_location = sheet_location.lower()
-
-    #     #for each dependent, tell it that is has changed
-    #     #and then tell their dependents
-    #     # if sheet_location in self.master_cell_dict:
-
-    #     if sheet_location in self.master_cell_dict:
-    #         self.cell_changed_dict[sheet_location.lower] = True
-    #         for cells in self.master_cell_dict[sheet_location]:
-
-    #             #check if a circ ref is being found
-    #             split_name = sheet_location.split('!')
-    #             row, col = self._get_col_and_row(split_name[1])
-    #             it = -1
-    #             for sheet in self.sheets:
-    #                 it += 1
-    #                 if sheet.sheet_name.lower() == split_name[0].lower():
-    #                     if isinstance(self.sheets[it].cells[(row,col)].evaluated_value, CellError):
-    #                         if self.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
-    #                             #print('circ ref found')
-    #                             return 'CircRef'
-
-    #                     #break out of for loop
-    #                     break
-
-
-
-    #             #now we continue calling all of our own dependencies, and breaking if there was a circ ref
-    #             self.cell_changed_dict[cells.lower] = True
-    #             splitting = cells.split('!')
-    #             return_val = self._dependencies_changed_helper(splitting[0],splitting[1])
-
-    #             #check if there is a circ ref
-    #             if return_val == 'CircRef':
-    #                 return return_val
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -695,77 +654,7 @@ class Workbook:
 
         raise KeyError()
 
-    #Helper function to carry out depth for search for whole dependency graph
-    def _dfs_helper(self, sheet_name, location, parent_dict, stack):
-        curr_cell = sheet_name + '!' + location
-        curr_cell = curr_cell.lower()
-        for next_cell in self.master_cell_dict[curr_cell]:
-            if next_cell not in parent_dict:
-                parent_dict[next_cell] = curr_cell
-                next_cell_components = next_cell.split('!')
-                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
-        stack.append(curr_cell)
 
-    #Primary function called to initiate DFS
-    def _dfs(self, sheet_name, location, stack):
-        parent_dict = {}
-        stack = []
-        curr_cell = sheet_name + '!' + location
-        if curr_cell not in self.master_cell_dict.keys():
-            return stack
-
-        for next_cell in self.master_cell_dict[(curr_cell)]:
-            next_cell_components = next_cell.split('!')
-            if next_cell not in parent_dict:
-                parent_dict[next_cell] = None
-                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
-        return stack
-
-    #Helper function used to initiate DFS
-    def _dfs_single_cell(self, curr_dict, sheet_name, location, visited, stack):
-        curr_cell = sheet_name + '!' + location
-        for next_cell in self.master_cell_dict[curr_cell]:
-            if next_cell not in visited:
-                visited[next_cell] = curr_cell
-                next_cell_components = next_cell.split('!')
-                self._dfs_single_cell(curr_dict, next_cell_components[0], next_cell_components[1], visited, stack)
-        stack.append(curr_cell)
-
-    #Helper function to find all components including strongly connected ones
-    #Any component longer than 1 in length is strongly connected
-    #Set all cells inside those components values to CIRCULAR_REFERENCE ERRORS
-    def kosaraju(self, sheet_name, location):
-        #Create stack of all dependent cells from performing DFS on starting current cell
-        stack = self._dfs(sheet_name, location, [])
-
-        #Reverse whole graph to perform stage 2 of Kosaraju's algorithm
-        reverse_depend = {}
-        for curr_cell in self.master_cell_dict.keys():
-            reverse_depend[curr_cell] = {}
-        for curr_cell in self.master_cell_dict.keys():
-            for next_cell in self.master_cell_dict[curr_cell]:
-                reverse_depend[next_cell][curr_cell] = True
-
-        # Traverse graph via poppping cells offstack
-        visited = {}
-        components = []
-        i = 0
-
-        while stack != []:
-            curr_cell = stack.pop()
-            #Don't need to DFS if already visited
-            if curr_cell in visited:
-                continue
-            else:
-                #Generate components based on dependencies of cells
-                components.append([])
-                if curr_cell not in visited:
-                    visited[curr_cell] = True
-                    curr_cell_components = curr_cell.split('!')
-                    self._dfs_single_cell(reverse_depend, curr_cell_components[0], curr_cell_components[1], visited, components[i])
-                components.append([])
-                i = i + 1
-        return components
 
     def get_cell_value(self, sheet_name: str, location: str):
         """Return the evaluated value of the specified cell on the specified
@@ -1112,26 +1001,9 @@ class Workbook:
         This function finds circ references as well as notifying all of the functions when a cell changes
         """
 
-
-        if curr_cell in self.check_circ_ref:
-            # CIRC ERRORS
-            for next_cell in self.check_circ_ref:
-                curr_cell_split = next_cell.split('!')
-                row, col = self._get_col_and_row(curr_cell_split[1])
-                for i in range(len(self.sheets)):
-                    if self.sheets[i].sheet_name.lower() == sheet_name.lower():
-                        self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                        break
-
-
-            return
-
-
-
-    #Iterate up through dependent cells of our current cell
-        if curr_cell in self.children_dict:
+        #Iterate up through dependent cells of our current cell
+        if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
             dependents_list = self.children_dict[curr_cell]
-            self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
 
@@ -1143,7 +1015,7 @@ class Workbook:
                     #recurse
                     self._notify_helper(split_cell_string[0], dependent)
 
-            self.check_circ_ref.remove(curr_cell)
+
 
 #
     def _base_10_to_alphabet(self, number):
@@ -1169,3 +1041,79 @@ class Workbook:
         while number:
             number, remainder = divmod(number - 1, ALPHABET_SIZE)
             yield remainder
+
+    def _tarjan_helper(self, u, low, found, in_stack, the_stack):
+
+        found[u] = self.num_visits
+        low[u] = self.num_visits
+        self.num_visits += 1
+        in_stack[u] = True
+        the_stack.append(u)
+
+        key_list = list(self.master_cell_dict.keys())
+        value_list = list(self.master_cell_dict.values())
+
+        #find the indices of the cells in value_list
+        cells = value_list[u]
+        idx = []
+        for c in cells:
+            #append where it is in the key list
+            if c in key_list:
+                idx.append(key_list.index(c))
+
+
+        for v in idx:
+
+            # If v is not found yet, then recurse for it
+            if found[v] == -1 :
+
+                self._tarjan_helper(v, low, found, in_stack, the_stack)
+
+                # Check if the subtree rooted with v has a connection to
+                # one of the ancestors of u
+
+                low[u] = min(low[u], low[v])
+
+            elif in_stack[v] == True:
+                low[u] = min(low[u], found[v])
+
+        # head node found
+        # If length greater than 2, set contents of stack to CIRC_REF errors
+        w = -1
+        if low[u] == found[u]:
+            connected = []
+            while w != u:
+                w = the_stack.pop()
+                connected.append(value_list[w])
+                in_stack[w] = False
+
+            #then we have a strongly connected list
+            if (len(connected) > 1):
+                for i in connected:
+                    split_name = i[0].split('!')
+                    for s in self.sheets:
+                        if s.sheet_name.lower() == split_name[0]:
+                            row,col = self._get_col_and_row(split_name[1])
+                            s.cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
+                            self.circ_refs.append(i[0])
+                            #make sure that it does not revaluate it
+                            self.cell_changed_dict[i[0]] = False
+                            #this break is just for efficiency so we dont need to keep checking
+                            break
+
+
+    def _tarjan(self):
+
+        self.num_visits = 0
+
+        #set everything to -1
+        found = [-1] * len(self.master_cell_dict.keys())
+        low = [-1] * len(self.master_cell_dict.keys())
+        in_stack = [False] * len(self.master_cell_dict.keys())
+        the_stack =[]
+
+
+        # Call the helper function
+        for i in range(len(self.master_cell_dict.keys())):
+            if found[i] == -1:
+                self._tarjan_helper(i, low, found, in_stack, the_stack)

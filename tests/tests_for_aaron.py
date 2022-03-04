@@ -48,11 +48,15 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A4',"=AND(true, true)")
         wb.set_cell_contents(name,'A5',"=AND(false, false)")
         wb.set_cell_contents(name,'A6',"=AND(false, true)")
+        wb.set_cell_contents(name,'A7',"=AND(false)")
+        wb.set_cell_contents(name,'A8',"=AND()")
 
         self.assertEqual(wb.get_cell_value(name, 'A3'), False)
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A7').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
 
     def test_or(self):
         wb = Workbook()
@@ -61,11 +65,15 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A4',"=OR(true, true)")
         wb.set_cell_contents(name,'A5',"=OR(false, false)")
         wb.set_cell_contents(name,'A6',"=OR(false, true)")
+        wb.set_cell_contents(name,'A7',"=OR(false)")
+        wb.set_cell_contents(name,'A8',"=OR()")
 
         self.assertEqual(wb.get_cell_value(name, 'A3'), True)
         self.assertEqual(wb.get_cell_value(name, 'A4'), True)
         self.assertEqual(wb.get_cell_value(name, 'A5'), False)
         self.assertEqual(wb.get_cell_value(name, 'A6'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A7').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
 
     def test_not(self):
         wb = Workbook()

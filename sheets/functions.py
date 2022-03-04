@@ -16,7 +16,7 @@ class Functions:
 
     def not_func(self, args):
         if len(args) != 1:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
         return not args[0]
 
     def xor_func(self, args):

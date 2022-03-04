@@ -1099,11 +1099,10 @@ class Workbook:
         #find the indices of the cells in value_list
         cells = value_list[u]
         idx = []
-        print(self.master_cell_dict)
         for c in cells:
-            print(c)
             #append where it is in the key list
-            idx.append(key_list.index(c))
+            if c in key_list:
+                idx.append(key_list.index(c))
             
         
         for v in idx: 

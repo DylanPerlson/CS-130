@@ -21,7 +21,7 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A1','7')
         self.assertEqual(wb.get_cell_value(name,'A1'),7)
 
-    def test_topological(self)git :
+    def test_topological(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
         wb.set_cell_contents(name,'A1','=A2+A3')

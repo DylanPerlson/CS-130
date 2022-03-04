@@ -286,6 +286,7 @@ class EvalExpressions(Transformer):
     #### METHODS FOR BOOLEAN STUFF:
 
     def bool_lit(self, args):
+        """Takes a boolean as string and returns actual bool."""
         if args[0].lower() == "true":
             return True
         elif args[0].lower() == "false":
@@ -295,6 +296,7 @@ class EvalExpressions(Transformer):
             f"Boolean value is not recognized: {args[0]}")
 
     def bool_oper(self, args):
+        """Performs boolean operations: ==, <, >, etc."""
         operation = args[1]
         args0 = args[0]
         args2 = args[2]
@@ -360,6 +362,7 @@ class EvalExpressions(Transformer):
 
 
     def remove_trailing_zeros(self, d):
+        """Removes trailing zeros of decimal.Decimals."""
         #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
             d = str(d)
@@ -376,6 +379,7 @@ class EvalExpressions(Transformer):
             return d
 
     def bool_func(self, args):
+        """Performs boolean functions: AND, OR, etc."""
         # pseudocode:
         #     import some new module
         #     pass args to module

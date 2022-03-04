@@ -61,7 +61,8 @@ class Cell():
 
         sheet_location = sheet_instance.sheet_name + '!' + location
 
-        if workbook_instance.cell_changed_dict[sheet_location.lower()] == False and self.contents is not None:
+        if workbook_instance.cell_changed_dict[sheet_location.lower()]\
+            is False and self.contents is not None:
             return self.evaluated_value
 
 
@@ -112,7 +113,8 @@ class Cell():
         # trying to evaluate
         try:
             evaluation =\
-                    EvalExpressions(workbook_instance,sheet_instance).transform(self.parsed_contents)
+                    EvalExpressions(workbook_instance,sheet_instance).transform(
+                        self.parsed_contents)
                 #TODO DTP FIX THIS
             if evaluation is None:
                 self.evaluated_value = decimal.Decimal('0')
@@ -160,6 +162,7 @@ class Cell():
             return False
 
     def remove_trailing_zeros(self, d):
+        """Removes trailing zero of a decimal.Decimal value."""
         if isinstance(d,decimal.Decimal):
             d = str(d)
             d_split = d.split('.')
@@ -173,4 +176,3 @@ class Cell():
                 return decimal.Decimal(d)
         else:
             return d
-

@@ -55,10 +55,10 @@ class Sheet:
             self.extent[1] = col
 
 
-        #stash old cell
-        prev_cell = None
-        if (row,col) in self.cells:
-            prev_cell = self.cells[(row,col)]
+        # #stash old cell
+        # prev_cell = None
+        # if (row,col) in self.cells:
+        #     prev_cell = self.cells[(row,col)]
 
         #update cell
         new_cell = Cell(contents)

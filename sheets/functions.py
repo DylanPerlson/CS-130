@@ -1,36 +1,50 @@
+"""Implements boolean functions."""
 from sheets.cell_error import CellError, CellErrorType
 
 
 def _is_integer(d):
+    """Checks whether input d is an integer.
+    True if so, False otherwise."""
     return d == d.to_integral_value()
 
 
 class Functions:
+    """Contains all functions that can be used."""
+
     def __init__(self):
-        pass
+        """Initializes the class."""
 
     def __call__(self, function, args):
+        """This is necessary for elegant function calls."""
         return getattr(self, function)(args)
 
     #Boolean functions
     def and_func(self, args):
+        """Implements AND function.
+        True if all arguments are True."""
         return all(args)
 
     def or_func(self, args):
+        """Implements OR function.
+        True if one argument is True."""
         return any(args)
 
     def not_func(self, args):
+        """Implements AND function.
+        Returns True for False and vice versa."""
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
         return not args[0]
 
     def xor_func(self, args):
+        """Implements XOR function.
+        True if odd number of arguments are True."""
         # for i, arg in enumerate(args):
         #     args[i] = int(arg)
 
         odd_count = 0
         for i in len(args):
-            if args[i] == True:
+            if args[i] is True:
                 odd_count = odd_count + 1
 
         if odd_count % 2 != 0:
@@ -39,6 +53,8 @@ class Functions:
 
     #String match
     def exact_func(self, args):
+        """Implements EXACT function.
+        True if two arguments are equal."""
         if len(args) != 2:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         # if not isinstance(args[0],str) or not isinstance(args[1],str):
@@ -63,6 +79,8 @@ class Functions:
 
     #Conditional functions
     def if_func(self, args): # previously: cond, value1, value2 = None):
+        """Implements IF function.
+        Returns one of the inputs."""
         if len(args) < 2 or len(args) > 3:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         cond = args[0]
@@ -82,6 +100,8 @@ class Functions:
         return value2
 
     def iferror_func(self, args): # previously: value1, value2 = None):
+        """Implements IFERROR function.
+        Returns some argument depending on whether first argument is an error."""
         if len(args) < 1 or len(args) > 2:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         value1 = args[0]
@@ -100,6 +120,8 @@ class Functions:
         return value2
 
     def choose_func(self, args):
+        """Implements CHOOSE function.
+        Select one of the arguments using first argument."""
         if len(args) <= 2:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {len(args)}")
         choose_index = args[0]
@@ -110,6 +132,8 @@ class Functions:
 
     #Informational errors
     def isblank_func(self, args):
+        """Implements ISBLANK function.
+        True if argument is empty."""
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
         if args[0] is None:
@@ -117,6 +141,8 @@ class Functions:
         return False
 
     def iserror_func(self, args):
+        """Implements ISERROR function.
+        True if argument is error."""
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
         if isinstance(args[0], CellError):
@@ -124,6 +150,8 @@ class Functions:
         return False
 
     def version_func(self, args):
+        """Implements VERSION function.
+        Returns version number."""
         if len(args) != 0:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
         return '1.3.0' #sheet.version

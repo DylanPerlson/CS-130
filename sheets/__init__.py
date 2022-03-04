@@ -1,4 +1,4 @@
-# __init__.py
+"""__init__.py"""
 
 from .workbook import Workbook
 from .cell_error import *

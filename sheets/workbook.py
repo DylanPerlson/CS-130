@@ -39,7 +39,7 @@ class Workbook:
         self.notification_functions = []
         self.user_defined_functions = []
         self.master_cell_dict = {} #master_cell_dict[child] = [list of parent cells/ cells that reference child]
-        self.cell_changed_dict = {}
+        
         self.visited_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
@@ -48,6 +48,7 @@ class Workbook:
         self.evaluate_again = []
         self.notifying_cells = []
         self.children_dict = {}
+        self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         sys.setrecursionlimit(100000)
@@ -929,7 +930,7 @@ class Workbook:
 
         #need to update sheetname in cell dependencies
 
-
+        #TODO DTP
         #create a list of keys to change bc cannot change during
         change_keys = []
         for key, value in self.master_cell_dict.items():
@@ -943,15 +944,60 @@ class Workbook:
             #if old name is in the key now replace
             if old_name in key:
                 change_keys.append(key)
-        old_key = key
+        
 
         #change all the necesarry key values
         for key in change_keys:
-            new_cell = old_key.replace(old_name,new_name)
+            new_cell = key.replace(old_name,new_name)
             #create the new entry
-            self.master_cell_dict[new_cell] = self.master_cell_dict[old_key]
+            self.master_cell_dict[new_cell] = self.master_cell_dict[key]
             #delete the old entry
-            self.master_cell_dict.pop(old_key)
+            self.master_cell_dict.pop(key)
+
+        #now do the same for:
+        #self.children_dict 
+        #self.cell_changed_dict 
+
+        change_keys = []
+        for key, value in self.children_dict.items():
+            #check if one of the master cells has it as a value
+            #everything should already be lower so not an issue
+            old_name = old_name.lower()
+
+            #the value is a list so need to iterate through the list
+            for _,i in enumerate(value):
+                i = i.replace(old_name,new_name.lower())
+            #if old name is in the key now replace
+            if old_name in key:
+                change_keys.append(key)
+        
+
+        #change all the necesarry key values
+        for key in change_keys:
+            new_cell = key.replace(old_name,new_name)
+            #create the new entry
+            self.children_dict[new_cell] = self.children_dict[key]
+            #delete the old entry
+            self.children_dict.pop(key)
+
+        change_keys = []
+        for key in self.cell_changed_dict:
+            #check if one of the master cells has it as a value
+            #everything should already be lower so not an issue
+            old_name = old_name.lower()
+
+            #if old name is in the key now replace
+            if old_name in key:
+                change_keys.append(key)
+        
+
+        #change all the necesarry key values
+        for key in change_keys:
+            new_cell = key.replace(old_name,new_name)
+            #create the new entry
+            self.cell_changed_dict[new_cell] = self.cell_changed_dict[key]
+            #delete the old entry
+            self.cell_changed_dict.pop(key)
 
 
 

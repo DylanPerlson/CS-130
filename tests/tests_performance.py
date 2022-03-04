@@ -197,14 +197,16 @@ def test_rename_sheet():
     wb = Workbook()
     (_, name1) = wb.new_sheet("fiRst_sheet")
 
+    length = 100
     wb.set_cell_contents(name1, 'AA57', 'words')
     wb.set_cell_contents(name1, 'AAA3', '=12+4')
     wb.set_cell_contents(name1, 'JNE41', 'more words')
-    for i in range(2, 100):
+    for i in range(3, length):
         location = 'A'+str(i)
         location_prev1 = 'A'+str(i-1)
         location_prev2 = 'A'+str(i-2)
         wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
+        #print(wb.get_cell_contents(name1,location))
 
 
     pr = cProfile.Profile()

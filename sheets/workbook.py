@@ -594,7 +594,7 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-                
+
                 #these are the cells that will be passed onto the notification functions
                 #needs to be reset each call
                 self.notifying_cells = []
@@ -602,7 +602,7 @@ class Workbook:
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #look for circular references and get the list of changed cells
 
-                #TODO DTP make this not recursive, this may not be the 
+                #TODO DTP make this not recursive, this may not be the
                 #MAY NOT BE THE RECURSIVE ISSUE
                 self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
                 #now we notify all of the functions of the cells that were changed
@@ -1137,7 +1137,7 @@ class Workbook:
 
                     #tell all of the cells that they have changed
                     self.cell_changed_dict[dependent] = True
-                    
+
                     #add the cell to list of cells to be notified of
                     self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
                     #recurse

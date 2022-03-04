@@ -233,7 +233,7 @@ def test_move_cells():
     pr = cProfile.Profile()
     pr.enable()
 
-    wb.move_cells(name1,'A1','B100','C100')
+    wb.move_cells(name1,'A1','B100','C200')
 
     pr.disable()
     stats = Stats(pr)
@@ -246,7 +246,7 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    test_long_reference_chain()
+    #test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     # test_cell_cycle()
     
     #test_load_wkbk()
-    #test_rename_sheet() # breaking??
+    test_rename_sheet() # breaking??
     #test_move_cells() #this is slow
 
     # pr.disable()

@@ -6,7 +6,6 @@ from sheets.cell_error import CellError, CellErrorType
 
 from .sheet import Sheet
 import lark
-import sys
 
 
 MAX_ROW = 475254
@@ -51,8 +50,7 @@ class Workbook:
         self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-        sys.setrecursionlimit(100000)
-
+        
         self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',
@@ -232,9 +230,7 @@ class Workbook:
                             #TODO there is a possible very nuanced error of overlapping replacements
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
-                            # old_cell_contents = copy[(r,c)]
-                            # copy[(r,c)] = copy[(r,c)].replace(old_loc,new_loc) #this is cell.contents
-                            # new_cell_contents = copy[((r,c))]
+                            
 
 
                         else:

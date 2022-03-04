@@ -112,4 +112,37 @@ class Functions:
         return '1.3.0' #sheet.version
 
     def indirect_func(self, args):
-        pass
+        """The cell value is returned."""
+        # print(args)
+        # sheet_instance()
+        if len(args) != 3:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+
+        workbook_instance = args[1]
+        sheet_instance = args[2]
+        # args = args[0]
+
+
+        args = args[0].split('!')
+
+        # if using the current sheet
+        if len(args) == 1:
+            sheet_name = sheet_instance.sheet_name
+            cell = args[0]
+        # if using a different sheet
+        elif len(args) == 2:
+            # in case of quotes around sheet name
+            if args[0][0] == "'" and args[0][-1] == "'":
+                sheet_name = args[0][1:-1]
+            elif not args[0][0] == "'" and not args[0][-1] == "'":
+                sheet_name = args[0]
+            else:
+                return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
+            cell = args[1]
+        else:
+            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+
+        # delete the dollar sign from the cell reference
+        cell = cell.replace("$","")
+
+        return workbook_instance.get_cell_value(sheet_name, cell)

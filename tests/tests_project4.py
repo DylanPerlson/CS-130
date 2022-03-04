@@ -14,7 +14,7 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=true')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
-        wb.set_cell_contents(sh, 'a1', '=FaLse')
+        wb.set_cell_contents(sh, 'a1', 'FaLse')
         self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
 
     def test_bool_oper(self):
@@ -198,15 +198,50 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=IFERROR(B1, "abc")')
         self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
 
-    # def test_iserror_func(self):
-    #     wb = Workbook()
-    #     (_,sh) = wb.new_sheet()
+    def test_iserror_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
 
-    #     wb.set_cell_contents(sh, 'a1', '=ISERROR(true)')
-    #     self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+        wb.set_cell_contents(sh, 'a1', '=ISERROR(true)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
 
-    #     wb.set_cell_contents(sh, 'a1', '=ISERROR(#REF!)')
-    #     self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
+        wb.set_cell_contents(sh, 'a1', '=ISERROR(#REF!)')
+        self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
+
+    def test_indirect_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+        (_,sh2) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'B1', '=3')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'B1', '=true')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'B1', '=1+2')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'B1', '=AND(true,false)')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        # referring to a different sheet
+
+        wb.set_cell_contents(sh2, 'B1', '=AND(true,false)')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("' + sh2 + '!B1")')
+        self.assertEqual(wb.get_cell_value(sh2, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh2, 'B1', '=CHOOSE(3, 1, 2, 3)')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("' + sh2 + '!B1")')
+        self.assertEqual(wb.get_cell_value(sh2, 'B1'), wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh2, 'B1', '="something"')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("' + sh2 + '!B1")')
+        self.assertEqual(wb.get_cell_value(sh2, 'B1'), wb.get_cell_value(sh, 'A1'))
 
 
 if __name__ == '__main__':

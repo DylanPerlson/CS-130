@@ -391,12 +391,12 @@ class EvalExpressions(Transformer):
 
         if function_key not in self.workbook_instance.function_directory.keys():
             return CellError(CellErrorType.BAD_NAME, f'"{function_key}" not recognized as function')
-            #raise Exception(f'"{function_key}" not recognized as function') # TODO CellError should be passed instead
 
         function_val = self.workbook_instance.function_directory[function_key]
-        # function = 'and_func' # only for testing
+
+        if function_key == "INDIRECT":
+            args.extend([self.workbook_instance, self.sheet_instance])
 
 
         # args is now a nice list with the entries
-
         return self.functions(function_val, args)

@@ -52,6 +52,7 @@ class Workbook:
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         sys.setrecursionlimit(100000)
 
+        self.Time = 0
         self.function_directory =   {
             'AND': 'and_func',
             'OR': 'or_func',
@@ -593,22 +594,23 @@ class Workbook:
                 #completed task
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
+                     
 
-                
-                #these are the cells that will be passed onto the notification functions
-                #needs to be reset each call
-                self.notifying_cells = []
-                #and add the current cell
-                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
-                #look for circular references and get the list of changed cells
+                self._tarjan()
+                # #these are the cells that will be passed onto the notification functions
+                # #needs to be reset each call
+                # self.notifying_cells = []
+                # #and add the current cell
+                # self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                # #look for circular references and get the list of changed cells
 
-                #TODO DTP make this not recursive, this may not be the 
-                #MAY NOT BE THE RECURSIVE ISSUE
-                self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
-                #now we notify all of the functions of the cells that were changed
-                for func in self.notification_functions:
-                    #split_cell_string = curr_cell.split('!')
-                    func(self, self.notifying_cells)
+                # #TODO DTP make this not recursive, this may not be the 
+                # #MAY NOT BE THE RECURSIVE ISSUE
+                # self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
+                # #now we notify all of the functions of the cells that were changed
+                # for func in self.notification_functions:
+                #     #split_cell_string = curr_cell.split('!')
+                #     func(self, self.notifying_cells)
 
 
 
@@ -695,77 +697,7 @@ class Workbook:
 
         raise KeyError()
 
-    #Helper function to carry out depth for search for whole dependency graph
-    def _dfs_helper(self, sheet_name, location, parent_dict, stack):
-        curr_cell = sheet_name + '!' + location
-        curr_cell = curr_cell.lower()
-        for next_cell in self.master_cell_dict[curr_cell]:
-            if next_cell not in parent_dict:
-                parent_dict[next_cell] = curr_cell
-                next_cell_components = next_cell.split('!')
-                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
-        stack.append(curr_cell)
-
-    #Primary function called to initiate DFS
-    def _dfs(self, sheet_name, location, stack):
-        parent_dict = {}
-        stack = []
-        curr_cell = sheet_name + '!' + location
-        if curr_cell not in self.master_cell_dict.keys():
-            return stack
-
-        for next_cell in self.master_cell_dict[(curr_cell)]:
-            next_cell_components = next_cell.split('!')
-            if next_cell not in parent_dict:
-                parent_dict[next_cell] = None
-                self._dfs_helper(next_cell_components[0], next_cell_components[1], parent_dict, stack)
-        return stack
-
-    #Helper function used to initiate DFS
-    def _dfs_single_cell(self, curr_dict, sheet_name, location, visited, stack):
-        curr_cell = sheet_name + '!' + location
-        for next_cell in self.master_cell_dict[curr_cell]:
-            if next_cell not in visited:
-                visited[next_cell] = curr_cell
-                next_cell_components = next_cell.split('!')
-                self._dfs_single_cell(curr_dict, next_cell_components[0], next_cell_components[1], visited, stack)
-        stack.append(curr_cell)
-
-    #Helper function to find all components including strongly connected ones
-    #Any component longer than 1 in length is strongly connected
-    #Set all cells inside those components values to CIRCULAR_REFERENCE ERRORS
-    def kosaraju(self, sheet_name, location):
-        #Create stack of all dependent cells from performing DFS on starting current cell
-        stack = self._dfs(sheet_name, location, [])
-
-        #Reverse whole graph to perform stage 2 of Kosaraju's algorithm
-        reverse_depend = {}
-        for curr_cell in self.master_cell_dict.keys():
-            reverse_depend[curr_cell] = {}
-        for curr_cell in self.master_cell_dict.keys():
-            for next_cell in self.master_cell_dict[curr_cell]:
-                reverse_depend[next_cell][curr_cell] = True
-
-        # Traverse graph via poppping cells offstack
-        visited = {}
-        components = []
-        i = 0
-
-        while stack != []:
-            curr_cell = stack.pop()
-            #Don't need to DFS if already visited
-            if curr_cell in visited:
-                continue
-            else:
-                #Generate components based on dependencies of cells
-                components.append([])
-                if curr_cell not in visited:
-                    visited[curr_cell] = True
-                    curr_cell_components = curr_cell.split('!')
-                    self._dfs_single_cell(reverse_depend, curr_cell_components[0], curr_cell_components[1], visited, components[i])
-                components.append([])
-                i = i + 1
-        return components
+    
 
     def get_cell_value(self, sheet_name: str, location: str):
         """Return the evaluated value of the specified cell on the specified
@@ -1169,3 +1101,91 @@ class Workbook:
         while number:
             number, remainder = divmod(number - 1, ALPHABET_SIZE)
             yield remainder
+            
+    def _tarjan_helper(self, u, low, disc, stackMember, st):
+        # Initialize discovery time and low value
+        disc[u] = self.Time
+        low[u] = self.Time
+        self.Time += 1
+        stackMember[u] = True
+        st.append(u)
+
+        key_list = list(self.master_cell_dict.keys())
+        value_list = list(self.master_cell_dict.values())
+        # Go through all vertices adjacent to this
+
+        #find the indices of the cells in value_list
+        cells = value_list[u]
+        idx = []
+        for c in cells:
+            #append where it is in the key list
+            idx.append(key_list.index(c))
+            
+        
+        for v in idx: 
+            
+            # If v is not visited yet, then recur for it
+            if disc[v] == -1 :
+            
+                self._tarjan_helper(v, low, disc, stackMember, st)
+
+                # Check if the subtree rooted with v has a connection to
+                # one of the ancestors of u
+                # Case 1 (per above discussion on Disc and Low value)
+                low[u] = min(low[u], low[v])
+                        
+            elif stackMember[v] == True:
+
+                '''Update low value of 'u' only if 'v' is still in stack
+                (i.e. it's a back edge, not cross edge).
+                Case 2 (per above discussion on Disc and Low value) '''
+                low[u] = min(low[u], disc[v])
+
+        # head node found, pop the stack and print an SCC
+        # If length greater than 2, set contents of stack to CIRC_REF errors
+        w = -1 #To store stack extracted vertices
+        if low[u] == disc[u]:
+            connected = []
+            while w != u:
+                w = st.pop()
+                connected.append(value_list[w])
+                stackMember[w] = False
+            #then we have a strongly connected list
+            if (len(connected) > 1):
+                for i in connected:
+                    split_name = i[0].split('!')
+                    for s in self.sheets:
+                        if s.sheet_name.lower() == split_name[0]:
+                            row,col = self._get_col_and_row(split_name[1])
+                            s.cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
+                            #make sure that it does not revaluate it 
+                            self.cell_changed_dict[i[0]] = False
+                            #this break is just for efficiency so we dont need to keep checking
+                            break
+                            
+                    
+            
+    
+ 
+        #The function to do DFS traversal.
+        # It uses recursive _tarjan_helper()
+    def _tarjan(self):
+
+        self.Time = 0
+        # Mark all the vertices as not visited
+        # and Initialize parent and visited,
+        # and ap(articulation point) arrays
+        disc = [-1] * len(self.master_cell_dict.keys())
+        low = [-1] * len(self.master_cell_dict.keys())
+        stackMember = [False] * len(self.master_cell_dict.keys())
+        st =[]
+        
+
+        # Call the recursive helper function
+        # to find articulation points
+        # in DFS tree rooted with vertex 'i'
+        for i in range(len(self.master_cell_dict.keys())):
+            if disc[i] == -1:
+                self._tarjan_helper(i, low, disc, stackMember, st)
+     
+

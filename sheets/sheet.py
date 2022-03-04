@@ -85,7 +85,6 @@ class Sheet:
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
             
           
-                
       
        
     def get_cell_contents(self, location):

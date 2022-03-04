@@ -44,7 +44,7 @@ class Workbook:
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
 
-        self.check_circ_ref = []
+        self.circ_refs = []
         self.evaluate_again = []
         self.notifying_cells = []
         self.children_dict = {}
@@ -595,22 +595,21 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
                      
+                #reset list of circ refs
+                self.circ_refs = []
 
                 self._tarjan()
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
-                # self.notifying_cells = []
+                self.notifying_cells = []
                 # #and add the current cell
-                # self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
-                # #look for circular references and get the list of changed cells
-
-                # #TODO DTP make this not recursive, this may not be the 
-                # #MAY NOT BE THE RECURSIVE ISSUE
-                # self._notify_helper(sheet_name, curr_cell)  #doesnt appear to be the slow down
-                # #now we notify all of the functions of the cells that were changed
-                # for func in self.notification_functions:
-                #     #split_cell_string = curr_cell.split('!')
-                #     func(self, self.notifying_cells)
+                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                #get the list of changed cells
+                self._notify_helper(sheet_name, curr_cell)  
+                #now we notify all of the functions of the cells that were changed
+                for func in self.notification_functions:
+                    #split_cell_string = curr_cell.split('!')
+                    func(self, self.notifying_cells)
 
 
 
@@ -1044,26 +1043,9 @@ class Workbook:
         This function finds circ references as well as notifying all of the functions when a cell changes
         """
 
-
-        if curr_cell in self.check_circ_ref:
-            # CIRC ERRORS
-            for next_cell in self.check_circ_ref:
-                curr_cell_split = next_cell.split('!')
-                row, col = self._get_col_and_row(curr_cell_split[1])
-                for i in range(len(self.sheets)):
-                    if self.sheets[i].sheet_name.lower() == sheet_name.lower():
-                        self.sheets[i].cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE, "Circular reference")
-                        break
-
-
-            return
-
-
-
-    #Iterate up through dependent cells of our current cell
-        if curr_cell in self.children_dict:
+        #Iterate up through dependent cells of our current cell
+        if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
             dependents_list = self.children_dict[curr_cell]
-            self.check_circ_ref.append(curr_cell)
             for dependent in dependents_list:
                     split_cell_string = dependent.split('!')
 
@@ -1075,7 +1057,7 @@ class Workbook:
                     #recurse
                     self._notify_helper(split_cell_string[0], dependent)
 
-            self.check_circ_ref.remove(curr_cell)
+            
 
 #
     def _base_10_to_alphabet(self, number):
@@ -1117,7 +1099,9 @@ class Workbook:
         #find the indices of the cells in value_list
         cells = value_list[u]
         idx = []
+        print(self.master_cell_dict)
         for c in cells:
+            print(c)
             #append where it is in the key list
             idx.append(key_list.index(c))
             
@@ -1158,6 +1142,7 @@ class Workbook:
                         if s.sheet_name.lower() == split_name[0]:
                             row,col = self._get_col_and_row(split_name[1])
                             s.cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
+                            self.circ_refs.append(i[0])
                             #make sure that it does not revaluate it 
                             self.cell_changed_dict[i[0]] = False
                             #this break is just for efficiency so we dont need to keep checking

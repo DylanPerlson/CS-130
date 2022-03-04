@@ -54,15 +54,15 @@ class Functions:
         try:
             value2 = args[2]
         except IndexError:
-            value2 = None
+            value2 = False
 
-        if cond is None or value1 is None:
+        if cond is not True and cond is not False:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
         if cond:
             return value1
-        elif not cond and value2 is not None:
-            return value2
-        return False
+        # elif not cond and value2 is not None:
+        #     return value2
+        return value2
 
     def iferror_func(self, args): # previously: value1, value2 = None):
         if len(args) < 1 or len(args) > 2:
@@ -72,15 +72,15 @@ class Functions:
         try:
             value2 = args[1]
         except IndexError:
-            value2 = None
+            value2 = ''
 
-        if value1 is None:
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+        # if value1 is None:
+        #     return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
         if not isinstance(value1, CellError):
             return value1
-        elif isinstance(value1, CellError) and value2 is not None:
-            return value2
-        return False
+        # elif isinstance(value1, CellError) and value2 is not None:
+        #     return value2
+        return value2
 
     def choose_func(self, args):
         if len(args) <= 2:

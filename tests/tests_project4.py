@@ -2,6 +2,7 @@ import context
 from sheets import *
 import decimal
 import unittest
+from sheets import version
 
 
 class Project3(unittest.TestCase):
@@ -150,6 +151,48 @@ class Project3(unittest.TestCase):
 
         wb.set_cell_contents(sh, 'A1', '=ISBLANK(False)')
         self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'A1', '=ISBLANK("")')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+    def test_if_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'a1', '=IF(true, 5)')
+        self.assertEqual(5, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IF(false, 5)')
+        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IF(true, 5, 4)')
+        self.assertEqual(5, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IF(false, 5, 4)')
+        self.assertEqual(4, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IF(false, 5, "abc")')
+        self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
+
+    def test_iferror_func(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'a1', '=IFERROR(true, 5)')
+        self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IFERROR(#REF!, 5)')
+        self.assertEqual(5, wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IFERROR(#NAME?)')
+        self.assertEqual('', wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'a1', '=IFERROR("something", 4)')
+        self.assertEqual('something', wb.get_cell_value(sh, 'A1'))
+
+        wb.set_cell_contents(sh, 'B1', '=1/0')
+        wb.set_cell_contents(sh, 'a1', '=IFERROR(B1, "abc")')
+        self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
 
 
 if __name__ == '__main__':

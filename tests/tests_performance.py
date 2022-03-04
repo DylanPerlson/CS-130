@@ -5,9 +5,9 @@ from sheets import *
 
 def test_long_reference_chain():
     wb = Workbook()
-
     (_,name) = wb.new_sheet("sheet")
-    wb.set_cell_contents(name, 'A1', '1')
+    
+    
     length = 100
 
     for i in range(2, length+1):
@@ -15,11 +15,20 @@ def test_long_reference_chain():
         location_prev = 'A'+str(i-1)
 
         wb.set_cell_contents(name, location, '=1+'+location_prev)
-        #wb.get_cell_value(name, location)
+    
+    #print(wb.get_cell_value(name, location))
+    pr = cProfile.Profile()
+    pr.enable()
+    
 
+    wb.set_cell_contents(name, 'A1', '1')
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
     #print(wb.get_cell_value(name, location))
+    
     assert wb.get_cell_value(name, location) == length
-    #print(wb.get_cell_value(name, location))
 
 
 def test_long_reference_chain_letters():
@@ -105,45 +114,53 @@ def test_fibonacci():
     wb = Workbook()
 
     (_,sheet) = wb.new_sheet()
-    wb.set_cell_contents(sheet, 'A1', '1')
-    wb.set_cell_contents(sheet, 'A2', '1')
+    
 
-    length = 3
+    length = 100
 
-    for i in range(3, length+1):
+    for i in range(3, length):
         location = 'A'+str(i)
         location_prev1 = 'A'+str(i-1)
         location_prev2 = 'A'+str(i-2)
         wb.set_cell_contents(sheet, location, '=' + location_prev1 + '+' + location_prev2)
+
+    pr = cProfile.Profile()
+    pr.enable()
+    wb.set_cell_contents(sheet, 'A1', '1')
+    wb.set_cell_contents(sheet, 'A2', '1')
+    
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
 
     cell_value = wb.get_cell_value(sheet, location)
     print(cell_value)
     #print(fibo_output)
     #assert cell_value == fibo_output, f'get_cell_value should be {fibo_output}, but is {cell_value}'
 
-# helper function for nth Fibonacci number
-def _fibonacci(n):
-    # from https://www.geeksforgeeks.org/python-program-for-program-for-fibonacci-numbers-2/
-    a = 0
-    b = 1
+# # helper function for nth Fibonacci number
+# def _fibonacci(n):
+#     # from https://www.geeksforgeeks.org/python-program-for-program-for-fibonacci-numbers-2/
+#     a = 0
+#     b = 1
 
-    # Check is n is less than 0
-    if n < 0:
-        print("Incorrect input")
+#     # Check is n is less than 0
+#     if n < 0:
+#         print("Incorrect input")
 
-    # Check is n is equal to 0
-    elif n == 0:
-        return 0
+#     # Check is n is equal to 0
+#     elif n == 0:
+#         return 0
 
-    # Check if n is equal to 1
-    elif n == 1:
-        return b
-    else:
-        for _ in range(1, n):
-            c = a + b
-            a = b
-            b = c
-        return b
+#     # Check if n is equal to 1
+#     elif n == 1:
+#         return b
+#     else:
+#         for _ in range(1, n):
+#             c = a + b
+#             a = b
+#             b = c
+#         return b
 
 def test_load_wkbk():
     wb = Workbook()
@@ -230,7 +247,7 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    #test_long_reference_chain()
+    test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
@@ -240,7 +257,7 @@ if __name__ == '__main__':
     
     #test_load_wkbk()
     #test_rename_sheet() # breaking??
-    test_move_cells() #this is slow
+    #test_move_cells() #this is slow
 
     # pr.disable()
     # stats = Stats(pr)

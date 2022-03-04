@@ -109,7 +109,7 @@ class Functions:
     def version_func(self, args):
         if len(args) != 0:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
-        return '1.2.0' #sheet.version
+        return '1.3.0' #sheet.version
 
     def indirect_func(self, args):
         pass

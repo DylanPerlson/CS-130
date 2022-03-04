@@ -52,7 +52,7 @@ class Workbook:
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
         sys.setrecursionlimit(100000)
 
-        self.Time = 0
+        self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',
             'OR': 'or_func',
@@ -621,52 +621,10 @@ class Workbook:
                 #return is needed so we do not raise a key error
                 return
 
-
-
-
-
         #no sheet found
         raise KeyError()
 
 
-
-    # def _dependencies_changed_helper(self, sheet_name, location):
-    #     sheet_location = sheet_name + '!' + location
-    #     sheet_location = sheet_location.lower()
-
-    #     #for each dependent, tell it that is has changed
-    #     #and then tell their dependents
-    #     # if sheet_location in self.master_cell_dict:
-
-    #     if sheet_location in self.master_cell_dict:
-    #         self.cell_changed_dict[sheet_location.lower] = True
-    #         for cells in self.master_cell_dict[sheet_location]:
-
-    #             #check if a circ ref is being found
-    #             split_name = sheet_location.split('!')
-    #             row, col = self._get_col_and_row(split_name[1])
-    #             it = -1
-    #             for sheet in self.sheets:
-    #                 it += 1
-    #                 if sheet.sheet_name.lower() == split_name[0].lower():
-    #                     if isinstance(self.sheets[it].cells[(row,col)].evaluated_value, CellError):
-    #                         if self.sheets[it].cells[(row,col)].evaluated_value.get_type() == CellErrorType.CIRCULAR_REFERENCE:
-    #                             #print('circ ref found')
-    #                             return 'CircRef'
-
-    #                     #break out of for loop
-    #                     break
-
-
-
-    #             #now we continue calling all of our own dependencies, and breaking if there was a circ ref
-    #             self.cell_changed_dict[cells.lower] = True
-    #             splitting = cells.split('!')
-    #             return_val = self._dependencies_changed_helper(splitting[0],splitting[1])
-
-    #             #check if there is a circ ref
-    #             if return_val == 'CircRef':
-    #                 return return_val
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -1084,18 +1042,17 @@ class Workbook:
             number, remainder = divmod(number - 1, ALPHABET_SIZE)
             yield remainder
             
-    def _tarjan_helper(self, u, low, disc, stackMember, st):
-        # Initialize discovery time and low value
-        disc[u] = self.Time
-        low[u] = self.Time
-        self.Time += 1
-        stackMember[u] = True
-        st.append(u)
+    def _tarjan_helper(self, u, low, found, in_stack, the_stack):
+        
+        found[u] = self.num_visits
+        low[u] = self.num_visits
+        self.num_visits += 1
+        in_stack[u] = True
+        the_stack.append(u)
 
         key_list = list(self.master_cell_dict.keys())
         value_list = list(self.master_cell_dict.values())
-        # Go through all vertices adjacent to this
-
+        
         #find the indices of the cells in value_list
         cells = value_list[u]
         idx = []
@@ -1107,32 +1064,29 @@ class Workbook:
         
         for v in idx: 
             
-            # If v is not visited yet, then recur for it
-            if disc[v] == -1 :
+            # If v is not found yet, then recurse for it
+            if found[v] == -1 :
             
-                self._tarjan_helper(v, low, disc, stackMember, st)
+                self._tarjan_helper(v, low, found, in_stack, the_stack)
 
                 # Check if the subtree rooted with v has a connection to
                 # one of the ancestors of u
-                # Case 1 (per above discussion on Disc and Low value)
+                
                 low[u] = min(low[u], low[v])
                         
-            elif stackMember[v] == True:
+            elif in_stack[v] == True:
+                low[u] = min(low[u], found[v])
 
-                '''Update low value of 'u' only if 'v' is still in stack
-                (i.e. it's a back edge, not cross edge).
-                Case 2 (per above discussion on Disc and Low value) '''
-                low[u] = min(low[u], disc[v])
-
-        # head node found, pop the stack and print an SCC
+        # head node found
         # If length greater than 2, set contents of stack to CIRC_REF errors
-        w = -1 #To store stack extracted vertices
-        if low[u] == disc[u]:
+        w = -1 
+        if low[u] == found[u]:
             connected = []
             while w != u:
-                w = st.pop()
+                w = the_stack.pop()
                 connected.append(value_list[w])
-                stackMember[w] = False
+                in_stack[w] = False
+
             #then we have a strongly connected list
             if (len(connected) > 1):
                 for i in connected:
@@ -1146,30 +1100,20 @@ class Workbook:
                             self.cell_changed_dict[i[0]] = False
                             #this break is just for efficiency so we dont need to keep checking
                             break
-                            
-                    
-            
-    
- 
-        #The function to do DFS traversal.
-        # It uses recursive _tarjan_helper()
+                                   
+
     def _tarjan(self):
 
-        self.Time = 0
-        # Mark all the vertices as not visited
-        # and Initialize parent and visited,
-        # and ap(articulation point) arrays
-        disc = [-1] * len(self.master_cell_dict.keys())
+        self.num_visits = 0
+        
+        #set everything to -1
+        found = [-1] * len(self.master_cell_dict.keys())
         low = [-1] * len(self.master_cell_dict.keys())
-        stackMember = [False] * len(self.master_cell_dict.keys())
-        st =[]
+        in_stack = [False] * len(self.master_cell_dict.keys())
+        the_stack =[]
         
 
-        # Call the recursive helper function
-        # to find articulation points
-        # in DFS tree rooted with vertex 'i'
+        # Call the helper function
         for i in range(len(self.master_cell_dict.keys())):
-            if disc[i] == -1:
-                self._tarjan_helper(i, low, disc, stackMember, st)
-     
-
+            if found[i] == -1:
+                self._tarjan_helper(i, low, found, in_stack, the_stack)

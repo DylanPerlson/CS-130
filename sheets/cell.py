@@ -26,7 +26,7 @@ class Cell():
         if not isinstance(contents, str) and contents is not None:
             raise TypeError('Content is not a string.')
 
-        #TODO return 0 for NONE
+        
 
         # Determine Cell Type
         elif str(contents) == "" or str(contents).isspace():

@@ -73,17 +73,20 @@ class Sheet:
 
 
 
-        # I believe I did this incorrectly
-        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
-            parent_cell = parent_cell.lower()
-            workbook_instance.children_dict[parent_cell] = []
+         # I believe I did this incorrectly
+        # for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
+        #     parent_cell = parent_cell.lower()
+        #     workbook_instance.children_dict[parent_cell] = []
+            
         workbook_instance.master_cell_dict[sheet_location] = []
         for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
             parent_cell = parent_cell.lower()
-
+            if parent_cell not in  workbook_instance.children_dict:
+                workbook_instance.children_dict[parent_cell] = []
             workbook_instance.children_dict[parent_cell].append(sheet_location)
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
-
+        #children dict needs to remove old values now though - it is not updating
+        #TODO DTP
 
 
 

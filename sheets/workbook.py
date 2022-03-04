@@ -611,7 +611,9 @@ class Workbook:
 
 
                 #keep this here so that we do not get recursion issues, but it breaks topological?
-                i.get_cell_value(self,location.lower())
+                #TODO DTP dont just update this cell, also update any dependencies
+                #i.get_cell_value(self,location.lower())
+                self._update(curr_cell)
                 #tell parents that there is a change
                 # for d in self.master_cell_dict[curr_cell]:
                 #     self.cell_changed_dict[d] = True
@@ -622,6 +624,16 @@ class Workbook:
         raise KeyError()
 
 
+    def _update(self,curr_cell):
+        #Iterate up through dependent cells of our current cell
+        if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
+            dependents_list = self.children_dict[curr_cell]
+            for dependent in dependents_list:
+                dep_split = dependent.split('!')
+                #evaluate the cell
+                self.get_cell_value(dep_split[0],dep_split[1])
+                #recurse
+                self._update(dependent)
 
 
     def get_cell_contents(self, sheet_name: str, location: str):

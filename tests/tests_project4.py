@@ -6,7 +6,7 @@ from sheets import version
 from sheets import cell
 
 
-class Project3(unittest.TestCase):
+class Project4(unittest.TestCase):
     def test_lark_bool_lit(self):
         wb = Workbook()
         (_,sh) = wb.new_sheet()
@@ -198,15 +198,15 @@ class Project3(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=IFERROR(B1, "abc")')
         self.assertEqual('abc', wb.get_cell_value(sh, 'A1'))
 
-    def test_iserror_func(self):
-        wb = Workbook()
-        (_,sh) = wb.new_sheet()
+    # def test_iserror_func(self):
+    #     wb = Workbook()
+    #     (_,sh) = wb.new_sheet()
 
-        wb.set_cell_contents(sh, 'a1', '=ISERROR(true)')
-        self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
+    #     wb.set_cell_contents(sh, 'a1', '=ISERROR(true)')
+    #     self.assertEqual(False, wb.get_cell_value(sh, 'A1'))
 
-        wb.set_cell_contents(sh, 'a1', '=ISERROR(#REF!)')
-        self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
+    #     wb.set_cell_contents(sh, 'a1', '=ISERROR(#REF!)')
+    #     self.assertEqual(True, wb.get_cell_value(sh, 'A1'))
 
 
 if __name__ == '__main__':

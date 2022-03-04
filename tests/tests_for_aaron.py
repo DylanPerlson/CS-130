@@ -113,11 +113,23 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A6','=#DIV/0! + #VALUE!')
         wb.set_cell_contents(name,'A7','=#VALUE! & #ERROR!')
 
+
         self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
         self.assertEqual(wb.get_cell_value(name,'A3').get_type(),CellErrorType.PARSE_ERROR)
         self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.BAD_REFERENCE)
         self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.TYPE_ERROR)
         self.assertEqual(wb.get_cell_value(name,'A7').get_type(),CellErrorType.PARSE_ERROR)
+    
+    def test_mixed(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A2','6')
+        wb.set_cell_contents(name,'B1','1')
+        wb.set_cell_contents(name,'C1','1')
+        wb.set_cell_contents(name,'D1','14')
+        wb.set_cell_contents(name, 'E1', '=OR(AND(A1 > 5, B1 < 2), AND(C1 < 6, D1 = 14))')
+
+        self.assertEqual(wb.get_cell_value(name, 'E1'), True)
 
 
 

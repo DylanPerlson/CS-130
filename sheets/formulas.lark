@@ -26,7 +26,7 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_func : BOOL_FUNC "(" ( base ["," (base)]* )? ")" -> bool_func
+?bool_func : BOOL_FUNC "(" ( (base | UNQUOTED_STRING) ["," (base)]* )? ")" -> bool_func
       // | BOOL_FUNC_1 "(" [ bool ] ")"
       // | BOOL_FUNC_2 "(" [ bool "," bool ] ")"
 
@@ -90,6 +90,7 @@ STRING: /\"[^"]*\"/
 
 // (new) This is supposed to add boolean functions (and, or, etc.)
 BOOL_FUNC: /[A-Za-z_][A-Za-z0-9_]*/ // TODO check whether this supports everything
+UNQUOTED_STRING: /[A-Za-z_][A-Za-z0-9_]*/
 // ("AND" | "OR" | "XOR")
 // BOOL_FUNC_1: ("NOT" | "ISBLANK" | "ISERROR")
 // BOOL_FUNC_2: ("EXACT")

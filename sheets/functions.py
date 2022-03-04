@@ -41,8 +41,24 @@ class Functions:
     def exact_func(self, args):
         if len(args) != 2:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
-        if not isinstance(args[0],str) or not isinstance(args[1],str):
-            return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+        # if not isinstance(args[0],str) or not isinstance(args[1],str):
+        #     return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+
+        args0 = args[0]
+        args1 = args[1]
+
+        # Determine return error based on priority in cell_error.py
+        if isinstance(args0, CellError) and isinstance(args1, CellError):
+            if args0.get_type().value < args1.get_type().value:
+                return args0
+            else:
+                return args1
+
+        if isinstance(args0, CellError):
+            return args0
+        if isinstance(args1, CellError):
+            return args1
+
         return str(args[0]) == str(args[1])
 
     #Conditional functions
@@ -114,12 +130,18 @@ class Functions:
 
     def indirect_func(self, args):
         """The cell value is returned."""
-        if len(args) != 3:
+        if len(args) != 4:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
+
 
         workbook_instance = args[1]
         sheet_instance = args[2]
+        cell_signal = args[3]
 
+        if cell_signal:
+            return args[0]
+
+        # print(args[0])
         args = args[0].split('!')
 
         # if using the current sheet

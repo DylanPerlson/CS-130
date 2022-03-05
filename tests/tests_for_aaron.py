@@ -36,6 +36,10 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A4', '=A3')
         wb.set_cell_contents(name,'A1', '5')
         print('3 above')
+        wb.set_cell_contents(name,'A5', '=A1')
+        wb.set_cell_contents(name,'A1','1')
+        print('4 above')
+
 
     def test_circular_references(self):
         wb = Workbook()

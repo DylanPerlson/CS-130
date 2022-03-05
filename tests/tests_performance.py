@@ -7,7 +7,7 @@ def test_long_reference_chain():
     wb = Workbook()
     
 
-    length = 300
+    length = 600
     (_,name) = wb.new_sheet("sheet")
 
     pr = cProfile.Profile()
@@ -113,7 +113,7 @@ def test_fibonacci():
     (_,sheet) = wb.new_sheet()
 
 
-    length = 150#update and notify are suuuper inefficient
+    length = 250
 
     for i in range(3, length):
         location = 'A'+str(i)

@@ -52,7 +52,7 @@ class Workbook:
         self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-
+        
         self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',

@@ -39,16 +39,11 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A1','1')
         wb.set_cell_contents(name,'A2','1')
         
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
-        print(wb.sheets[0].cells[(1,4)].evaluated_value)
-        print(wb.sheets[0].cells[(1,5)].evaluated_value)
-        print(wb.get_cell_value(name,'A3'))
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
+        self.assertEqual(wb.sheets[0].cells[(1,3)].evaluated_value, 2)
+        self.assertEqual(wb.sheets[0].cells[(1,4)].evaluated_value,3)
+        self.assertEqual(wb.sheets[0].cells[(1,5)].evaluated_value,5)
+
         self.assertEqual(wb.get_cell_value(name,'A5'),5)
-        
-        print(wb.sheets[0].cells[(1,3)].evaluated_value)
-        print(wb.sheets[0].cells[(1,4)].evaluated_value)
-        print(wb.sheets[0].cells[(1,5)].evaluated_value)
         self.assertEqual(wb.get_cell_value(name,'A4'),3)
         self.assertEqual(wb.get_cell_value(name,'A3'),2)
     # def test_tarjan(self):

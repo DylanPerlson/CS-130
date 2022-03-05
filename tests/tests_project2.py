@@ -41,8 +41,7 @@ class Project2(unittest.TestCase):
         wb.rename_sheet('New_nAme','newName2')
         self.assertEqual('=newName2!A1+3',wb.get_cell_contents(name2,'A1'))
 
-        # TODO what's this;
-        # I wanna try to not have commented code in the project testfiles (Pieter)
+        # TODO commented test code: not working
         #(_, name2) = wb.new_sheet("s3")
         #wb.set_cell_contents(name2,'A1',"='newName2'!A1 + 's3'!A1")
         #wb.rename_sheet('newName2','new?name')

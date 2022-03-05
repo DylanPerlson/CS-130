@@ -32,10 +32,10 @@ class Dylan(unittest.TestCase):
     def test_fib_failure(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
-        wb.set_cell_contents(name,'A3','=A1+A2')  
-        wb.set_cell_contents(name,'A4','=A2+A3') 
-        wb.set_cell_contents(name,'A5','=A3+A4') 
+
+        wb.set_cell_contents(name,'A3','=A1+A2')
+        wb.set_cell_contents(name,'A4','=A2+A3')
+        wb.set_cell_contents(name,'A5','=A3+A4')
         wb.set_cell_contents(name,'A1','1')
         wb.set_cell_contents(name,'A2','1')
         
@@ -63,9 +63,9 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name1,'A4','=A2+A3')
         wb.set_cell_contents(name2,'A1',"=s1!A1+A2")
         wb.rename_sheet('S1','new_name')
-        
 
-        
+
+
 
 
 
@@ -84,7 +84,7 @@ class Dylan(unittest.TestCase):
         # wb.set_cell_contents(name,'A4', '=A3')
         # wb.set_cell_contents(name,'A1', '5')
         # print('3 above')
-        
+
 
 
 

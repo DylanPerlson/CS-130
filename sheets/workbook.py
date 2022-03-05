@@ -2,11 +2,11 @@
 import copy
 import json
 
+import lark
+
 from sheets.cell_error import CellError, CellErrorType
 
 from .sheet import Sheet
-import lark
-
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -37,8 +37,10 @@ class Workbook:
         self.number_sheets = 0
         self.notification_functions = []
         self.user_defined_functions = []
-        self.master_cell_dict = {} #master_cell_dict[child] = [list of parent cells/ cells that reference child]
-        
+
+        #master_cell_dict[child] = [list of parent cells/ cells that reference child]
+        self.master_cell_dict = {}
+
         self.visited_cell_dict = {}
         self.allowed_characters = ".?!,:;!@#$%^&*()-_ "
         self.needs_quotes = ".?!,:;!@#$%^&*()- "
@@ -50,7 +52,7 @@ class Workbook:
         self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-        
+
         self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',
@@ -168,7 +170,8 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e]._retrieve_cell_references(self, copy_dict[(r,c)])
+                            cell_list = self.sheets[e]._retrieve_cell_references(self,
+                            copy_dict[(r,c)])
 
                     for i in cell_list:
 
@@ -227,10 +230,10 @@ class Workbook:
                                     +'$'+str(replace_r)
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
-                            #TODO there is a possible very nuanced error of overlapping replacements
+                            #TODO (Dylan) there is a possible very nuanced error of overlapping replacements
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
-                            
+
 
 
                         else:
@@ -611,7 +614,7 @@ class Workbook:
 
 
                 #keep this here so that we do not get recursion issues, but it breaks topological?
-                #TODO DTP dont just update this cell, also update any dependencies
+                #TODO (Dylan) DTP dont just update this cell, also update any dependencies
                 #i.get_cell_value(self,location.lower())
                 self._update(curr_cell)
                 #tell parents that there is a change
@@ -938,7 +941,7 @@ class Workbook:
 
         #need to update sheetname in cell dependencies
 
-        #TODO DTP
+        #TODO (Dylan) DTP
         #create a list of keys to change bc cannot change during
         change_keys = []
         for key, value in self.master_cell_dict.items():
@@ -952,7 +955,7 @@ class Workbook:
             #if old name is in the key now replace
             if old_name in key:
                 change_keys.append(key)
-        
+
 
         #change all the necesarry key values
         for key in change_keys:
@@ -963,8 +966,8 @@ class Workbook:
             self.master_cell_dict.pop(key)
 
         #now do the same for:
-        #self.children_dict 
-        #self.cell_changed_dict 
+        #self.children_dict
+        #self.cell_changed_dict
 
         change_keys = []
         for key, value in self.children_dict.items():
@@ -978,7 +981,7 @@ class Workbook:
             #if old name is in the key now replace
             if old_name in key:
                 change_keys.append(key)
-        
+
 
         #change all the necesarry key values
         for key in change_keys:
@@ -997,7 +1000,7 @@ class Workbook:
             #if old name is in the key now replace
             if old_name in key:
                 change_keys.append(key)
-        
+
 
         #change all the necesarry key values
         for key in change_keys:
@@ -1037,41 +1040,34 @@ class Workbook:
 
         return row, col
 
-    def add_user_function(self, new_func):
-        self.user_defined_functions.append(new_func)
-
-    def run_user_function(self, function, arguments):
-        if function not in self.user_defined_functions:
-            raise KeyError
-
-
     def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
     def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
-        """add all of our cells to the evaluate again list if it is not in it already
+        """add all of our cells to the evaluate again list if it
+        is not in it already
 
-        This function finds circ references as well as notifying all of the functions when a cell changes
+        This function finds circ references as well as notifying
+        all of the functions when a cell changes
         """
 
         #Iterate up through dependent cells of our current cell
         if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
             dependents_list = self.children_dict[curr_cell]
             for dependent in dependents_list:
-                    split_cell_string = dependent.split('!')
+                split_cell_string = dependent.split('!')
 
-                    #tell all of the cells that they have changed
-                    self.cell_changed_dict[dependent] = True
+                #tell all of the cells that they have changed
+                self.cell_changed_dict[dependent] = True
 
-                    #add the cell to list of cells to be notified of
-                    self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
-                    #recurse
-                    self._notify_helper(split_cell_string[0], dependent)
+                #add the cell to list of cells to be notified of
+                self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+                #recurse
+                self._notify_helper(split_cell_string[0], dependent)
 
 
 
-#
     def _base_10_to_alphabet(self, number):
         """Helper function: base 10 to alphabet
         Convert a decimal number to its base alphabet representation
@@ -1128,7 +1124,7 @@ class Workbook:
 
                 low[u] = min(low[u], low[v])
 
-            elif in_stack[v] == True:
+            elif in_stack[v] is True:
                 low[u] = min(low[u], found[v])
 
         # head node found
@@ -1142,13 +1138,14 @@ class Workbook:
                 in_stack[w] = False
 
             #then we have a strongly connected list
-            if (len(connected) > 1):
+            if len(connected) > 1:
                 for i in connected:
                     split_name = i[0].split('!')
                     for s in self.sheets:
                         if s.sheet_name.lower() == split_name[0]:
                             row,col = self._get_col_and_row(split_name[1])
-                            s.cells[(row,col)].evaluated_value = CellError(CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
+                            s.cells[(row,col)].evaluated_value = CellError(
+                                CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
                             self.circ_refs.append(i[0])
                             #make sure that it does not revaluate it
                             self.cell_changed_dict[i[0]] = False

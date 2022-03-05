@@ -45,7 +45,7 @@ def _is_float(element):
     except ValueError:
         return False
 
-#TODO DTP FIX THIS
+#TODO (Dylan) DTP FIX THIS
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
@@ -61,7 +61,7 @@ def _get_value_as_number(curr_arg):
 
     return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
-#TODO DTP fix
+#TODO (Dylan) DTP fix
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
@@ -286,6 +286,7 @@ class EvalExpressions(Transformer):
     #### METHODS FOR BOOLEAN STUFF:
 
     def bool_lit(self, args):
+        """Takes a boolean as string and returns actual bool."""
         if args[0].lower() == "true":
             return True
         elif args[0].lower() == "false":
@@ -295,6 +296,7 @@ class EvalExpressions(Transformer):
             f"Boolean value is not recognized: {args[0]}")
 
     def bool_oper(self, args):
+        """Performs boolean operations: ==, <, >, etc."""
         operation = args[1]
         args0 = args[0]
         args2 = args[2]
@@ -356,10 +358,11 @@ class EvalExpressions(Transformer):
             return _compare(args0, operation, args2)
 
         else:
-            pass # TODO something
+            CellError(CellErrorType.TYPE_ERROR, f"Invalid operator: {operation}")
 
 
     def remove_trailing_zeros(self, d):
+        """Removes trailing zeros of decimal.Decimals."""
         #are big numbers getting rounded wrong?? DTP
         if isinstance(d,decimal.Decimal):
             d = str(d)
@@ -376,6 +379,7 @@ class EvalExpressions(Transformer):
             return d
 
     def bool_func(self, args):
+        """Performs boolean functions: AND, OR, etc."""
         # pseudocode:
         #     import some new module
         #     pass args to module

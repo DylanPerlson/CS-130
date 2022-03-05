@@ -312,7 +312,7 @@ class Project1(unittest.TestCase):
         self.assertEqual(content1, 'Lots of space in the back')
         self.assertEqual(content2, '=54')
         self.assertEqual(content3, None)
-        # self.assertEqual(value3, None) # TODO fix empty cells issue; is 'None' instead of None
+        # self.assertEqual(value3, None) # TODO empty cells issue; is 'None' instead of None
         self.assertEqual(content4, None)
 
     def test_simple_formula_with_decimal(self):
@@ -433,6 +433,15 @@ class Project1(unittest.TestCase):
         wb.set_cell_contents(sh, 'A1', '#REF!')
 
         self.assertEqual(wb.get_cell_value(sh,'A1').get_type(), CellErrorType.BAD_REFERENCE)
+
+    def test_double_quote_literal(self):
+        wb = Workbook()
+        (_, sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'A1', "'one quote: ''")
+        content1 = wb.get_cell_value(sh, 'A1')
+        self.assertEqual(content1, "one quote: '")
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

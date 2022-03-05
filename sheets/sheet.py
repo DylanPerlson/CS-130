@@ -55,10 +55,10 @@ class Sheet:
             self.extent[1] = col
 
 
-        #stash old cell
-        prev_cell = None
-        if (row,col) in self.cells:
-            prev_cell = self.cells[(row,col)]
+        # #stash old cell
+        # prev_cell = None
+        # if (row,col) in self.cells:
+        #     prev_cell = self.cells[(row,col)]
 
         #update cell
         new_cell = Cell(contents)
@@ -77,7 +77,7 @@ class Sheet:
         # for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
         #     parent_cell = parent_cell.lower()
         #     workbook_instance.children_dict[parent_cell] = []
-            
+
         workbook_instance.master_cell_dict[sheet_location] = []
         for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
             parent_cell = parent_cell.lower()
@@ -86,7 +86,7 @@ class Sheet:
             workbook_instance.children_dict[parent_cell].append(sheet_location)
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
         #children dict needs to remove old values now though - it is not updating
-        #TODO DTP
+        #TODO (Dylan) DTP
 
 
 

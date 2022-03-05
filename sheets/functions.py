@@ -154,7 +154,7 @@ class Functions:
         Returns version number."""
         if len(args) != 0:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
-        return '1.3.0' #sheet.version
+        return '1.3' #sheet.version
 
     def indirect_func(self, args):
         """The cell value is returned."""

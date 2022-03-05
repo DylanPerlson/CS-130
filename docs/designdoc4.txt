@@ -35,10 +35,10 @@ D1.  [4pts] Briefly describe the changes you made to the Lark parser grammar to
      string concatenation operations?
 
 We added a new BOOL_LIT grammar object that handles boolean values true and false.
-In addition, there is now a BOOL_FUNC object that handles operations like AND, OR, etc. and 
+In addition, there is now a BOOL_FUNC object that handles operations like AND, OR, etc. and
 BOOL_OP object that handles things like greater than, less than etc.
 To ensure these operations are lowest priority, these were defined separately as specified above
-and are the last to be evaluated in the grammar.
+and are the last to be evaluated in the grammar by using appropriate maybe-operators, i.e. [] or ()?.
 
 D2.  [5pts] Briefly describe how function invocation works in your spreadsheet
      engine.  How easy or hard would it be for you to add new functions to your
@@ -59,7 +59,10 @@ D3.  [5pts] Is your implementation able to lazily evaluate the arguments to
      what changes to your design were required to achieve this?  If not, what
      prevented your team from implementing this?
 
-
+This has not been implemented yet because we use a Transformer instead of Interpreter.
+We did not have the time to rewrite earlier code (and use an Interpreter).
+Using an Interpreter, the conditional evaluation is likely easily implementable,
+by use of indicator variables and/or if functions.
 
 D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      correctly, with respect to circular-reference errors?  (Recall from the
@@ -69,7 +72,7 @@ D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      not, what prevented your team from implementing this?
 
 Due to needing to devote a significant amount of time fixing our prior circular reference and dependency algorithm
-that was broken from weeks prior, we were unable to implement this particular edge case of ISERROR in a timely matter.
+that was broken from weeks prior, we were unable to implement this particular edge case of ISERROR() in a timely matter.
 
 D5.  [5pts] Is your implementation able to successfully identify cycles that
      are not evident from static analysis of formulas containing INDIRECT()?
@@ -124,15 +127,22 @@ we can improve future versions of the course.
 F1.  What parts of the assignment did you find highly enjoyable?  Conversely,
      what parts of the assignment did you find unenjoyable?
 
+Implementing new grammar to lark was difficult but interesting.
+
 
 F2.  What parts of the assignment helped you learn more about software
      engineering best-practices, or other useful development skills?
      What parts were not helpful in learning these skills?
 
+The lark grammar (and associated parsing principles) seem very useful!
+
 
 F3.  Were there any parts of the assignment that seemed _unnecessarily_ tedious?
      (Some parts of software development are always tedious, of course.)
 
+Changing from a Transformer to Interpreter evaluation would seem unnecessarily
+difficult since we could have done it with an Interpreter in the first place
+(but didn't realise it mattered).
 
 F4.  Do you have any feedback and/or constructive criticism about how this
      project can be made better in future iterations of CS130?

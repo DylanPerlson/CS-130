@@ -7,27 +7,27 @@ def test_long_reference_chain():
     wb = Workbook()
     
 
-    length = 50
+    length = 300
+    (_,name) = wb.new_sheet("sheet")
+
     pr = cProfile.Profile()
     pr.enable()
-    for j in range(10):
-        (_,name) = wb.new_sheet("s"+j)
 
-        for i in range(2, length+1):
-            location = 'A'+str(i)
-            location_prev = 'A'+str(i-1)
+    for i in range(2, length+1):
+        location = 'A'+str(i)
+        location_prev = 'A'+str(i-1)
 
-            wb.set_cell_contents(name, location, '=1+'+location_prev)
+        wb.set_cell_contents(name, location, '=1+'+location_prev)
 
 
    
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('totime').print_stats(5)
+    stats.sort_stats('tottime').print_stats(5)
     #print(wb.get_cell_value(name, location))
 
-    assert wb.get_cell_value(name, location) == length
+    #assert wb.get_cell_value(name, location) == length
 
 
 def test_long_reference_chain_letters():
@@ -113,7 +113,7 @@ def test_fibonacci():
     (_,sheet) = wb.new_sheet()
 
 
-    length = 100
+    length = 150#update and notify are suuuper inefficient
 
     for i in range(3, length):
         location = 'A'+str(i)
@@ -195,16 +195,22 @@ def test_rename_sheet():
     wb = Workbook()
     (_, name1) = wb.new_sheet("fiRst_sheet")
 
-    length = 100
+    
     wb.set_cell_contents(name1, 'AA57', 'words')
     wb.set_cell_contents(name1, 'AAA3', '=12+4')
     wb.set_cell_contents(name1, 'JNE41', 'more words')
-    for i in range(3, length):
-        location = 'A'+str(i)
-        location_prev1 = 'A'+str(i-1)
-        location_prev2 = 'A'+str(i-2)
-        wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
-        #print(wb.get_cell_contents(name1,location))
+    
+    length = 50
+   
+    for j in range(5):
+        (_,name) = wb.new_sheet("s"+str(j))
+
+        for i in range(3, length):
+            location = 'A'+str(i)
+            location_prev1 = 'A'+str(i-1)
+            location_prev2 = 'A'+str(i-2)
+            wb.set_cell_contents(name1, location, '=' + location_prev1 + '+' + location_prev2)
+            #print(wb.get_cell_contents(name1,location))
 
 
     pr = cProfile.Profile()

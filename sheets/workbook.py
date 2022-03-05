@@ -611,15 +611,11 @@ class Workbook:
                     #split_cell_string = curr_cell.split('!')
                     func(self, self.notifying_cells)
 
-
-
-                #keep this here so that we do not get recursion issues, but it breaks topological?
+                
                 #TODO (Dylan) DTP dont just update this cell, also update any dependencies
-                #i.get_cell_value(self,location.lower())
+                
                 self._update(curr_cell)
-                #tell parents that there is a change
-                # for d in self.master_cell_dict[curr_cell]:
-                #     self.cell_changed_dict[d] = True
+                
                 #return is needed so we do not raise a key error
                 return
 
@@ -634,9 +630,10 @@ class Workbook:
             for dependent in dependents_list:
                 dep_split = dependent.split('!')
                 #evaluate the cell
-                self.get_cell_value(dep_split[0],dep_split[1])
-                #recurse
-                self._update(dependent)
+                if self.cell_changed_dict[dependent] == True:
+                    self.get_cell_value(dep_split[0],dep_split[1])
+                    #recurse
+                    self._update(dependent)
 
 
     def get_cell_contents(self, sheet_name: str, location: str):
@@ -1051,7 +1048,6 @@ class Workbook:
         This function finds circ references as well as notifying
         all of the functions when a cell changes
         """
-
         #Iterate up through dependent cells of our current cell
         if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
             dependents_list = self.children_dict[curr_cell]
@@ -1062,9 +1058,10 @@ class Workbook:
                 self.cell_changed_dict[dependent] = True
 
                 #add the cell to list of cells to be notified of
-                self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
-                #recurse
-                self._notify_helper(split_cell_string[0], dependent)
+                if (split_cell_string[0],split_cell_string[1]) not in self.notifying_cells:
+                    self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+                    #recurse
+                    self._notify_helper(split_cell_string[0], dependent)
 
 
 
@@ -1154,7 +1151,6 @@ class Workbook:
 
 
     def _tarjan(self):
-
         self.num_visits = 0
 
         #set everything to -1

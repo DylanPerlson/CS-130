@@ -169,7 +169,7 @@ class Functions:
         if cell_signal:
             return args[0]
 
-        # print(args[0])
+      
         args = args[0].split('!')
 
         # if using the current sheet

@@ -16,13 +16,15 @@ Logistics (7 pts)
 -----------------
 
 L1.  [2pts] Enumerate all teammates here.
-
+Aaron Tran, Dylan Perlson, Pieter Van Santvliet
 
 L2.  [2pts] What did each teammate focus on during this project?
-
+Aaron - function directory, unit tests, fixing old code
+Pieter - updating lark grammer/parser, function directory, unit tests + linting
+Dylan - Performance tests, unit tests + linting, fixing old code
 
 L3.  [3pts] Approximately how many hours did each teammate spend on the project?
-
+Everyone spent approximately 30 hours on this project
 
 Spreadsheet Engine Design (27 pts)
 ----------------------------------
@@ -32,12 +34,23 @@ D1.  [4pts] Briefly describe the changes you made to the Lark parser grammar to
      that conditional expressions are lower precedence than arithmetic and
      string concatenation operations?
 
+We added a new BOOL_LIT grammar object that handles boolean values true and false.
+In addition, there is now a BOOL_FUNC object that handles operations like AND, OR, etc. and 
+BOOL_OP object that handles things like greater than, less than etc.
+To ensure these operations are lowest priority, these were defined separately as specified above
+and are the last to be evaluated in the grammar.
 
 D2.  [5pts] Briefly describe how function invocation works in your spreadsheet
      engine.  How easy or hard would it be for you to add new functions to your
      engine?  What about a third-party developer?  How well does your code
      follow the Open/Closed Principle?
 
+We have created a new function dictionary in workbook.py that contains the Lark grammar equivalent
+of a function as the key, and its corresponding value is the actual function definition as defined in functions.py.
+Function invocation is as simple as typing in the function and appropriate parameters as the contents of any cell and when the value
+need to be obtained, the function will get called and the appropriate value returned. As the function dictionary and functions.py is
+quite modular and clear in its implementation, new functions could be added with minimal obstruction (including for external developers)
+and no modifications to the lark grammar would be needed - thus adhering to the open-closed principle.
 
 D3.  [5pts] Is your implementation able to lazily evaluate the arguments to
      functions like IF(), CHOOSE() and IFERROR()?  (Recall from the Project 4
@@ -47,6 +60,7 @@ D3.  [5pts] Is your implementation able to lazily evaluate the arguments to
      prevented your team from implementing this?
 
 
+
 D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      correctly, with respect to circular-reference errors?  (Recall from the
      Project 4 spec that ISERROR() behaves differently when part of a cycle,
@@ -54,12 +68,16 @@ D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      If so, what changes to your design were required to achieve this?  If
      not, what prevented your team from implementing this?
 
+Due to needing to devote a significant amount of time fixing our prior circular reference and dependency algorithm
+that was broken from weeks prior, we were unable to implement this particular edge case of ISERROR in a timely matter.
 
 D5.  [5pts] Is your implementation able to successfully identify cycles that
      are not evident from static analysis of formulas containing INDIRECT()?
      If so, what changes to your design were required, if any, to achieve this?
      If not, what prevented your team from implementing this?
 
+Due to needing to devote a significant amount of time fixing our prior circular reference and dependency algorithm
+that was broken from weeks prior, we were unable to implement this particular edge case of INDIRECT() in a timely matter.
 
 D6.  [3pts] Project 4 has a number of small but important operations to
      implement:  Comparison operations include a number of comparison and type
@@ -68,6 +86,10 @@ D6.  [3pts] Project 4 has a number of small but important operations to
      these operations?  How did your approach affect the reusability and
      testability of these operations?
 
+Within eval_expressions inside bool_func, we seperate the function call from the rest of the arguments (if they exist) and throw
+a TYPE_ERROR if there is no argument for any function other than VERSION(). Furthermore, within the individual function calls if there
+is an explicit parameter range (i.e. 1 for NOT), we verify the arguments list's length a second time and throw a TYPE_ERROR if there is
+an incorrect number of arguments. This approach made reusing and testing the code much more straightforward for unit testing purposes.
 
 Performance Analysis (16 pts)
 -----------------------------

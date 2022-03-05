@@ -112,14 +112,44 @@ to identify where your program is spending the bulk of its time.
 A1.  [4pts] Briefly enumerate the performance tests you created to exercise
      your implementation.
 
+The performance tests that we created were to save and load a workbook with many sheets and cells
+inside of them, rename a sheet with many cells inside of it, and move a large area of cells to another area
+in the same sheet. This is in addition to the previous performance tests of a long chain of reference,
+fibonacci, and other tests we had implemented earlier.
 
 A2.  [4pts] What profiler did you choose to run your performance tests with?
      Why?  Give an example of how to invoke one of your tests with the profiler.
 
+We chose to use cProfiler to run our performance tests. We used cProfile because it 
+is alredy built into python so did not require any additional downloads, and it is able
+to tell us how long each function runs for in addition to the total time of the program.
+
+example invokation:
+
+pr = cProfile.Profile()
+pr.enable()
+
+#code to test performance of
+
+pr.disable()
+stats = Stats(pr)
+stats.sort_stats('cumtime').print_stats(5)
 
 A3.  [8pts] What are ~3 of the most significant hot-spots you identified in your
      performance testing?  Did you expect these hot-spots, or were they
      surprising to you?
+
+One large hotspot was in the move cells function. I was surprised that this took so 
+long because the other two bulk performance tests that we created, rename sheet test and 
+load workbook test were efficient.
+
+Another hotspot was lark, this was not surprising because in our previous performance tests,
+we had found that lark was a consistant hotspot for them too.
+
+And finally, another hotspot that was found in the code was the set cell contents. This 
+also was not surprising because every time we set a cells contents, we are checking for circular
+references and notifying for any cell changes. And because some cells can have many dependencies,
+it is not surprising that this can take a while
 
 
 Section F:  CS130 Project 3 Feedback [OPTIONAL]

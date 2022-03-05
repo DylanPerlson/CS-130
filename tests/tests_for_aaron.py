@@ -21,21 +21,21 @@ class Aaron(unittest.TestCase):
     # but when it's uncommented it gives output
     # so usually it is commented out:
 
-    # def test_notification_with_print_output(self):
-    #     wb = Workbook()
-    #     (_, name) = wb.new_sheet("s1")
-    #     def on_cells_changed(workbook, changed_cells):
-    #         print(f'Cell(s) changed:  {changed_cells}')
-    #     wb.notify_cells_changed(on_cells_changed)
-    #     print('.')
-    #     wb.set_cell_contents(name,'A1','1')
-    #     wb.set_cell_contents(name,'A2',"hi")
-    #     wb.set_cell_contents(name,'A3',"=A1 + 2")
-    #     wb.set_cell_contents(name,'A1','2')
-    #     print('2 above')
-    #     wb.set_cell_contents(name,'A4', '=A3')
-    #     wb.set_cell_contents(name,'A1', '5')
-    #     print('3 above')
+    def test_notification_with_print_output(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        def on_cells_changed(workbook, changed_cells):
+            print(f'Cell(s) changed:  {changed_cells}')
+        wb.notify_cells_changed(on_cells_changed)
+        print('.')
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2',"hi")
+        wb.set_cell_contents(name,'A3',"=A1 + 2")
+        wb.set_cell_contents(name,'A1','2')
+        print('2 above')
+        wb.set_cell_contents(name,'A4', '=A3')
+        wb.set_cell_contents(name,'A1', '5')
+        print('3 above')
 
     def test_circular_references(self):
         wb = Workbook()

@@ -62,7 +62,9 @@ D3.  [5pts] Is your implementation able to lazily evaluate the arguments to
 This has not been implemented yet because we use a Transformer instead of Interpreter.
 We did not have the time to rewrite earlier code (and use an Interpreter).
 Using an Interpreter, the conditional evaluation is likely easily implementable,
-by use of indicator variables and/or if functions.
+by use of indicator variables and/or if functions. Should we have gone ahead and used the interpreter,
+we would have made so that cells only get evaluated if their values are required for another calculation, whether that be checking for 
+errors or calculating the value of another cell.
 
 D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      correctly, with respect to circular-reference errors?  (Recall from the
@@ -72,7 +74,11 @@ D4.  [5pts] Is your implementation able to evaluate the ISERROR() function
      not, what prevented your team from implementing this?
 
 Due to needing to devote a significant amount of time fixing our prior circular reference and dependency algorithm
-that was broken from weeks prior, we were unable to implement this particular edge case of ISERROR() in a timely matter.
+that was broken from weeks prior, we were unable to implement this particular edge case of ISERROR() in a timely matter. 
+Similarly to part D3, we would need to completely redo our lark parser and we did not find the time to do so given how much
+old broken code we needed to address simultaneously while working on project 4. Should we have gone ahead and used the interpreter,
+we would have made so that cells only get evaluated if their values are required for another calculation, whether that be checking for 
+errors or calculating the value of another cell.
 
 D5.  [5pts] Is your implementation able to successfully identify cycles that
      are not evident from static analysis of formulas containing INDIRECT()?

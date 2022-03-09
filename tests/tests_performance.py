@@ -159,6 +159,29 @@ def test_fibonacci():
 #             b = c
 #         return b
 
+def test_get_cell_val():
+    
+    wb = Workbook()
+
+    (_,name) = wb.new_sheet("sheet")
+    wb.set_cell_contents(name, 'A1', '=5+7')
+    length = 100
+    
+    
+        
+    
+    
+    pr = cProfile.Profile()
+    pr.enable()
+
+    for i in range(100):
+        wb.get_cell_value(name, 'A1')
+
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(5)
+
 def test_load_wkbk():
     wb = Workbook()
     (_, name1) = wb.new_sheet("fiRst_sheet")
@@ -263,7 +286,7 @@ if __name__ == '__main__':
     #test_load_wkbk()
     #test_rename_sheet()
     #test_move_cells() #this is slow
-
+    #test_get_cell_val()
     # pr.disable()
     # stats = Stats(pr)
     # stats.sort_stats('cumtime').print_stats(5)

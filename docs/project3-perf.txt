@@ -41,10 +41,33 @@ Getting the Cell Value
 ----------------------
 
 **Hypothesis**
+One of the major slow downs was getting the value of a cell. We believe that this is being slowed down because
+the cell contents is being evaluated everytime get_cell_value is called. We thought that we would be able to drastically
+improve the speed of get_cell_value by only evaluating once and then saving the value for future references.
 
+**Rationale**
+Prior to our changes, our get_cell_value test was taking an unnecessarily long amount of time to simply 
+get a cell value. As we see below, our function is getting stuck inside of the get_cell_value function inside
+of cell.py, which is where the evaluation occurs
 
-**Checking Hypothesis with Measurements**
+Ordered by: cumulative time
+   List reduced from 401 to 5 due to restriction <5>
 
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.001    0.000    2.916    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:298(get_cell_value)
+      100    0.004    0.000    2.914    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:120(get_cell_value)
+      100    0.001    0.000    2.910    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\cell.py:51(get_cell_value)      
+      100    0.005    0.000    2.710    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:524(open)       
+      100    0.005    0.000    2.682    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:252(__init__)   
 
 **Result**
+When comparing the results from before and after the implementation of our performance fixes, it is clear
+that not having to evaulate a cell value over and over again was able to drastically improve performance.
+However, when your previous implementation is incredibly redundant, it is not hard to see drastic improvements
+
+| Metric                   | Before implementation | After implementation | Improvement |
+|--------------------------|-----------------------|----------------------|-------------|
+| Primitive Function calls | 6603805               | 9301                 | 99.8%       |
+| Total function calls     | 6812109               | 9901                 | 99.8%       |
+| Total execution time     | 2.915s                | 0.005s               | 99.8%       |
 

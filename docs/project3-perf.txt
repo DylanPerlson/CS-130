@@ -2,16 +2,27 @@ Performance Log
 ================
 
 
-Lark issues
------------
+Lark redundancy
+---------------
 
 **Hypothesis**
-
+We expected that there were an unnecessarily high amount of lark function calls. Obviously lark is an important part of the system, so many function calls can be expected. But we thought there were more than necessary for a good operation. More specifically, we realized that the contents of a cell are parsed with each call to that cell, even if the cell-contents did not change. This is of course useless, because if the contents don't change, the result of parsing it will stay the same (the evaluation of those parsed contents might be different though).
 
 **Checking Hypothesis with Measurements**
+As you can see in project3-perf_lark-before.png, there are indeed a lot of function calls to lark, but we don't know which ones are redundant. So we implemented code that saves the parsed contents of a cell and tracks whether contents changed. Then, if there were no cell-content changes, the old parsed contents could still be used. Indeed, new tests (in project3-perf_lark-after.png) show that the amount of function calls to lark went down significantly.
 
+Commit Hash of the improved code:
+c93af7693585b76ad9c30733695f005c86ea7456
 
 **Result**
+Comparing the execution of our performance tests before and after the lark changes, we can conclude that our improvements work (well). The table below shows the comparison and the improvements that are obtained:
+
+| Metric                   | Before implementation | After implementation | Improvement |
+|--------------------------|-----------------------|----------------------|-------------|
+| Function calls to parser | 68.5K                 | 51.2K                | 25%         |
+| Parser execution time    | 1.25s                 | 0.92s                | 26%         |
+| Total function calls     | 13.3M                 | 10.0M                | 25%         |
+| Total execution time     | 11.4s                 | 8.9s                 | 22%         |
 
 
 Checking Validity of Cells

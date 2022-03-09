@@ -1,0 +1,39 @@
+Performance Log
+================
+
+
+Lark issues
+-----------
+
+**Hypothesis**
+
+
+**Checking Hypothesis with Measurements**
+
+
+**Result**
+
+
+Checking Validity of Cells
+--------------------------
+
+**Hypothesis**
+
+
+**Checking Hypothesis with Measurements**
+
+
+**Result**
+
+
+Getting the Cell Value
+----------------------
+
+**Hypothesis**
+
+
+**Checking Hypothesis with Measurements**
+
+
+**Result**
+

@@ -68,9 +68,17 @@ We believed that our check_valid_cell function was running inefficiently or with
 how long/ the number of times it would be run for simple cell evaluations.
 
 **Rationale**
+The reason that we thought that the check_valid_cell was an issue was due to the high number of calls that it was receiving
+as well as the the amount of time it took in comparison with the simplicity of the tests being performed.
 
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   10000    0.032    0.000    0.043    0.000 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:330(check_valid_cell)
 
 **Result**
-
+While we were able to reduce the number of calls and time that the function was running, we realized that the reason
+that the function was being executed so many times was due to us evaluating the cell unnecesarilly. Thus, 
+the cehck_valid_cell function did not actually need to be made more efficient, it just needed to be called less.
+And this was achieved by simply not evaluating cell values as often. Thus, it is not quite possible to evaluate how much faster
+the program is with just less calls to check_valid_cell because the speed up happened simultaneously with other optimizations.
 
 

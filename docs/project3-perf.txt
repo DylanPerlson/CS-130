@@ -25,18 +25,6 @@ Comparing the execution of our performance tests before and after the lark chang
 | Total execution time     | 11.4s                 | 8.9s                 | 22%         |
 
 
-Checking Validity of Cells
---------------------------
-
-**Hypothesis**
-
-
-**Checking Hypothesis with Measurements**
-
-
-**Result**
-
-
 Getting the Cell Value
 ----------------------
 
@@ -70,4 +58,19 @@ However, when your previous implementation is incredibly redundant, it is not ha
 | Primitive Function calls | 6603805               | 9301                 | 99.8%       |
 | Total function calls     | 6812109               | 9901                 | 99.8%       |
 | Total execution time     | 2.915s                | 0.005s               | 99.8%       |
+
+
+Checking Validity of Cells
+--------------------------
+
+**Hypothesis**
+We believed that our check_valid_cell function was running inefficiently or with many redundancies due to
+how long/ the number of times it would be run for simple cell evaluations.
+
+**Rationale**
+
+
+**Result**
+
+
 

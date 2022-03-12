@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr | bool_func | bool // (bool_func, bool are new)
+?expression : add_expr | concat_expr | bool_func | bool | cell_range // (bool_func, bool, cell_range are new)
 
 //========================================
 // Arithmetic expressions
@@ -43,6 +43,10 @@
 ?concat_expr : (concat_expr "&")? base
 
 //========================================
+// add cell range
+
+?cell_range : (cell_range ":")? base
+//========================================
 // Base values
 
 ?base : cell
@@ -51,6 +55,8 @@
       | STRING                  -> string
       | "(" expression ")"      -> parens
       | bool // (new)
+      | cell_range
+      
 
 cell : (_sheetname "!")? CELLREF
 
@@ -101,3 +107,4 @@ BOOL_LIT: ("true"i | "false"i)
 
 // (new) this is supposed to add boolean operators (=, <, >, etc.)
 BOOL_OP: ("=" | "==" | "<>" | "!=" | ">" | "<" | ">=" | "<=")
+

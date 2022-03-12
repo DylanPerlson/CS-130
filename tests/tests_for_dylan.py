@@ -85,11 +85,23 @@ class Dylan(unittest.TestCase):
         # wb.set_cell_contents(name,'A1', '5')
         # print('3 above')
 
-
+    def test_moving_multi(self):
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        wb.set_cell_contents(name1,'A1',"=AND(A2:A3)")
+        wb.set_cell_contents(name1,'A2','true')
+        wb.set_cell_contents(name1,'A3','true')
+        
+        
+        #print(wb.get_cell_contents(name1,'A1'))
+        wb.move_cells(name1,'A1','B4','C1')
+        print(wb.get_cell_contents(name1,'C1'))
+        #self.assertEqual(wb.get_cell_contents(name1,'C1'),"=AND(C2,C3)")
 
 
 
 
 if __name__ == '__main__':
-    #print('Dylan--------')
+    print('Dylan--------')
     unittest.main(verbosity=1)
+    

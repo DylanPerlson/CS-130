@@ -7,6 +7,7 @@ from tests_project1 import Project1
 from tests_project2 import Project2
 from tests_project3 import Project3
 from tests_project4 import Project4
+from tests_project4 import Project5
 
 import os; os.system('clear')
 

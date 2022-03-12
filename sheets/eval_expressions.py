@@ -237,11 +237,29 @@ class EvalExpressions(Transformer):
                 return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by zero")
         else:
             raise Exception(f'Unexpected multiplication operator {args[1]}')
+            
+    def cell_range(self, args):
+        # Determine return error based on priority in cell_error.py
+        #copied from concat expression
+        if isinstance(args[0], CellError) and isinstance(args[1], CellError):
+            if args[0].get_type().value < args[1].get_type().value:
+                return args[0]
+            else:
+                return args[1]
+
+        if isinstance(args[0], CellError):
+            return args[0]
+        if isinstance(args[1], CellError):
+            return args[1]
+
+        return args
+        
 
     def concat_expr(self, args):
         """Concatenation operation is applied on parsed formula."""
         args0 = _get_value_as_string(args[0])
         args1 = _get_value_as_string(args[1])
+        
 
         # Determine return error based on priority in cell_error.py
         if isinstance(args0, CellError) and isinstance(args1, CellError):
@@ -294,7 +312,7 @@ class EvalExpressions(Transformer):
         else:
             return CellError(CellErrorType.PARSE_ERROR,
             f"Boolean value is not recognized: {args[0]}")
-
+    
     def bool_oper(self, args):
         """Performs boolean operations: ==, <, >, etc."""
         operation = args[1]

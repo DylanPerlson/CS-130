@@ -20,10 +20,13 @@ class Project5(unittest.TestCase):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
         wb.set_cell_contents(name,'A1','True')
-        wb.set_cell_contents(name,'A2','False')
+        wb.set_cell_contents(name,'A2','false')
         wb.set_cell_contents(name,'A3','true')
         wb.set_cell_contents(name,'A4','=AND(A1:A3)')
         print(wb.get_cell_value(name,'A4'))
+
+        #what about 
+        #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
 
 
 

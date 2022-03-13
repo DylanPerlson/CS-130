@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr | bool_func | bool | cell_range // (bool_func, bool are new)
+?expression : add_expr | concat_expr | bool_func | bool  | cell_range // (bool_func, bool are new)
 
 //========================================
 // Arithmetic expressions
@@ -106,5 +106,5 @@ UNQUOTED_STRING: /[A-Za-z_][A-Za-z0-9_]*/
 BOOL_LIT: ("true"i | "false"i)
 
 // (new) this is supposed to add boolean operators (=, <, >, etc.)
-BOOL_OP: ("=" | "==" | "<>" | "!=" | ">" | "<" | ">=" | "<=")
+BOOL_OP: ("=" | "==" | "<>" | "!=" | ">" | "<" | ">=" | "<=" )
 

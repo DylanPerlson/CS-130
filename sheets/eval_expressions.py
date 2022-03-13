@@ -257,7 +257,6 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
             
     def cell_range(self, args):
-        
         p1 = args[0][1]
         p2 = args[1][1]
         r1,c1 = self.sheet_instance._get_col_and_row(p1)
@@ -278,7 +277,8 @@ class EvalExpressions(Transformer):
             cell_row, cell_col = cell[0],cell[1]
             if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
                 vals.append(self.sheet_instance.cells[cell_row,cell_col].evaluated_value)
- 
+
+        
         return vals
         
 
@@ -435,8 +435,8 @@ class EvalExpressions(Transformer):
 
     def bool_func(self, args):
         #get the old arg values
-        
         args = self._args(args)
+        
         
 
         """Performs boolean functions: AND, OR, etc."""
@@ -475,8 +475,9 @@ class EvalExpressions(Transformer):
             if i is None:
                 continue
             if isinstance(i,list):
-                #if isinstance(i[0],str):
-                    
+                if len(i) > 1 and isinstance(i[1],bool):
+                    args.append(i)
+                    continue
                 args.append(i[0])
             else:
                 args.append(i)

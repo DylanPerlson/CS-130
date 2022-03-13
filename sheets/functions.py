@@ -22,17 +22,33 @@ class Functions:
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""
-        print(args)
-        return all(args)
+
+        flat_list = []
+        for sublist in args:
+            for item in sublist:
+                flat_list.append(item)
+
+        
+        return all(flat_list)
 
     def or_func(self, args):
         """Implements OR function.
         True if one argument is True."""
+        flat_list = []
+        for sublist in args:
+            for item in sublist:
+                flat_list.append(item)
+
         return any(args)
 
     def not_func(self, args):
         """Implements NOT function.
         Returns True for False and vice versa."""
+        flat_list = []
+        for sublist in args:
+            for item in sublist:
+                flat_list.append(item)
+
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
         return not args[0]
@@ -40,6 +56,11 @@ class Functions:
     def xor_func(self, args):
         """Implements XOR function.
         True if odd number of arguments are True."""
+        flat_list = []
+        for sublist in args:
+            for item in sublist:
+                flat_list.append(item)
+
         # for i, arg in enumerate(args):
         #     args[i] = int(arg)
 

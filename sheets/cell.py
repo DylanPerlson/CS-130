@@ -100,11 +100,10 @@ class Cell():
         if self.parse_necessary:
             # trying to parse
             try:
-                # only needs to happen once
-                #parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-                #self.parsed_contents = workbook_instance.parser.parse(self.contents)
+                
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
+               
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
                 'Unable to parse formula', lark.exceptions.LarkError)
@@ -115,7 +114,8 @@ class Cell():
             evaluation =\
                     EvalExpressions(workbook_instance,sheet_instance).transform(
                         self.parsed_contents)
-                #TODO (Dylan) DTP FIX THIS
+            if isinstance(evaluation,list):
+                evaluation = evaluation[0]
             if evaluation is None:
                 self.evaluated_value = decimal.Decimal('0')
                 return self.evaluated_value

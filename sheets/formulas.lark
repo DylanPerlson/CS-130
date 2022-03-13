@@ -9,7 +9,7 @@
 
 ?formula : "=" expression
 
-?expression : add_expr | concat_expr | bool_func | bool | cell_range // (bool_func, bool, cell_range are new)
+?expression : add_expr | concat_expr | bool_func | bool | cell_range // (bool_func, bool are new)
 
 //========================================
 // Arithmetic expressions

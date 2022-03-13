@@ -7,7 +7,7 @@ from tests_project1 import Project1
 from tests_project2 import Project2
 from tests_project3 import Project3
 from tests_project4 import Project4
-from tests_project4 import Project5
+from tests_project5 import Project5
 
 import os; os.system('clear')
 
@@ -15,7 +15,7 @@ import os; os.system('clear')
 def run_some_tests():
     # Run only the tests in the specified classes
 
-    test_classes_to_run = [Project1, Project2, Project3, Project4,
+    test_classes_to_run = [Project1, Project2, Project3, Project4, Project5,
                             Aaron, Dylan, Pieter]
 
     loader = unittest.TestLoader()

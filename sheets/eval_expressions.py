@@ -61,7 +61,6 @@ def _get_value_as_number(curr_arg):
 
     return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
 
-#TODO (Dylan) DTP fix
 def _get_value_as_string(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
         return curr_arg
@@ -126,7 +125,7 @@ class RetrieveReferences(Visitor):
         self.error_occurred = False
 
     def cell(self, args):
-        """The cell value is returned."""
+        """this get the cell references"""
         args = args.children
 
         # getting the appropriate sheet name and cell location
@@ -163,19 +162,31 @@ class EvalExpressions(Transformer):
 
     def error(self, args):
         """If an error is encountered, the error is propagated"""
+        #get the old arg values
+        args = self._args(args)
+
         return generate_error_object(args[0])
 
     def number(self, args):
         """If a number is encountered, it is put into the right format."""
+        #get the old arg values
+        args = self._args(args)
+
         d = decimal.Decimal(args[0])
         return self.remove_trailing_zeros(d)
 
 
     def string(self, args):
         """If a string is encountered, it is put into the right format."""
+        #get the old arg values
+        args = self._args(args)
+
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
+        #get the old arg values
+        args = self._args(args)
+
         """Unitary operator is applied when encountered in parsed formula."""
         if isinstance(args[1], CellError):
             return args[1]
@@ -188,10 +199,15 @@ class EvalExpressions(Transformer):
 
     def parens(self, args):
         """Parentheses are applied on the parsed formula."""
+        #get the old arg values
+        args = self._args(args)
+
         return args[0]
 
     def add_expr(self, args):
         """Additive operation is applied on parsed formula."""
+        args = self._args(args)
+        
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
         # Determine return error based on priority in cell_error.py
@@ -214,6 +230,8 @@ class EvalExpressions(Transformer):
 
     def mul_expr(self, args):
         """Multiplicative operation is applied on parsed formula."""
+        args = self._args(args)
+
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
         # Determine return error based on priority in cell_error.py
@@ -239,24 +257,36 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
             
     def cell_range(self, args):
-        # Determine return error based on priority in cell_error.py
-        #copied from concat expression
-        if isinstance(args[0], CellError) and isinstance(args[1], CellError):
-            if args[0].get_type().value < args[1].get_type().value:
-                return args[0]
-            else:
-                return args[1]
+        
+        p1 = args[0][1]
+        p2 = args[1][1]
+        r1,c1 = self.sheet_instance._get_col_and_row(p1)
+        r2,c2 = self.sheet_instance._get_col_and_row(p2)
 
-        if isinstance(args[0], CellError):
-            return args[0]
-        if isinstance(args[1], CellError):
-            return args[1]
+        edge1 = (min(r1,r2),min(c1,c2))
+        edge2 = (max(r1,r2),max(c1,c2))
 
-        return args
+        r1 = edge1[0]
+        c1 = edge1[1]
+        r2 = edge2[0]
+        c2 = edge2[1]
+        vals = []
+
+        #now get every value in the range
+        for cell in self.sheet_instance.cells:
+            
+            cell_row, cell_col = cell[0],cell[1]
+            if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
+                vals.append(self.sheet_instance.cells[cell_row,cell_col].evaluated_value)
+ 
+        return vals
         
 
     def concat_expr(self, args):
         """Concatenation operation is applied on parsed formula."""
+        #get the old arg values
+        args = self._args(args)
+
         args0 = _get_value_as_string(args[0])
         args1 = _get_value_as_string(args[1])
         
@@ -298,13 +328,17 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         self.cell_signal = True
-
-        return self.workbook_instance.get_cell_value(sheet_name, cell)
+        
+        # why is this being called if it is not
+        return [self.workbook_instance.get_cell_value(sheet_name, cell),cell]
 
     #### METHODS FOR BOOLEAN STUFF:
 
     def bool_lit(self, args):
         """Takes a boolean as string and returns actual bool."""
+        #get the old arg values
+        args = self._args(args)
+
         if args[0].lower() == "true":
             return True
         elif args[0].lower() == "false":
@@ -315,6 +349,9 @@ class EvalExpressions(Transformer):
     
     def bool_oper(self, args):
         """Performs boolean operations: ==, <, >, etc."""
+        #get the old arg values
+        args = self._args(args)
+
         operation = args[1]
         args0 = args[0]
         args2 = args[2]
@@ -397,6 +434,11 @@ class EvalExpressions(Transformer):
             return d
 
     def bool_func(self, args):
+        #get the old arg values
+        
+        args = self._args(args)
+        
+
         """Performs boolean functions: AND, OR, etc."""
         # pseudocode:
         #     import some new module
@@ -425,3 +467,17 @@ class EvalExpressions(Transformer):
 
         # args is now a nice list with the entries
         return self.functions(function_val, args)
+        
+    def _args(self,args):
+        old_args = args
+        args = []
+        for i in old_args:
+            if i is None:
+                continue
+            if isinstance(i,list):
+                #if isinstance(i[0],str):
+                    
+                args.append(i[0])
+            else:
+                args.append(i)
+        return args

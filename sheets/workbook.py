@@ -613,7 +613,7 @@ class Workbook:
 
                 
                 #TODO (Dylan) DTP dont just update this cell, also update any dependencies
-                
+                self.get_cell_value(sheet_name,curr_cell.split('!')[1])
                 self._update(curr_cell)
                 
                 #return is needed so we do not raise a key error

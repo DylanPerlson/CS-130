@@ -22,6 +22,7 @@ class Functions:
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""
+        print(args)
         return all(args)
 
     def or_func(self, args):
@@ -30,7 +31,7 @@ class Functions:
         return any(args)
 
     def not_func(self, args):
-        """Implements AND function.
+        """Implements NOT function.
         Returns True for False and vice versa."""
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")

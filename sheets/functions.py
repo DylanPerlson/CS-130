@@ -47,7 +47,7 @@ class Functions:
     def not_func(self, args):
         """Implements NOT function.
         Returns True for False and vice versa."""
-        #args = self._flat(args)
+        args = self._flat(args)
 
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
@@ -56,7 +56,7 @@ class Functions:
     def xor_func(self, args):
         """Implements XOR function.
         True if odd number of arguments are True."""
-        #args = self._flat(args)
+        args = self._flat(args)
 
         # for i, arg in enumerate(args):
         #     args[i] = int(arg)

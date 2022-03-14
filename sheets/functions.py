@@ -47,11 +47,20 @@ class Functions:
             else:
                 args.append(i)
         return args
-    #Boolean functions
-    # 'MIN': 'min_func',
-    #         'MAX': 'max_func',
-    #         'SUM': 'sum_func',
-    #         'AVERAGE': 'avg_func'
+  
+    #new range functions
+    def sum_func(self,args):
+        args = self._args(args)
+        args = self._flat(args)
+
+        return sum(args)
+    def avg_func(self,args):
+        args = self._args(args)
+        args = self._flat(args)
+
+        return sum(args)/len(args)
+        #TODO DTP might need to do this in decimal
+
     def min_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
@@ -65,7 +74,7 @@ class Functions:
         args = self._flat(args)
         
         return max(args)
-
+  #Boolean functions
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""

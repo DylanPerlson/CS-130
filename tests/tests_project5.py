@@ -7,6 +7,24 @@ from sheets import cell
 
 
 class Project5(unittest.TestCase):
+    def test_avg_sum(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        
+        wb.set_cell_contents(name,'A1',"5")
+        wb.set_cell_contents(name,'A2',"15")
+        wb.set_cell_contents(name,'A3',"10")
+        wb.set_cell_contents(name,'A4',"=SUM(A1,A3)")
+        wb.set_cell_contents(name,'A5',"=SUM(A1:A3)")
+        wb.set_cell_contents(name,'A6',"=AVERAGE(A1,A3)")
+        wb.set_cell_contents(name,'A7',"=AVERAGE(A1:A3)")
+
+        self.assertEqual(wb.get_cell_value(name,'A4'),15)
+        self.assertEqual(wb.get_cell_value(name,'A5'),30)
+        
+        self.assertEqual(wb.get_cell_value(name,'A6'),7.5)
+        self.assertEqual(wb.get_cell_value(name,'A7'),10)
+
     def test_min_max(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")

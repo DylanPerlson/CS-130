@@ -289,7 +289,6 @@ class EvalExpressions(Transformer):
             if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
                 vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
 
-        
         return vals
         
 
@@ -489,8 +488,11 @@ class EvalExpressions(Transformer):
                 if len(i) > 1 and isinstance(i[1],bool):
                     args.append(i)
                     continue
-                if len(i) > 1:
+                if len(i) > 1 and not isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
                     args.append(i[0])
+                    continue
+                else: 
+                     args.append(i)
             else:
                 args.append(i)
         return args

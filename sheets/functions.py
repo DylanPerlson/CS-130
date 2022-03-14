@@ -1,6 +1,6 @@
 """Implements boolean functions."""
 from sheets.cell_error import CellError, CellErrorType
-
+import decimal
 
 def _is_integer(d):
     """Checks whether input d is an integer.
@@ -28,7 +28,44 @@ class Functions:
                 flat_list.append(sublist)
         return flat_list
 
+    def _args(self,args):
+        old_args = args
+        args = []
+        for i in old_args:
+            if i is None:
+                continue
+            if isinstance(i,list):
+                if len(i) > 1 and isinstance(i[1],bool):
+                    args.append(i)
+                    continue
+                #get rid of not for this case
+                if len(i) > 1 and isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
+                    args.append(i[0])
+                    continue
+                else: 
+                     args.append(i)
+            else:
+                args.append(i)
+        return args
     #Boolean functions
+    # 'MIN': 'min_func',
+    #         'MAX': 'max_func',
+    #         'SUM': 'sum_func',
+    #         'AVERAGE': 'avg_func'
+    def min_func(self,args):
+        #call _args again for case of it not being a cell range
+        args = self._args(args)
+        args = self._flat(args)
+        
+        return min(args)
+
+    def max_func(self,args):
+        #call _args again for case of it not being a cell range
+        args = self._args(args)
+        args = self._flat(args)
+        
+        return max(args)
+
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""

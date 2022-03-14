@@ -66,7 +66,11 @@ class Workbook:
             'ISBLANK': 'isblank_func',
             'ISERROR': 'iserror_func',
             'VERSION': 'version_func',
-            'INDIRECT': 'indirect_func'
+            'INDIRECT': 'indirect_func',
+            'MIN': 'min_func',
+            'MAX': 'max_func',
+            'SUM': 'sum_func',
+            'AVERAGE': 'avg_func'
             }
 
 

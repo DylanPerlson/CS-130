@@ -605,11 +605,13 @@ class Workbook:
                 self._tarjan()
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
-                self.notifying_cells = []
-                # #and add the current cell
-                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
-                #get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell)
+                if len(self.notification_functions) > -1:
+                    self.notifying_cells = []
+                    # #and add the current cell
+                    self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                    #get the list of changed cells
+                    self._notify_helper(sheet_name, curr_cell)
+
                 #now we notify all of the functions of the cells that were changed
                 for func in self.notification_functions:
                     #split_cell_string = curr_cell.split('!')
@@ -627,17 +629,34 @@ class Workbook:
         raise KeyError()
 
 
+    # def _update(self,curr_cell):
+    #     #Iterate up through dependent cells of our current cell
+    #     if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
+    #         dependents_list = self.children_dict[curr_cell]
+    #         for dependent in dependents_list:
+    #             dep_split = dependent.split('!')
+    #             #evaluate the cell
+    #             if self.cell_changed_dict[dependent] == True:
+    #                 self.get_cell_value(dep_split[0],dep_split[1])
+    #                 #recurse
+    #                 self._update(dependent)
+
     def _update(self,curr_cell):
-        #Iterate up through dependent cells of our current cell
-        if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
-            dependents_list = self.children_dict[curr_cell]
-            for dependent in dependents_list:
-                dep_split = dependent.split('!')
-                #evaluate the cell
-                if self.cell_changed_dict[dependent] == True:
-                    self.get_cell_value(dep_split[0],dep_split[1])
-                    #recurse
-                    self._update(dependent)
+        base_stack = []
+        base_stack.append(curr_cell)
+        while len(base_stack) > 0:
+            bottom_entry = base_stack.pop(0)
+            #Iterate up through dependent cells of our current cell
+            if bottom_entry in self.children_dict and bottom_entry not in self.circ_refs:
+                dependents_list = self.children_dict[bottom_entry]
+                for dependent in dependents_list:
+                    dep_split = dependent.split('!')
+                    #evaluate the cell
+                    if self.cell_changed_dict[dependent] == True:
+                        self.get_cell_value(dep_split[0],dep_split[1])
+                        #recurse
+                        base_stack.append(dependent)
+
 
 
     def get_cell_contents(self, sheet_name: str, location: str):

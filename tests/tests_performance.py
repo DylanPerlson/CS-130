@@ -7,7 +7,7 @@ def test_long_reference_chain():
     wb = Workbook()
     
 
-    length = 600
+    length = 200
     (_,name) = wb.new_sheet("sheet")
 
     pr = cProfile.Profile()
@@ -275,7 +275,7 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    #test_long_reference_chain()
+    test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
@@ -286,7 +286,7 @@ if __name__ == '__main__':
     #test_load_wkbk()
     #test_rename_sheet()
     #test_move_cells() #this is slow
-    test_get_cell_val()
+    #test_get_cell_val()
     # pr.disable()
     # stats = Stats(pr)
     # stats.sort_stats('cumtime').print_stats(5)

@@ -206,7 +206,7 @@ class EvalExpressions(Transformer):
 
     def add_expr(self, args):
         """Additive operation is applied on parsed formula."""
-        args = self._args(args)    
+        args = self._args(args)
 
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
@@ -255,7 +255,7 @@ class EvalExpressions(Transformer):
                 return CellError(CellErrorType.DIVIDE_BY_ZERO, "Cannot divide by zero")
         else:
             raise Exception(f'Unexpected multiplication operator {args[1]}')
-            
+
     def cell_range(self, args):
         #check if it is in another sheet
         if self.sheet_instance.sheet_name.lower() != args[0][1].lower():
@@ -264,7 +264,7 @@ class EvalExpressions(Transformer):
                 if s.sheet_name.lower() == args[0][1].lower():
                     sheet_inst = s
 
-        #otherwise treat normally     
+        #otherwise treat normally
         else:
             sheet_inst = self.sheet_instance
 
@@ -282,15 +282,22 @@ class EvalExpressions(Transformer):
         c2 = edge2[1]
         vals = []
 
-        #now get every value in the range
-        for cell in sheet_inst.cells:
-            
-            cell_row, cell_col = cell[0],cell[1]
-            if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-                vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
+        # #now get every value in the range
+        # for cell in sheet_inst.cells:
+        #     cell_row, cell_col = cell[0],cell[1]
+        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
+        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
+
+        # this code returns a matrix instead of a flat list
+        for count, row in enumerate(range(r1, r2+1)):
+            vals.append([])
+            for col in range(c1, c2+1):
+                val = sheet_inst.cells[row,col].evaluated_value
+                print(val)
+                vals[count].append(val)
 
         return vals
-        
+
 
     def concat_expr(self, args):
         """Concatenation operation is applied on parsed formula."""
@@ -299,7 +306,7 @@ class EvalExpressions(Transformer):
 
         args0 = _get_value_as_string(args[0])
         args1 = _get_value_as_string(args[1])
-        
+
 
         # Determine return error based on priority in cell_error.py
         if isinstance(args0, CellError) and isinstance(args1, CellError):
@@ -338,7 +345,7 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         self.cell_signal = True
-        
+
         # why is this being called if it is not
         return [self.workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
 
@@ -356,7 +363,7 @@ class EvalExpressions(Transformer):
         else:
             return CellError(CellErrorType.PARSE_ERROR,
             f"Boolean value is not recognized: {args[0]}")
-    
+
     def bool_oper(self, args):
         """Performs boolean operations: ==, <, >, etc."""
         #get the old arg values
@@ -446,8 +453,8 @@ class EvalExpressions(Transformer):
     def bool_func(self, args):
         #get the old arg values
         args = self._args(args)
-        
-        
+
+
 
         """Performs boolean functions: AND, OR, etc."""
         # pseudocode:
@@ -477,7 +484,7 @@ class EvalExpressions(Transformer):
 
         # args is now a nice list with the entries
         return self.functions(function_val, args)
-        
+
     def _args(self,args):
         old_args = args
         args = []
@@ -491,7 +498,7 @@ class EvalExpressions(Transformer):
                 if len(i) > 1 and isinstance(i[1],str):
                     args.append(i[0])
                     continue
-                else: 
+                else:
                      args.append(i)
             else:
                 args.append(i)

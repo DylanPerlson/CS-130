@@ -42,12 +42,12 @@ class Functions:
                 if len(i) > 1 and isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
                     args.append(i[0])
                     continue
-                else: 
+                else:
                      args.append(i)
             else:
                 args.append(i)
         return args
-  
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
@@ -65,22 +65,24 @@ class Functions:
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
-        
+
         return min(args)
 
     def max_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
-        
+
         return max(args)
+
   #Boolean functions
+
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""
 
         args = self._flat(args)
-        
+
         return all(args)
 
     def or_func(self, args):
@@ -234,7 +236,7 @@ class Functions:
         if cell_signal:
             return args[0]
 
-      
+
         args = args[0].split('!')
 
         # if using the current sheet
@@ -264,3 +266,6 @@ class Functions:
         if value is None:
             return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
         return value
+
+    def hlookup_func(self, args):
+        print(args[1])

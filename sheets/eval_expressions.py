@@ -478,7 +478,9 @@ class EvalExpressions(Transformer):
                 if len(i) > 1 and isinstance(i[1],bool):
                     args.append(i)
                     continue
-                args.append(i[0])
+                if len(i) > 1 and i[0] is not None:
+                    #print(i)
+                    args.append(i[0])
             else:
                 args.append(i)
         return args

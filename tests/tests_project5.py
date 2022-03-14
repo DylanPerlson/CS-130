@@ -16,6 +16,16 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_contents(name1,'C1'),"=AND(C2:C3)")
         self.assertEqual(wb.get_cell_contents(name1,'C2'),"=AND(C2,C3)")
 
+    def test_rename_multi(self):
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        wb.set_cell_contents(name1,'A1',"=AND(A2:A3)")
+        wb.set_cell_contents(name1,'A2','=AND(A2,A3)')
+        name2 = 'skdbkhsd'
+        wb.rename_sheet(name1,name2)
+        self.assertEqual(wb.get_cell_contents(name2,'A1'),"=AND(A2:A3)")
+        self.assertEqual(wb.get_cell_contents(name2,'A2'),"=AND(A2,A3)")
+
     def test_and_range(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")

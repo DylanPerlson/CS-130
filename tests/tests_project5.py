@@ -34,6 +34,26 @@ class Project5(unittest.TestCase):
         #what about 
         #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
 
+    def test_or_range(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        
+        # wb.set_cell_contents(name,'A1','3')
+        # wb.set_cell_contents(name,'A2','4')
+        # wb.set_cell_contents(name,'A3','=A1+A2')
+        # print(wb.get_cell_value(name,'A3'))
+
+
+        wb.set_cell_contents(name,'A1','True')
+        wb.set_cell_contents(name,'A2','false')
+        wb.set_cell_contents(name,'A3','true')
+        wb.set_cell_contents(name,'A4','=OR(A1:A3)')
+        self.assertEqual(wb.get_cell_value(name,'A4'),True)
+        wb.set_cell_contents(name,'A1','false')
+        wb.set_cell_contents(name,'A2','false')
+        wb.set_cell_contents(name,'A3','false')
+        wb.set_cell_contents(name,'A4','=OR(A1:A3)')
+        self.assertEqual(wb.get_cell_value(name,'A4'),False)
 
 
     

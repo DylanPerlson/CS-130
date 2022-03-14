@@ -206,8 +206,8 @@ class EvalExpressions(Transformer):
 
     def add_expr(self, args):
         """Additive operation is applied on parsed formula."""
-        args = self._args(args)
-        
+        args = self._args(args)    
+
         args0 = _get_value_as_number(args[0])
         args2 = _get_value_as_number(args[2])
         # Determine return error based on priority in cell_error.py
@@ -478,8 +478,7 @@ class EvalExpressions(Transformer):
                 if len(i) > 1 and isinstance(i[1],bool):
                     args.append(i)
                     continue
-                if len(i) > 1 and i[0] is not None:
-                    #print(i)
+                if len(i) > 1:
                     args.append(i[0])
             else:
                 args.append(i)

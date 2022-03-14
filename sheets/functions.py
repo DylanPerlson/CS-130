@@ -18,36 +18,36 @@ class Functions:
         """This is necessary for elegant function calls."""
         return getattr(self, function)(args)
 
+    def _flat(self, args):
+        flat_list = []
+        for sublist in args:
+            if isinstance(sublist, list):
+                for item in sublist:
+                    flat_list.append(item)
+            else:
+                flat_list.append(sublist)
+        return flat_list
+
     #Boolean functions
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""
 
-        flat_list = []
-        for sublist in args:
-            for item in sublist:
-                flat_list.append(item)
-
+        args = self._flat(args)
         
-        return all(flat_list)
+        return all(args)
 
     def or_func(self, args):
         """Implements OR function.
         True if one argument is True."""
-        flat_list = []
-        for sublist in args:
-            for item in sublist:
-                flat_list.append(item)
+        args = self._flat(args)
 
         return any(args)
 
     def not_func(self, args):
         """Implements NOT function.
         Returns True for False and vice versa."""
-        flat_list = []
-        for sublist in args:
-            for item in sublist:
-                flat_list.append(item)
+        #args = self._flat(args)
 
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
@@ -56,10 +56,7 @@ class Functions:
     def xor_func(self, args):
         """Implements XOR function.
         True if odd number of arguments are True."""
-        flat_list = []
-        for sublist in args:
-            for item in sublist:
-                flat_list.append(item)
+        #args = self._flat(args)
 
         # for i, arg in enumerate(args):
         #     args[i] = int(arg)

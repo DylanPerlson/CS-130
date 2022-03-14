@@ -488,7 +488,7 @@ class EvalExpressions(Transformer):
                 if len(i) > 1 and isinstance(i[1],bool):
                     args.append(i)
                     continue
-                if len(i) > 1 and not isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
+                if len(i) > 1 and isinstance(i[1],str):
                     args.append(i[0])
                     continue
                 else: 

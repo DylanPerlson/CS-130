@@ -257,10 +257,21 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
             
     def cell_range(self, args):
-        p1 = args[0][1]
-        p2 = args[1][1]
-        r1,c1 = self.sheet_instance._get_col_and_row(p1)
-        r2,c2 = self.sheet_instance._get_col_and_row(p2)
+        #check if it is in another sheet
+        if self.sheet_instance.sheet_name.lower() != args[0][1].lower():
+            #need to change sheet instance to proper one
+            for s in self.workbook_instance.sheets:
+                if s.sheet_name.lower() == args[0][1].lower():
+                    sheet_inst = s
+
+        #otherwise treat normally     
+        else:
+            sheet_inst = self.sheet_instance
+
+        p1 = args[0][2]
+        p2 = args[1][2]
+        r1,c1 = sheet_inst._get_col_and_row(p1)
+        r2,c2 = sheet_inst._get_col_and_row(p2)
 
         edge1 = (min(r1,r2),min(c1,c2))
         edge2 = (max(r1,r2),max(c1,c2))
@@ -272,11 +283,11 @@ class EvalExpressions(Transformer):
         vals = []
 
         #now get every value in the range
-        for cell in self.sheet_instance.cells:
+        for cell in sheet_inst.cells:
             
             cell_row, cell_col = cell[0],cell[1]
             if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-                vals.append(self.sheet_instance.cells[cell_row,cell_col].evaluated_value)
+                vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
 
         
         return vals
@@ -330,7 +341,7 @@ class EvalExpressions(Transformer):
         self.cell_signal = True
         
         # why is this being called if it is not
-        return [self.workbook_instance.get_cell_value(sheet_name, cell),cell]
+        return [self.workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
 
     #### METHODS FOR BOOLEAN STUFF:
 

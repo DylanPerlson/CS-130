@@ -7,6 +7,17 @@ from sheets import cell
 
 
 class Project5(unittest.TestCase):
+    def test_cell_range_other_sheet(self):
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
+        wb.set_cell_contents(name2,'A3','True')
+        wb.set_cell_contents(name2,'A2','False')
+
+        wb.set_cell_contents(name1,'A1',"=AND(s2!A3:A2)")
+
+        self.assertEqual(wb.get_cell_value(name1,'A1'),False)
+
     def test_moving_multi(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
@@ -43,6 +54,9 @@ class Project5(unittest.TestCase):
 
         #what about 
         #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
+
+
+        #TODO DYLAN need to also include other sheets
 
     def test_or_range(self):
         wb = Workbook()

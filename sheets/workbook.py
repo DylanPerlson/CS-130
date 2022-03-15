@@ -605,17 +605,18 @@ class Workbook:
                 self._tarjan()
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
-                if len(self.notification_functions) > -1:
-                    self.notifying_cells = []
-                    # #and add the current cell
-                    self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
-                    #get the list of changed cells
-                    self._notify_helper(sheet_name, curr_cell)
+                
+                self.notifying_cells = []
+                # #and add the current cell
+                self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
+                #get the list of changed cells
+                self._notify_helper(sheet_name, curr_cell)
 
+                if len(self.notification_functions) > 0:
                 #now we notify all of the functions of the cells that were changed
-                for func in self.notification_functions:
-                    #split_cell_string = curr_cell.split('!')
-                    func(self, self.notifying_cells)
+                    for func in self.notification_functions:
+                        #split_cell_string = curr_cell.split('!')
+                        func(self, self.notifying_cells)
 
                 
                 #TODO (Dylan) DTP dont just update this cell, also update any dependencies
@@ -651,6 +652,8 @@ class Workbook:
                 dependents_list = self.children_dict[bottom_entry]
                 for dependent in dependents_list:
                     dep_split = dependent.split('!')
+                    #tell dependents they need to be updated
+                    #self.cell_changed_dict[dependent] = True #DTP HERE
                     #evaluate the cell
                     if self.cell_changed_dict[dependent] == True:
                         self.get_cell_value(dep_split[0],dep_split[1])
@@ -1072,19 +1075,45 @@ class Workbook:
         all of the functions when a cell changes
         """
         #Iterate up through dependent cells of our current cell
-        if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
-            dependents_list = self.children_dict[curr_cell]
-            for dependent in dependents_list:
-                split_cell_string = dependent.split('!')
+        base_stack = []
+        base_stack.append(curr_cell)
+        while len(base_stack) > 0:
+            bottom_entry = base_stack.pop(0)
+            if bottom_entry in self.children_dict and bottom_entry not in self.circ_refs:
+                dependents_list = self.children_dict[bottom_entry]
+                for dependent in dependents_list:
+                    split_cell_string = dependent.split('!')
 
-                #tell all of the cells that they have changed
-                self.cell_changed_dict[dependent] = True
+                    #tell all of the cells that they have changed
+                    self.cell_changed_dict[dependent] = True
 
-                #add the cell to list of cells to be notified of
-                if (split_cell_string[0],split_cell_string[1]) not in self.notifying_cells:
-                    self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
-                    #recurse
-                    self._notify_helper(split_cell_string[0], dependent)
+                    #add the cell to list of cells to be notified of
+                    if (split_cell_string[0],split_cell_string[1]) not in self.notifying_cells:
+                        self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+                        #recurse
+                        base_stack.append(dependent)
+
+    # def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
+    #     """add all of our cells to the evaluate again list if it
+    #     is not in it already
+
+    #     This function finds circ references as well as notifying
+    #     all of the functions when a cell changes
+    #     """
+    #     #Iterate up through dependent cells of our current cell
+    #     if curr_cell in self.children_dict and curr_cell not in self.circ_refs:
+    #         dependents_list = self.children_dict[curr_cell]
+    #         for dependent in dependents_list:
+    #             split_cell_string = dependent.split('!')
+
+    #             #tell all of the cells that they have changed
+    #             self.cell_changed_dict[dependent] = True
+
+    #             #add the cell to list of cells to be notified of
+    #             if (split_cell_string[0],split_cell_string[1]) not in self.notifying_cells:
+    #                 self.notifying_cells.append((split_cell_string[0],split_cell_string[1]))
+    #                 #recurse
+    #                 self._notify_helper(split_cell_string[0], dependent)
 
 
 

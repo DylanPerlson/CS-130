@@ -18,15 +18,22 @@ class Functions:
         """This is necessary for elegant function calls."""
         return getattr(self, function)(args)
 
-    def _flat(self, args):
-        flat_list = []
-        for sublist in args:
-            if isinstance(sublist, list):
-                for item in sublist:
-                    flat_list.append(item)
-            else:
-                flat_list.append(sublist)
-        return flat_list
+    # def _flat(self, args):
+    #     flat_list = []
+    #     for sublist in args:
+    #         if isinstance(sublist, list):
+    #             for item in sublist:
+    #                 flat_list.append(self._flat(item))
+    #         else:
+    #             flat_list.append(sublist)
+    #     return flat_list
+
+    def _flat(self, list_of_lists):
+        if len(list_of_lists) == 0:
+            return list_of_lists
+        if isinstance(list_of_lists[0], list):
+            return self._flat(list_of_lists[0]) + self._flat(list_of_lists[1:])
+        return list_of_lists[:1] + self._flat(list_of_lists[1:])
 
     def _args(self,args):
         old_args = args
@@ -52,8 +59,8 @@ class Functions:
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
-
         return sum(args)
+
     def avg_func(self,args):
         args = self._args(args)
         args = self._flat(args)
@@ -110,7 +117,8 @@ class Functions:
         #     args[i] = int(arg)
 
         odd_count = 0
-        for i in len(args):
+        for i in len(args): # TODO what is this supposed to do? len(args) is just a number
+                            # TODO tests for XOR
             if args[i] is True:
                 odd_count = odd_count + 1
 
@@ -268,4 +276,36 @@ class Functions:
         return value
 
     def hlookup_func(self, args):
-        print(args[1])
+        if len(args) != 3:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+
+        key = args[0]
+        matrix = args[1]
+        index = int(args[2] - 1) # 1-indexed
+
+        for count, value in enumerate(matrix[0]):
+            if key == value:
+                # print([index, count])
+
+                return matrix[index][count]
+
+        # if no match is found
+        return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
+
+    def vlookup_func(self, args):
+        if len(args) != 3:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+
+        key = args[0]
+        matrix = args[1]
+        index = int(args[2] - 1) # 1-indexed
+
+        matrix = [list(x) for x in zip(*matrix)] # transpose matrix
+
+        for count, value in enumerate(matrix[0]):
+            if key == value and type(key) == type(value):
+                return matrix[index][count]
+
+        # if no match is found
+        return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
+

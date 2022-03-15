@@ -292,9 +292,16 @@ class EvalExpressions(Transformer):
         for count, row in enumerate(range(r1, r2+1)):
             vals.append([])
             for col in range(c1, c2+1):
-                val = sheet_inst.cells[row,col].evaluated_value
-                print(val)
+                try:
+                    val = sheet_inst.cells[row,col].evaluated_value
+                except KeyError:
+                    val = None
+                # print(val)
                 vals[count].append(val)
+
+        vals = [list(x) for x in zip(*vals)] # transpose matrix
+                                                # because of row v col inconsistency
+
 
         return vals
 
@@ -480,7 +487,6 @@ class EvalExpressions(Transformer):
         if function_key == "INDIRECT":
             args.extend([self.workbook_instance, self.sheet_instance, self.cell_signal])
             self.cell_signal = False
-
 
         # args is now a nice list with the entries
         return self.functions(function_val, args)

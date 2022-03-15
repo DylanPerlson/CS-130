@@ -71,7 +71,8 @@ class Workbook:
             'MAX': 'max_func',
             'SUM': 'sum_func',
             'AVERAGE': 'avg_func',
-            'HLOOKUP': 'hlookup_func'
+            'HLOOKUP': 'hlookup_func',
+            'VLOOKUP': 'vlookup_func'
             }
 
 

@@ -10,7 +10,7 @@ class Project5(unittest.TestCase):
     def test_avg_sum(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         wb.set_cell_contents(name,'A1',"5")
         wb.set_cell_contents(name,'A2',"15")
         wb.set_cell_contents(name,'A3',"10")
@@ -21,14 +21,14 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name,'A4'),15)
         self.assertEqual(wb.get_cell_value(name,'A5'),30)
-        
+
         self.assertEqual(wb.get_cell_value(name,'A6'),7.5)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
     def test_min_max(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         wb.set_cell_contents(name,'A1',"3")
         wb.set_cell_contents(name,'A2',"2")
         wb.set_cell_contents(name,'A3',"10")
@@ -39,7 +39,7 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name,'A4'),3)
         self.assertEqual(wb.get_cell_value(name,'A5'),2)
-        
+
         self.assertEqual(wb.get_cell_value(name,'A6'),3)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
@@ -88,7 +88,7 @@ class Project5(unittest.TestCase):
         #print(wb.get_cell_value(name,'A4'))
         self.assertEqual(wb.get_cell_value(name,'A4'),True)
 
-        #what about 
+        #what about
         #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
 
 
@@ -97,7 +97,7 @@ class Project5(unittest.TestCase):
     def test_or_range(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         # wb.set_cell_contents(name,'A1','3')
         # wb.set_cell_contents(name,'A2','4')
         # wb.set_cell_contents(name,'A3','=A1+A2')
@@ -115,7 +115,7 @@ class Project5(unittest.TestCase):
         wb.set_cell_contents(name,'A4','=OR(A1:A3)')
         self.assertEqual(wb.get_cell_value(name,'A4'),False)
 
-    
+
     def test_mixed(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -128,6 +128,6 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name, 'E1'), True)
 
 
-    
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)

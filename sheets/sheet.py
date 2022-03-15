@@ -64,13 +64,6 @@ class Sheet:
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
        
         #add all of the new cells to the master cell dict
-
-
-
-         # I believe I did this incorrectly
-        # for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
-        #     parent_cell = parent_cell.lower()
-        #     workbook_instance.children_dict[parent_cell] = []
         
         workbook_instance.master_cell_dict[sheet_location] = []
         for parent_cell in self._retrieve_cell_references(workbook_instance,location.lower(),row,col):

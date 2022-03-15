@@ -135,32 +135,7 @@ def test_fibonacci():
     print(location)
     print(cell_value)
     #print(fibo_output)
-    #assert cell_value == fibo_output, f'get_cell_value should be {fibo_output}, but is {cell_value}'
-
-# # helper function for nth Fibonacci number
-# def _fibonacci(n):
-#     # from https://www.geeksforgeeks.org/python-program-for-program-for-fibonacci-numbers-2/
-#     a = 0
-#     b = 1
-
-#     # Check is n is less than 0
-#     if n < 0:
-#         print("Incorrect input")
-
-#     # Check is n is equal to 0
-#     elif n == 0:
-#         return 0
-
-#     # Check if n is equal to 1
-#     elif n == 1:
-#         return b
-#     else:
-#         for _ in range(1, n):
-#             c = a + b
-#             a = b
-#             b = c
-#         return b
-
+    
 def test_get_cell_val():
     
     wb = Workbook()
@@ -277,12 +252,12 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    test_long_reference_chain()
+    #test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    #test_fibonacci()
+    test_fibonacci()
     # test_cell_cycle()
 
     #test_load_wkbk()

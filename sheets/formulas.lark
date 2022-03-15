@@ -26,9 +26,12 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_func : BOOL_FUNC "(" ( (base | UNQUOTED_STRING) ["," (base)]* )? ")" -> bool_func
-      // | BOOL_FUNC_1 "(" [ bool ] ")"
-      // | BOOL_FUNC_2 "(" [ bool "," bool ] ")"
+?bool_func : BOOL_FUNC "(" ( (base | UNQUOTED_STRING | concat_expr | cell_range) ["," (base | cell_range)]* )? ")" -> bool_func
+// for readability:
+// ?bool_func : BOOL_FUNC "(" (
+//                                     (base | UNQUOTED_STRING | concat_expr | cell_range)
+//                                     ["," (base | cell_range)]*
+//                               )? ")" -> bool_func
 
 ?bool_oper : expression BOOL_OP expression // bool oper takes lowest precedence
 
@@ -36,6 +39,9 @@
       | bool_func
       | bool_oper
       // | base
+
+// ?base_func : base
+//             | UNQUOTED_STRING
 
 //========================================
 // String concatenation
@@ -56,7 +62,7 @@
       | STRING                  -> string
       | "(" expression ")"      -> parens
       | bool // (new)
-      | cell_range
+      // | cell_range
 
 
 cell : (_sheetname "!")? CELLREF

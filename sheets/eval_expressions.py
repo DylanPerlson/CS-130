@@ -257,6 +257,7 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
 
     def cell_range(self, args):
+
         #check if it is in another sheet
         if self.sheet_instance.sheet_name.lower() != args[0][1].lower():
             #need to change sheet instance to proper one
@@ -299,9 +300,9 @@ class EvalExpressions(Transformer):
                 # print(val)
                 vals[count].append(val)
 
-        vals = [list(x) for x in zip(*vals)] # transpose matrix
-                                                # because of row v col inconsistency
-
+        # transpose matrix
+        # because of row v col inconsistency
+        vals = [list(x) for x in zip(*vals)]
 
         return vals
 

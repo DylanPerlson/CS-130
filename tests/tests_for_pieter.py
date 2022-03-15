@@ -133,10 +133,12 @@ class Pieter(unittest.TestCase):
 
 
         # wb.set_cell_contents(sh, 'A1', '=IFERROR(VLOOKUP(1, INDIRECT(B1 & "!A2:c4"), 2), "")') # TODO more tests
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, INDIRECT("sheet" & "!A2:c4"), 2)') # TODO more tests
+        # wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, sheet!A2:c4, 2)') # TODO more tests
         # wb.set_cell_contents(sh, 'A1', '=INDIRECT(B1 & "!A2:c4")') # TODO more tests
-        wb.set_cell_contents(sh, 'A1', '=INDIRECT(B1 & "!A2:c4")') # TODO more tests
+        # wb.set_cell_contents(sh, 'A1', '=INDIRECT(B1 & "!A2:c4")') # TODO more tests
 
-        print(wb.get_cell_value(sh, 'A1'))
+        # print(wb.get_cell_value(sh, 'A1'))
 
         # print(wb.get_cell_value(sh, 'A10'))
 

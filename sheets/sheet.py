@@ -111,22 +111,4 @@ class Sheet:
         else: 
             self.get_cell_value(workbook_instance,location)
             return self.cells[(row,col)].references
-        #return the cells parsed contents
-
-
-
-        #add none case (Dylan)
-        # if contents is None:
-        #     return []
-        #if can not use lark then that would be great
-
-        # try:
-        #     formula = workbook_instance.parser_reference.parse(contents)
-        # except lark.exceptions.LarkError:
-        #     # should not need a parse error here for this current use case (Dylan)
-        #     return []
-            
-
-        # ref = RetrieveReferences(self)
-        # ref.visit(formula)
-        # return ref.references
+        

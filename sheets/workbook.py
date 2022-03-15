@@ -589,6 +589,7 @@ class Workbook:
             #set cell contents and notify parent cells
             if i.sheet_name.lower() == sheet_name.lower():
                 #if want to set cell contents to empty
+                #SLOW DOWN IS IN HERE
                 if contents is None or (not self._is_float(contents) and contents.strip() == ''):
                     i.set_cell_contents(self, location.lower(), None)
                 elif self._is_float(contents):
@@ -610,7 +611,7 @@ class Workbook:
                 # #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell)
+                self._notify_helper(sheet_name, curr_cell) #not a slow down
 
                 if len(self.notification_functions) > 0:
                 #now we notify all of the functions of the cells that were changed
@@ -619,8 +620,8 @@ class Workbook:
 
                 
                 #TODO (Dylan) DTP dont just update this cell, also update any dependencies
-                self.get_cell_value(sheet_name,curr_cell.split('!')[1])
-                self._update(curr_cell)
+                self.get_cell_value(sheet_name,curr_cell.split('!')[1]) #not a slow down
+                self._update(curr_cell) #not a slow down
                 
                 #return is needed so we do not raise a key error
                 return

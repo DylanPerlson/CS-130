@@ -7,10 +7,12 @@ def test_long_reference_chain():
     wb = Workbook()
     
     #get cell value from a chain reference is not slow, the continually setting a value is 
-    length = 200
+    length = 100
     (_,name) = wb.new_sheet("sheet")
 
     
+    pr = cProfile.Profile()
+    pr.enable()
 
     for i in range(2, length+1):
         location = 'A'+str(i)
@@ -18,14 +20,12 @@ def test_long_reference_chain():
 
         wb.set_cell_contents(name, location, '=1+'+location_prev)
 
-    pr = cProfile.Profile()
-    pr.enable()
    
     wb.set_cell_contents(name, 'A1', '1')
     #print(wb.get_cell_value(name, location))
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(10)
+    stats.sort_stats('cumtime').print_stats(10)
     print(wb.get_cell_value(name, location))
 
     assert wb.get_cell_value(name, location) == length

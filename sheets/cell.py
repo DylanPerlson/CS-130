@@ -15,7 +15,6 @@ class Cell():
         self.contents = contents
         self.parse_necessary = True
         self.evaluated_value = None
-        self.value = None
         self.parsed_contents = ''
 
 
@@ -31,30 +30,29 @@ class Cell():
         # Determine Cell Type
         elif str(contents) == "" or str(contents).isspace():
             self.type = "NONE"
-            self.content = None
-            self.value = None
+            self.evaluated_value = None
         elif str(contents)[0] == '=':
             self.type = "FORMULA"
         elif str(contents)[0] == "'":
             self.type = "STRING"
-            self.value = str(contents[1:].replace("''","'"))
+            self.evaluated_value = str(contents[1:].replace("''","'"))
         elif self.is_float(str(contents)):
             self.type = "NUMBER"
-            self.value = decimal.Decimal(str(contents))
+            self.evaluated_value = decimal.Decimal(str(contents))
         elif isinstance(generate_error_object(contents, return_arg = True), CellError):
             self.type = "ERROR"
-            self.value = generate_error_object(contents)
+            self.evaluated_value = generate_error_object(contents)
         elif str(contents).lower() == "true" or str(contents).lower() == "false":
             self.type = "BOOLEAN"
             if str(contents).lower() == "true":
-                self.value = True
+                self.evaluated_value = True
             else:
-                self.value = False
+                self.evaluated_value = False
         #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
         #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
         else:
             self.type = "STRING"
-            self.value = str(contents)
+            self.evaluated_value = str(contents)
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
@@ -78,17 +76,17 @@ class Cell():
             return self.evaluated_value
         # digit case
         elif self.type == "NUMBER": #str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
-            self.evaluated_value = self.remove_trailing_zeros(self.value)
+            self.evaluated_value = self.remove_trailing_zeros(self.evaluated_value)
             return self.evaluated_value
         #string case
         elif self.type == "STRING": #self.contents[0] == "'":
-            self.evaluated_value = self.remove_trailing_zeros(self.value)
+            self.evaluated_value = self.remove_trailing_zeros(self.evaluated_value)
             return self.evaluated_value
         elif self.type == "BOOLEAN":
-            self.evaluated_value = self.value
+            #self.evaluated_value = self.evaluated_value
             return self.evaluated_value
         elif self.type == "ERROR":
-            self.evaluated_value = self.value
+            #self.evaluated_value = self.evaluated_value
             return self.evaluated_value
         else:
             if self.type != "FORMULA":

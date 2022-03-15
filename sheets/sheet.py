@@ -42,7 +42,7 @@ class Sheet:
 
     def set_cell_contents(self, workbook_instance, location, contents):
         """Set the contents of the specified cell on this sheet."""
-
+        
         #check if we are trying to get an out of bound cell
         row, col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
@@ -53,23 +53,15 @@ class Sheet:
             self.extent[0] = row
         if col > self.extent[1]:
             self.extent[1] = col
-
-
-        # #stash old cell
-        # prev_cell = None
-        # if (row,col) in self.cells:
-        #     prev_cell = self.cells[(row,col)]
-
+        
         #update cell
-        new_cell = Cell(contents)
-        self.cells[(row,col)] = new_cell
-
+        
+        self.cells[(row,col)] = Cell(contents)
+        #self.cells[(row,col)].parse_necessary = True
 
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
-
+        #workbook_instance.cell_changed_dict[sheet_location] = True
         #add all of the new cells to the master cell dict
-
-
 
 
 
@@ -77,11 +69,11 @@ class Sheet:
         # for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
         #     parent_cell = parent_cell.lower()
         #     workbook_instance.children_dict[parent_cell] = []
-
+        
         workbook_instance.master_cell_dict[sheet_location] = []
-        for parent_cell in self._retrieve_cell_references(workbook_instance, new_cell.contents):
+        for parent_cell in self._retrieve_cell_references(workbook_instance, contents):
             parent_cell = parent_cell.lower()
-            if parent_cell not in  workbook_instance.children_dict:
+            if parent_cell not in workbook_instance.children_dict:
                 workbook_instance.children_dict[parent_cell] = []
             workbook_instance.children_dict[parent_cell].append(sheet_location)
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)

@@ -43,7 +43,7 @@ class Sheet:
     def set_cell_contents(self, workbook_instance, location, contents):
         """Set the contents of the specified cell on this sheet."""
         
-        #check if we are trying to get an out of bound cell
+        #check if we are trying to set an out of bound cell
         row, col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
             raise ValueError()
@@ -67,7 +67,18 @@ class Sheet:
         
         workbook_instance.master_cell_dict[sheet_location] = []
         for parent_cell in self._retrieve_cell_references(workbook_instance,location.lower(),row,col):
+            #check for bad reference
+            
             parent_cell = parent_cell.lower()
+
+            parent_r,parent_c = self._get_col_and_row(parent_cell.split('!')[1])
+            #if we are referenceing an out of bounds
+            if parent_r > MAX_ROW or parent_c > MAX_COL:
+                self.cells[(row,col)].evaluated_value = Cell(CellError(CellErrorType, 'Out of bounds reference'))
+                self.cells[(row,col)].parse_neccesary = False
+                workbook_instance.cell_changed_dict[parent_cell] = False
+                return
+
             if parent_cell not in workbook_instance.children_dict:
                 workbook_instance.children_dict[parent_cell] = []
             workbook_instance.children_dict[parent_cell].append(sheet_location)

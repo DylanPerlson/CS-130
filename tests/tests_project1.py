@@ -350,6 +350,15 @@ class Project1(unittest.TestCase):
         with self.assertRaises(ValueError):
             wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
 
+    # TODO DTP 
+    # def test_bad_reference(self):
+    #     wb = Workbook()
+    #     (_, name1) = wb.new_sheet("first_sheet")
+    #     wb.set_cell_contents(name1,'A1', '= ZZAZZ9999')
+    #     print(wb.get_cell_value(name1,'A1'))
+    #     #this should retrun bad reference, but is a value error
+
+
     def test_simple_cell_reference(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("first_sheet")

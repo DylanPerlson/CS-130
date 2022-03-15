@@ -618,6 +618,8 @@ class Workbook:
                         func(self, self.notifying_cells)
 
                 self.get_cell_value(sheet_name,curr_cell.split('!')[1]) #not a slow down
+                
+                #what if instead of doing this we are only telling functions that they need to be updated?
                 self._update(curr_cell) #not a slow down
                 
                 #return is needed so we do not raise a key error
@@ -639,6 +641,7 @@ class Workbook:
                     dep_split = dependent.split('!')
                     #evaluate the cell
                     if self.cell_changed_dict[dependent] == True:
+ 
                         self.get_cell_value(dep_split[0],dep_split[1])
                         #recurse
                         base_stack.append(dependent)
@@ -693,12 +696,17 @@ class Workbook:
         whole number.  For example, this function would not return
         Decimal('1.000'); rather it would return Decimal('1').
         """
+        
+        # sheet_location = sheet_name.lower() + '!' + location.lower()
+        # #only check for valid cells if we have not evaluated already
+        # if (sheet_location not in self.cell_changed_dict) or (self.cell_changed_dict[sheet_location] == True):
         if not self._check_valid_cell(location):
             raise ValueError()
 
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
+                
                 workbook_instance = self
                 return i.get_cell_value(workbook_instance,location)
 
@@ -1102,6 +1110,8 @@ class Workbook:
             yield remainder
 
     def _tarjan_helper(self, u, low, found, in_stack, the_stack):
+
+        #Make this iterative DTP TODO
 
         found[u] = self.num_visits
         low[u] = self.num_visits

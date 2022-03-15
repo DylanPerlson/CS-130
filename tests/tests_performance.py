@@ -7,7 +7,7 @@ def test_long_reference_chain():
     wb = Workbook()
     
     #get cell value from a chain reference is not slow, the continually setting a value is 
-    length = 100
+    length = 1000
     (_,name) = wb.new_sheet("sheet")
 
     
@@ -252,12 +252,12 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    #test_long_reference_chain()
+    test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    test_fibonacci()
+    #test_fibonacci()
     # test_cell_cycle()
 
     #test_load_wkbk()

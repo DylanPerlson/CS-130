@@ -328,9 +328,9 @@ class Functions:
         sheet_instance = args[2]
 
 
-        x = args[0].split('!')
+        x = args[0].split('!', 1)
         sheet_name = x[0]
-        args = x[1].split(':')
+        args = x[1].split(':', 1)
 
         # args[0] = [workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
         # args[1]

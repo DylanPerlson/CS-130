@@ -3,7 +3,7 @@
 import decimal
 
 import lark
-
+from lark import Visitor
 from .cell_error import CellError, CellErrorType
 from .eval_expressions import EvalExpressions
 from .eval_expressions import generate_error_object
@@ -17,6 +17,7 @@ class Cell():
         self.evaluated_value = None
         self.parsed_contents = ''
         self.type = ''
+        self.references = []
 
 
 
@@ -28,9 +29,11 @@ class Cell():
 
         sheet_location = sheet_instance.sheet_name + '!' + location
 
-        if workbook_instance.cell_changed_dict[sheet_location.lower()]\
-            is False and self.contents is not None:
-            return self.evaluated_value
+        #DTP check here
+        if sheet_location.lower() in workbook_instance.cell_changed_dict:
+            if workbook_instance.cell_changed_dict[sheet_location.lower()]\
+                is False and self.contents is not None:
+                return self.evaluated_value
 
 
         #otherwise now we need to re-evaluate
@@ -51,6 +54,7 @@ class Cell():
         elif str(self.contents) == "" or str(self.contents).isspace():
             self.type = "NONE"
             self.evaluated_value = None
+            self.references = []
             return self.evaluated_value
         elif str(self.contents)[0] == '=':
             self.type = "FORMULA"
@@ -88,16 +92,23 @@ class Cell():
         ### fyi: at this point, it is known that the cell contains a formula
 
         # parsing the contents
+        #would have returned by this point if it was not a formula
         if self.parse_necessary:
             # trying to parse
+            
             try:
                 
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
-               
+                
+                ref = RetrieveReferences(sheet_instance)
+                ref.visit(self.parsed_contents)
+                self.references = ref.references
+                #eturn ref.reference
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
                 'Unable to parse formula', lark.exceptions.LarkError)
+                self.references = []
                 return self.evaluated_value
 
         # trying to evaluate
@@ -167,3 +178,40 @@ class Cell():
                 return decimal.Decimal(d)
         else:
             return d
+
+class RetrieveReferences(Visitor):
+    """This class is used to retrieve all cell references
+    It acts as a visitor on a lark object.
+    """
+
+    def __init__(self, sheet_instance):
+        """Initializes class."""
+        self.references = []
+        self.sheet_instance = sheet_instance
+        self.error_occurred = False
+
+    def cell(self, args):
+        """this get the cell references"""
+        args = args.children
+        
+        # getting the appropriate sheet name and cell location
+        if len(args) == 1:      # if using the current sheet
+            sheet_name = self.sheet_instance.sheet_name
+            cell_location = args[0].value
+        elif len(args) == 2:    # if using a different sheet
+            # in case of quotes around sheet name
+            if args[0][0] == "'" and args[0][-1] == "'":
+                sheet_name = args[0][1:-1]
+            elif not args[0][0] == "'" and not args[0][-1] == "'":
+                sheet_name = args[0]
+            else:
+                self.error_occurred = True
+                sheet_name = ''
+            cell_location = args[1].value
+        else:
+            self.error_occurred = True
+            sheet_name = ''
+            cell_location = ''
+
+        self.references.append(str(sheet_name) + '!' + str(cell_location))
+

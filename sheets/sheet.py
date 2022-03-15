@@ -6,7 +6,7 @@ from sheets.cell_error import CellError
 
 from .cell import Cell
 from .cell_error import CellError, CellErrorType
-from .eval_expressions import RetrieveReferences
+#from .eval_expressions import RetrieveReferences
 
 MAX_ROW = 475254
 MAX_COL = 9999
@@ -62,7 +62,7 @@ class Sheet:
             self.cells[(row,col)].parse_necessary = True
 
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
-        #workbook_instance.cell_changed_dict[sheet_location] = True
+       
         #add all of the new cells to the master cell dict
 
 
@@ -73,7 +73,7 @@ class Sheet:
         #     workbook_instance.children_dict[parent_cell] = []
         
         workbook_instance.master_cell_dict[sheet_location] = []
-        for parent_cell in self._retrieve_cell_references(workbook_instance, contents):
+        for parent_cell in self._retrieve_cell_references(workbook_instance,location.lower(),row,col):
             parent_cell = parent_cell.lower()
             if parent_cell not in workbook_instance.children_dict:
                 workbook_instance.children_dict[parent_cell] = []
@@ -104,21 +104,29 @@ class Sheet:
         else:
             return self.cells[(row,col)].get_cell_value(workbook_instance,sheet_instance, location)
 
-    def _retrieve_cell_references(self, workbook_instance, contents):
+    def _retrieve_cell_references(self,workbook_instance,location,row,col):
         """Helper function that returns the references in a cell's formula."""
+        if self.cells[(row,col)].parse_necessary == False:
+            return self.cells[(row,col)].references
+        else: 
+            self.get_cell_value(workbook_instance,location)
+            return self.cells[(row,col)].references
+        #return the cells parsed contents
+
+
+
         #add none case (Dylan)
-        if contents is None:
-            return []
+        # if contents is None:
+        #     return []
+        #if can not use lark then that would be great
 
-        try:
-            formula = workbook_instance.parser.parse(contents)
-        except lark.exceptions.LarkError:
-            # should not need a parse error here for this current use case (Dylan)
-            return []
-            # return CellError(CellErrorType.PARSE_ERROR,
-            # 'Unable to parse formula',
-            # lark.exceptions.LarkError)
+        # try:
+        #     formula = workbook_instance.parser_reference.parse(contents)
+        # except lark.exceptions.LarkError:
+        #     # should not need a parse error here for this current use case (Dylan)
+        #     return []
+            
 
-        ref = RetrieveReferences(self)
-        ref.visit(formula)
-        return ref.references
+        # ref = RetrieveReferences(self)
+        # ref.visit(formula)
+        # return ref.references

@@ -25,7 +25,7 @@ def test_long_reference_chain():
     #print(wb.get_cell_value(name, location))
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(10)
+    stats.sort_stats('tottime').print_stats(15)
     print(wb.get_cell_value(name, location))
 
     assert wb.get_cell_value(name, location) == length

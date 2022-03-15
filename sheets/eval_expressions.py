@@ -2,7 +2,7 @@
 
 import decimal
 
-from lark import Transformer, Visitor, Token
+from lark import Transformer, Token #Visitor was removed here
 
 from .cell_error import CellError, CellErrorType
 from .functions import Functions
@@ -113,41 +113,41 @@ def _compare(a, op, b):
 
 #Use this somewhere
 
-class RetrieveReferences(Visitor):
-    """This class is used to retrieve all cell references
-    It acts as a visitor on a lark object.
-    """
+# class RetrieveReferences(Visitor):
+#     """This class is used to retrieve all cell references
+#     It acts as a visitor on a lark object.
+#     """
 
-    def __init__(self, sheet_instance):
-        """Initializes class."""
-        self.references = []
-        self.sheet_instance = sheet_instance
-        self.error_occurred = False
+#     def __init__(self, sheet_instance):
+#         """Initializes class."""
+#         self.references = []
+#         self.sheet_instance = sheet_instance
+#         self.error_occurred = False
 
-    def cell(self, args):
-        """this get the cell references"""
-        args = args.children
+#     def cell(self, args):
+#         """this get the cell references"""
+#         args = args.children
+        
+#         # getting the appropriate sheet name and cell location
+#         if len(args) == 1:      # if using the current sheet
+#             sheet_name = self.sheet_instance.sheet_name
+#             cell_location = args[0].value
+#         elif len(args) == 2:    # if using a different sheet
+#             # in case of quotes around sheet name
+#             if args[0][0] == "'" and args[0][-1] == "'":
+#                 sheet_name = args[0][1:-1]
+#             elif not args[0][0] == "'" and not args[0][-1] == "'":
+#                 sheet_name = args[0]
+#             else:
+#                 self.error_occurred = True
+#                 sheet_name = ''
+#             cell_location = args[1].value
+#         else:
+#             self.error_occurred = True
+#             sheet_name = ''
+#             cell_location = ''
 
-        # getting the appropriate sheet name and cell location
-        if len(args) == 1:      # if using the current sheet
-            sheet_name = self.sheet_instance.sheet_name
-            cell_location = args[0].value
-        elif len(args) == 2:    # if using a different sheet
-            # in case of quotes around sheet name
-            if args[0][0] == "'" and args[0][-1] == "'":
-                sheet_name = args[0][1:-1]
-            elif not args[0][0] == "'" and not args[0][-1] == "'":
-                sheet_name = args[0]
-            else:
-                self.error_occurred = True
-                sheet_name = ''
-            cell_location = args[1].value
-        else:
-            self.error_occurred = True
-            sheet_name = ''
-            cell_location = ''
-
-        self.references.append(str(sheet_name) + '!' + str(cell_location))
+#         self.references.append(str(sheet_name) + '!' + str(cell_location))
 
 
 class EvalExpressions(Transformer):

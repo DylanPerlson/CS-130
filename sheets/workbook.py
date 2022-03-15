@@ -52,6 +52,7 @@ class Workbook:
         self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
+        #self.parser_reference = lark.Lark.open('sheets/reference.lark', start='formula')
         
         self.num_visits = 0
         self.function_directory =   {
@@ -174,8 +175,7 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e]._retrieve_cell_references(self,
-                            copy_dict[(r,c)])
+                            cell_list = self.sheets[e]._retrieve_cell_references(self,cell,r,c)
 
                     for i in cell_list:
 
@@ -618,8 +618,6 @@ class Workbook:
                     for func in self.notification_functions:
                         func(self, self.notifying_cells)
 
-                
-                #TODO (Dylan) DTP dont just update this cell, also update any dependencies
                 self.get_cell_value(sheet_name,curr_cell.split('!')[1]) #not a slow down
                 self._update(curr_cell) #not a slow down
                 

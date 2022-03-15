@@ -55,9 +55,11 @@ class Sheet:
             self.extent[1] = col
         
         #update cell
-        
-        self.cells[(row,col)] = Cell(contents)
-        #self.cells[(row,col)].parse_necessary = True
+        if (row,col) not in self.cells:
+            self.cells[(row,col)] = Cell(contents)
+        else:
+            self.cells[(row,col)].contents = contents
+            self.cells[(row,col)].parse_necessary = True
 
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
         #workbook_instance.cell_changed_dict[sheet_location] = True

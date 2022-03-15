@@ -16,43 +16,12 @@ class Cell():
         self.parse_necessary = True
         self.evaluated_value = None
         self.parsed_contents = ''
+        self.type = ''
 
 
 
 
 
-        # check that the cell is either a string or None
-        if not isinstance(contents, str) and contents is not None:
-            raise TypeError('Content is not a string.')
-
-
-
-        # Determine Cell Type
-        elif str(contents) == "" or str(contents).isspace():
-            self.type = "NONE"
-            self.evaluated_value = None
-        elif str(contents)[0] == '=':
-            self.type = "FORMULA"
-        elif str(contents)[0] == "'":
-            self.type = "STRING"
-            self.evaluated_value = str(contents[1:].replace("''","'"))
-        elif self.is_float(str(contents)):
-            self.type = "NUMBER"
-            self.evaluated_value = decimal.Decimal(str(contents))
-        elif isinstance(generate_error_object(contents, return_arg = True), CellError):
-            self.type = "ERROR"
-            self.evaluated_value = generate_error_object(contents)
-        elif str(contents).lower() == "true" or str(contents).lower() == "false":
-            self.type = "BOOLEAN"
-            if str(contents).lower() == "true":
-                self.evaluated_value = True
-            else:
-                self.evaluated_value = False
-        #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
-        #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
-        else:
-            self.type = "STRING"
-            self.evaluated_value = str(contents)
 
     def get_cell_value(self, workbook_instance, sheet_instance, location):
         """Get the value of this cell."""
@@ -69,28 +38,52 @@ class Cell():
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
 
 
+        ## move the determination of type to get cll _val
 
-        #None case
-        if self.type == "NONE":
+
+
+        
+        # check that the cell is either a string or None
+        if not isinstance(self.contents, str) and self.contents is not None:
+            raise TypeError('Content is not a string.')
+
+        # Determine Cell Type
+        elif str(self.contents) == "" or str(self.contents).isspace():
+            self.type = "NONE"
             self.evaluated_value = None
             return self.evaluated_value
-        # digit case
-        elif self.type == "NUMBER": #str(self.contents)[0] != '=' and str(self.contents)[0] != "'":
+        elif str(self.contents)[0] == '=':
+            self.type = "FORMULA"
+        elif str(self.contents)[0] == "'":
+            self.type = "STRING"
+            self.evaluated_value = str(self.contents[1:].replace("''","'"))
             self.evaluated_value = self.remove_trailing_zeros(self.evaluated_value)
             return self.evaluated_value
-        #string case
-        elif self.type == "STRING": #self.contents[0] == "'":
+        elif self.is_float(str(self.contents)):
+            self.type = "NUMBER"
+            self.evaluated_value = decimal.Decimal(str(self.contents))
             self.evaluated_value = self.remove_trailing_zeros(self.evaluated_value)
             return self.evaluated_value
-        elif self.type == "BOOLEAN":
-            #self.evaluated_value = self.evaluated_value
+        elif isinstance(generate_error_object(self.contents, return_arg = True), CellError):
+            self.type = "ERROR"
+            self.evaluated_value = generate_error_object(self.contents)
             return self.evaluated_value
-        elif self.type == "ERROR":
-            #self.evaluated_value = self.evaluated_value
+        elif str(self.contents).lower() == "true" or str(self.contents).lower() == "false":
+            self.type = "BOOLEAN"
+            if str(self.contents).lower() == "true":
+                self.evaluated_value = True
+            else:
+                self.evaluated_value = False
             return self.evaluated_value
+        #ONLY VALUE CAN BE CELLERROR OBJECTS, CONTENTS CANNOT BE CELLERROR OBJECTS
+        #CONTENTS CAN BE ERROR STRING REPRESENTATIONS BUT NOT THE CELLERROR OBJECT
         else:
-            if self.type != "FORMULA":
-                raise TypeError(f'Cell object has unrecognized type: {self.type}')
+            self.type = "STRING"
+            self.evaluated_value = str(self.contents)
+            return self.evaluated_value
+
+        # if self.type != "FORMULA":
+        #     raise TypeError(f'Cell object has unrecognized type: {self.type}')
 
         ### fyi: at this point, it is known that the cell contains a formula
 

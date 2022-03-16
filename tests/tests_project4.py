@@ -5,6 +5,7 @@ import unittest
 from sheets import version
 from sheets import cell
 
+import os; os.system('clear')
 
 class Project4(unittest.TestCase):
     def test_lark_bool_lit(self):
@@ -93,8 +94,17 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(name,'A7',"=XOR(False)")
         self.assertEqual(wb.get_cell_value(name, 'A7'), False)
 
-        wb.set_cell_contents(name,'A8',"=XOR()")
+        wb.set_cell_contents(name,'A8','=XOR("something")')
         self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A8','=XOR(4,3)')
+        self.assertEqual(wb.get_cell_value(name, 'A8'), False)
+
+        wb.set_cell_contents(name,'A8','=XOR(4,3,0,1)')
+        self.assertEqual(wb.get_cell_value(name, 'A8'), True)
+
+        wb.set_cell_contents(name,'A8',"=XOR(0,1,1,0)")
+        self.assertEqual(wb.get_cell_value(name, 'A8'), False)
 
         wb.set_cell_contents(name,'A9',"=XOR(False, True, False)")
         self.assertEqual(wb.get_cell_value(name, 'A9'), True)

@@ -65,6 +65,24 @@ class Functions:
         elif isinstance(curr_arg, bool):
             return str(curr_arg).upper()
 
+    def _get_value_as_bool(self, curr_arg):
+        if isinstance(curr_arg, CellError) or isinstance(curr_arg, bool):
+            return curr_arg
+        elif curr_arg is None:
+            return False
+        elif isinstance(curr_arg, str):
+            if curr_arg.lower() == 'true':
+                return True
+            elif curr_arg.lower() == 'false':
+                return False
+        elif isinstance(curr_arg, decimal.Decimal):
+            if curr_arg == 0:
+                return False
+            else:
+                return True
+
+        return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
@@ -153,16 +171,22 @@ class Functions:
 
         odd_count = 0
 
+        converted_args = []
+        for i, arg in enumerate(args):
+            new_arg = self._get_value_as_bool(arg)
+            if isinstance(new_arg, CellError):
+                return new_arg
+            converted_args.append(new_arg)
+
         try:
-            for i, _ in enumerate(args):
-                                # TODO PVS tests for XOR
-                if args[i] is True:
+            for i, _ in enumerate(converted_args):
+                if converted_args[i] is True:
                     odd_count = odd_count + 1
 
             if odd_count % 2 != 0:
                 return True
             return False
-        except TypeError: # TODO PVS test
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
 
     #String match

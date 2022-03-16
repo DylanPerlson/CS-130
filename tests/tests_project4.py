@@ -173,13 +173,13 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'B2', 'true')
         wb.set_cell_contents(sh, 'B3', '=False')
 
-        wb.set_cell_contents(sh,'A1','=EXACT(1,"1")') # TODO
+        wb.set_cell_contents(sh,'A1','=EXACT(1,"1")')
         self.assertEqual(wb.get_cell_value(sh, 'A1'), True)
 
-        wb.set_cell_contents(sh,'A1','=CHOOSE("string",1.5,2.5,true,  false  , B1, B2, B3, "last")') # TODO
+        wb.set_cell_contents(sh,'A1','=CHOOSE("string",1.5,2.5,true,  false  , B1, B2, B3, "last")')
         self.assertEqual(wb.get_cell_value(sh, 'A1').get_type(), CellErrorType.TYPE_ERROR)
 
-        wb.set_cell_contents(sh,'A1','=CHOOSE(2,1.5,-2.5,true,  false  , B1, B2, B3, "last")') # TODO
+        wb.set_cell_contents(sh,'A1','=CHOOSE(2,1.5,-2.5,true,  false  , B1, B2, B3, "last")')
         self.assertEqual(wb.get_cell_value(sh, 'A1'), -2.5)
 
     def test_isblank_func(self):

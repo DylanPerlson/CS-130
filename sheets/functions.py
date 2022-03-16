@@ -55,6 +55,16 @@ class Functions:
                 args.append(i)
         return args
 
+    def _get_value_as_string(self, curr_arg):
+        if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
+            return curr_arg
+        elif curr_arg is None:
+            return ''
+        elif isinstance(curr_arg, decimal.Decimal):
+            return str(curr_arg)
+        elif isinstance(curr_arg, bool):
+            return str(curr_arg).upper()
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
@@ -179,7 +189,7 @@ class Functions:
         if isinstance(args1, CellError):
             return args1
 
-        return str(args[0]) == str(args[1])
+        return self._get_value_as_string(args[0]) == self._get_value_as_string(args[1])
 
     #Conditional functions
     def if_func(self, args): # previously: cond, value1, value2 = None):
@@ -350,11 +360,11 @@ class Functions:
         if sheet_instance.sheet_name.lower() != sheet_name:
             #need to change sheet instance to proper one
             for s in workbook_instance.sheets:
-                if s.sheet_name.lower() == sheet_name: # TODO PVS catch case in which no sheet is found
+                if s.sheet_name.lower() == sheet_name: # TODO PVS test
                     updated_sheet_instance = s
                     break
             else:
-                return CellError(CellErrorType.BAD_REFERENCE, "Bad reference")
+                return CellError(CellErrorType.BAD_REFERENCE, "Bad reference: no sheet found")
 
         #otherwise treat normally
         else:

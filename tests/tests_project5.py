@@ -25,6 +25,12 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A6'),7.5)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
+        wb.set_cell_contents(name,'A5','=SUM("string")')
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=AVERAGE("string")')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
     def test_min_max(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -42,6 +48,13 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name,'A6'),3)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
+
+        wb.set_cell_contents(name,'A5','=MIN("string")')
+        # print(wb.get_cell_value(name,'A5'))
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(), CellErrorType.TYPE_ERROR)
+
+        # wb.set_cell_contents(name,'A6','=MAX("string")')
+        # self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
 
     def test_cell_range_other_sheet(self):
         wb = Workbook()
@@ -153,7 +166,7 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(sh, 'A1'), 5)
         wb.set_cell_contents(sh, 'A1', '=HLOOKUP(2, a2:c4, 3)')
         self.assertEqual(wb.get_cell_value(sh, 'A1'), 8)
-        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(three, a2:c4, 1)')
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP("three", a2:c4, 1)')
         self.assertEqual(wb.get_cell_value(sh, 'A1'), 'three')
         wb.set_cell_contents(sh, 'A1', '=HLOOKUP("three", a2:c4, 2)')
         self.assertEqual(wb.get_cell_value(sh, 'A1'), 6)

@@ -26,7 +26,7 @@ class Pieter(unittest.TestCase):
         wb.set_cell_contents(sh,'b4', '8')
         wb.set_cell_contents(sh,'c4', '9')
 
-        # TODO add tests for the following cases
+        # TODO PVS tests for the following cases
         # wb.set_cell_contents(sh, 'A1', '=IFERROR(VLOOKUP(1, INDIRECT(B1 & "!A2:c4"), 2), "")')
         # wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, INDIRECT("sheet" & "!A2:c4"), 3)')
         # wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, INDIRECT(B1 & "!A2:c4"), 3)')
@@ -45,6 +45,13 @@ class Pieter(unittest.TestCase):
 
         wb.set_cell_contents(sh, 'A1', '=INDIRECT("B2")')
         self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
+    def test_exact(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+
+        wb.set_cell_contents(name, 'B1', '=EXACT(FALSE, "FALSE")') # TODO PVS test
+        self.assertEqual(wb.get_cell_value(name, 'B1'), True)
 
 
 if __name__ == '__main__':

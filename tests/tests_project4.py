@@ -75,6 +75,39 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=b1 = B2 & " world"')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
+    def test_xor(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A3',"=XOR(True, False)")
+        self.assertEqual(wb.get_cell_value(name, 'A3'), True)
+
+        wb.set_cell_contents(name,'A4',"=XOR(True, True)")
+        self.assertEqual(wb.get_cell_value(name, 'A4'), False)
+
+        wb.set_cell_contents(name,'A5',"=XOR(False, False)")
+        self.assertEqual(wb.get_cell_value(name, 'A5'), False)
+
+        wb.set_cell_contents(name,'A6',"=XOR(False, True)")
+        self.assertEqual(wb.get_cell_value(name, 'A6'), True)
+
+        wb.set_cell_contents(name,'A7',"=XOR(False)")
+        self.assertEqual(wb.get_cell_value(name, 'A7'), False)
+
+        wb.set_cell_contents(name,'A8',"=XOR()")
+        self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A9',"=XOR(False, True, False)")
+        self.assertEqual(wb.get_cell_value(name, 'A9'), True)
+
+        wb.set_cell_contents(name,'A10',"=XOR(True, False, True, False, True, True)")
+        self.assertEqual(wb.get_cell_value(name, 'A10'), False)
+
+        wb.set_cell_contents(name,'A10',"=XOR(True, True, False, True, True)")
+        self.assertEqual(wb.get_cell_value(name, 'A10'), False)
+
+        wb.set_cell_contents(name,'A10',"=XOR(False, False, False, False, False, True)")
+        self.assertEqual(wb.get_cell_value(name, 'A10'), True)
+
     def test_version_func(self):
         wb = Workbook()
         (_, sh) = wb.new_sheet()
@@ -131,6 +164,23 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'B1', '=1/0')
         wb.set_cell_contents(sh,'A1','=CHOOSE(5,1.5,2.5,true,  false  , B1, B2, B3, "last")')
         self.assertEqual(CellErrorType.DIVIDE_BY_ZERO, wb.get_cell_value(sh, 'A1').get_type())
+
+    def test_choose_func_edgecase(self):
+        wb = Workbook()
+        (_, sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'B1', '5.5')
+        wb.set_cell_contents(sh, 'B2', 'true')
+        wb.set_cell_contents(sh, 'B3', '=False')
+
+        wb.set_cell_contents(sh,'A1','=EXACT(1,"1")') # TODO
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), True)
+
+        wb.set_cell_contents(sh,'A1','=CHOOSE("string",1.5,2.5,true,  false  , B1, B2, B3, "last")') # TODO
+        self.assertEqual(wb.get_cell_value(sh, 'A1').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(sh,'A1','=CHOOSE(2,1.5,-2.5,true,  false  , B1, B2, B3, "last")') # TODO
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), -2.5)
 
     def test_isblank_func(self):
         wb = Workbook()

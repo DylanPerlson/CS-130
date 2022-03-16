@@ -117,7 +117,7 @@ class Functions:
         #     args[i] = int(arg)
 
         odd_count = 0
-        for i in len(args): # TODO what is this supposed to do? len(args) is just a number
+        for i, arg in enumerate(args): # TODO what is this supposed to do? len(args) is just a number
                             # TODO tests for XOR
             if args[i] is True:
                 odd_count = odd_count + 1
@@ -302,7 +302,7 @@ class Functions:
         index = int(args[2] - 1) # 1-indexed
 
         for count, value in enumerate(matrix[0]):
-            if key == value:
+            if key == value and type(key) is type(value):
                 # print([index, count])
 
                 return matrix[index][count]
@@ -316,12 +316,13 @@ class Functions:
 
         key = args[0]
         matrix = args[1]
+        # print(matrix)
         index = int(args[2] - 1) # 1-indexed
 
         matrix = [list(x) for x in zip(*matrix)] # transpose matrix
 
         for count, value in enumerate(matrix[0]):
-            if key == value and type(key) == type(value):
+            if key == value and type(key) is type(value):
                 return matrix[index][count]
 
         # if no match is found

@@ -599,12 +599,6 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-
-
-    
-
-
-
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
                 
@@ -621,13 +615,7 @@ class Workbook:
 
                 #DYLAN HERE SET
 
-                #tarjan doesnt need to be run over and over, just at the end, so should move this to get_cell_valkue
-                #reset list of circ refs
-                # self.circ_refs = []
-                # self._tarjan()
-                
-                #call the cell get_cell_value, not the workbook get_cell value to avoid tarjan
-                
+                #call the sheet get_cell_value, not the workbook get_cell value to avoid tarjan
                 #already found the sheet instance i
                 workbook_instance = self
                 i.get_cell_value(workbook_instance,location)
@@ -1193,7 +1181,7 @@ class Workbook:
 
 
     def _tarjan(self):
-        #print('tarjan')
+        print('tarjan')
         self.num_visits = 0
 
         #set everything to -1

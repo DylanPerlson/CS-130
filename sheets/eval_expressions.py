@@ -246,12 +246,6 @@ class EvalExpressions(Transformer):
         c2 = edge2[1]
         vals = []
 
-        # #now get every value in the range
-        # for cell in sheet_inst.cells:
-        #     cell_row, cell_col = cell[0],cell[1]
-        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
-
         # this code returns a matrix instead of a flat list
         for count, row in enumerate(range(r1, r2+1)):
             vals.append([])
@@ -260,7 +254,6 @@ class EvalExpressions(Transformer):
                     val = sheet_inst.cells[row,col].evaluated_value
                 except KeyError:
                     val = None
-                # print(val)
                 vals[count].append(val)
 
         # transpose matrix

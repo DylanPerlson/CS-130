@@ -245,36 +245,19 @@ class Functions:
         if len(args) != 5:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
 
-
         workbook_instance = args[1]
         sheet_instance = args[2]
         cell_signal = args[3]
         eval_expressions = args[4]
 
-
-        # eval_expressions.signal = True
-
-        # if not isinstance(args[0], str):
-        #     return args[0]
-        # elif not workbook_instance._check_valid_cell(args[0].split('!')[0]):
-        #     return args[0]
-
-        # elif not workbook_instance._check_valid_cell(args[0].split('!')[1]):
-        #     return args[0]
-
-
         # if a cell is passed, then it will already have been evaluated
         #   in that case: just return the input argument
-        # if not workbook_instance._check_valid_cell(args[0]):
-        #     # print(args[0])
-
+        if cell_signal:
+            return args[0]
 
         # in case of a range
         #   the requested cell is probably given as string
         #   in that case: evaluate using helper function
-        if cell_signal:
-            return args[0]
-
         elif ':' in args[0]:
             return self._indirect_range(args)
 
@@ -283,25 +266,6 @@ class Functions:
         else:
             args = args[0].split('!')
 
-            '''# if using the current sheet
-            if len(args) == 1:
-                sheet_name = sheet_instance.sheet_name
-                cell = args[0]
-            # if using a different sheet
-            elif len(args) == 2:
-                # in case of quotes around sheet name
-                if args[0][0] == "'" and args[0][-1] == "'":
-                    sheet_name = args[0][1:-1]
-                elif not args[0][0] == "'" and not args[0][-1] == "'":
-                    sheet_name = args[0]
-                else:
-                    return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
-                cell = args[1]
-            else:
-                return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
-
-            # delete the dollar sign from the cell reference
-            cell = cell.replace("$","")'''
             try:
                 value = eval_expressions.cell(args)
             except UnboundLocalError: # in case of a string
@@ -354,13 +318,9 @@ class Functions:
         workbook_instance = args[1]
         sheet_instance = args[2]
 
-
         x = args[0].split('!', 1)
         sheet_name = x[0]
         args = x[1].split(':', 1)
-
-        # args[0] = [workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
-        # args[1]
 
         #check if it is in another sheet
         if sheet_instance.sheet_name.lower() != sheet_name:
@@ -389,12 +349,6 @@ class Functions:
         r2 = edge2[0]
         c2 = edge2[1]
         vals = []
-
-        # #now get every value in the range
-        # for cell in sheet_inst.cells:
-        #     cell_row, cell_col = cell[0],cell[1]
-        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
 
         # this code returns a matrix instead of a flat list
         for count, row in enumerate(range(r1, r2+1)):

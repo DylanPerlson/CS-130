@@ -26,12 +26,7 @@
 //========================================
 // (new) Boolean expressions
 
-?bool_func : BOOL_FUNC "(" ( (expression | UNQUOTED_STRING | cell_range) ["," (expression | cell_range)]* )? ")" -> bool_func
-// for readability:
-// ?bool_func : BOOL_FUNC "(" (
-//                                     (base | UNQUOTED_STRING | concat_expr | cell_range)
-//                                     ["," (base | cell_range)]*
-//                               )? ")" -> bool_func
+?bool_func : BOOL_FUNC "(" ( (expression | cell_range) ["," (expression | cell_range)]* )? ")" -> bool_func
 
 ?bool_oper : expression BOOL_OP expression // bool oper takes lowest precedence
 

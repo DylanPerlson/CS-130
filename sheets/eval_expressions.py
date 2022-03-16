@@ -121,6 +121,7 @@ class EvalExpressions(Transformer):
         self.sheet_instance = sheet_instance
         self.functions = Functions()
         self.cell_signal = False
+        self.signal = False
 
     def error(self, args):
         """If an error is encountered, the error is propagated"""
@@ -290,6 +291,7 @@ class EvalExpressions(Transformer):
         if isinstance(args1, CellError):
             return args1
 
+        self.cell_signal = False
         return args0 + args1
 
     def cell(self, args):
@@ -315,6 +317,9 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         self.cell_signal = True
+        # if self.signal:
+        #     self.signal = False
+        #     return cell
 
         # why is this being called if it is not
         return [self.workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
@@ -452,7 +457,7 @@ class EvalExpressions(Transformer):
         function_val = self.workbook_instance.function_directory[function_key]
 
         if function_key == "INDIRECT":
-            args.extend([self.workbook_instance, self.sheet_instance, self.cell_signal])
+            args.extend([self.workbook_instance, self.sheet_instance, self.cell_signal, self])
             self.cell_signal = False
 
         # args is now a nice list with the entries

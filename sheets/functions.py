@@ -59,7 +59,12 @@ class Functions:
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
-        return sum(args)
+        try:
+            result = sum(args)
+        except TypeError: # TODO test and add to other functions
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
+
+        return result
 
     def avg_func(self,args):
         args = self._args(args)
@@ -237,23 +242,39 @@ class Functions:
 
     def indirect_func(self, args):
         """The cell value is returned."""
-        if len(args) != 4:
+        if len(args) != 5:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
 
 
         workbook_instance = args[1]
         sheet_instance = args[2]
         cell_signal = args[3]
+        eval_expressions = args[4]
+
+
+        # eval_expressions.signal = True
+
+        # if not isinstance(args[0], str):
+        #     return args[0]
+        # elif not workbook_instance._check_valid_cell(args[0].split('!')[0]):
+        #     return args[0]
+
+        # elif not workbook_instance._check_valid_cell(args[0].split('!')[1]):
+        #     return args[0]
+
 
         # if a cell is passed, then it will already have been evaluated
         #   in that case: just return the input argument
-        if cell_signal:
-            # print(args[0])
-            return args[0]
+        # if not workbook_instance._check_valid_cell(args[0]):
+        #     # print(args[0])
+
 
         # in case of a range
         #   the requested cell is probably given as string
         #   in that case: evaluate using helper function
+        if cell_signal:
+            return args[0]
+
         elif ':' in args[0]:
             return self._indirect_range(args)
 
@@ -262,7 +283,7 @@ class Functions:
         else:
             args = args[0].split('!')
 
-            # if using the current sheet
+            '''# if using the current sheet
             if len(args) == 1:
                 sheet_name = sheet_instance.sheet_name
                 cell = args[0]
@@ -280,17 +301,18 @@ class Functions:
                 return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
             # delete the dollar sign from the cell reference
-            cell = cell.replace("$","")
+            cell = cell.replace("$","")'''
             try:
-                value = (workbook_instance.get_cell_value(sheet_name, cell))
+                value = eval_expressions.cell(args)
             except UnboundLocalError: # in case of a string
                 return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+
+            if isinstance(value, list):
+                value = value[0]
 
             if value is None:
                 return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
             return value
-
-
 
 
     def hlookup_func(self, args):
@@ -344,8 +366,11 @@ class Functions:
         if sheet_instance.sheet_name.lower() != sheet_name:
             #need to change sheet instance to proper one
             for s in workbook_instance.sheets:
-                if s.sheet_name.lower() == sheet_name:
+                if s.sheet_name.lower() == sheet_name: # TODO catch case in which no sheet is found
                     updated_sheet_instance = s
+                    break
+            else:
+                return CellError(CellErrorType.BAD_REFERENCE, "Bad reference")
 
         #otherwise treat normally
         else:

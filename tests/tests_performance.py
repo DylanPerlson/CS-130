@@ -7,7 +7,7 @@ def test_long_reference_chain():
     wb = Workbook()
     
     #get cell value from a chain reference is not slow, the continually setting a value is 
-    length = 400
+    length = 300
     (_,name) = wb.new_sheet("sheet")
 
     
@@ -30,7 +30,7 @@ def test_long_reference_chain():
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(15)
+    stats.sort_stats('tottime').print_stats(3)
     #assert wb.get_cell_value(name, location) == length
     #only get cell value once, and only parse at the very end???
 

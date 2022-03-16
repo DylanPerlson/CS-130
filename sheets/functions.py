@@ -257,17 +257,10 @@ class Functions:
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         try:
-            #found = False
             for s in workbook_instance.sheets:
-                # if not self._check_valid_cell(cell):
-                #     raise ValueError()
                 if s.sheet_name.lower() == sheet_name.lower():
                     value = (s.get_cell_value(workbook_instance, cell))
-                    found = True
                     break
-                    #DTP CHANGE HERE
-            # if not found:
-            #     value = None
         except UnboundLocalError: # in case of a string
             return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 

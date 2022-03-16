@@ -1181,7 +1181,6 @@ class Workbook:
 
 
     def _tarjan(self):
-        #print('tarjan')
         self.num_visits = 0
 
         #set everything to -1

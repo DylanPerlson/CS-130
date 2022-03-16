@@ -601,10 +601,6 @@ class Workbook:
 
                 curr_cell = sheet_name.lower() + '!' + location.lower()
 
-                #reset list of circ refs
-                self.circ_refs = []
-
-                self._tarjan()
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
 
@@ -619,11 +615,16 @@ class Workbook:
                     for func in self.notification_functions:
                         func(self, self.notifying_cells)
 
+                #DYLAN HERE SET
 
-                #TODO (Dylan) DTP dont just update this cell, also update any dependencies
-                self.get_cell_value(sheet_name,curr_cell.split('!')[1])
-                self._update(curr_cell)
-
+                #call the sheet get_cell_value, not the workbook get_cell value to avoid tarjan
+                #already found the sheet instance i
+                workbook_instance = self
+                i.get_cell_value(workbook_instance,location)
+                
+                #what if instead of doing this we are only telling functions that they need to be updated?
+                self._update(curr_cell) #not a slow down
+                
                 #return is needed so we do not raise a key error
                 return
 
@@ -643,8 +644,11 @@ class Workbook:
                     dep_split = dependent.split('!')
                     #evaluate the cell
                     if self.cell_changed_dict[dependent] == True:
-
-                        self.get_cell_value(dep_split[0],dep_split[1])
+                        for s in self.sheets:
+                            if s.sheet_name.lower() == dep_split[0].lower():
+                                workbook_instance = self
+                                s.get_cell_value(workbook_instance,dep_split[1].lower())
+                        #self.get_cell_value(dep_split[0],dep_split[1])
                         #recurse
                         base_stack.append(dependent)
 
@@ -705,6 +709,10 @@ class Workbook:
         if not self._check_valid_cell(location):
             raise ValueError()
 
+        #tarjan doesnt need to be run over and over, just at the end, so should move this to get_cell_valkue
+                #reset list of circ refs
+        self.circ_refs = []
+        self._tarjan()
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
@@ -1178,7 +1186,7 @@ class Workbook:
             yield remainder
 
     def _tarjan_helper(self, u, low, found, in_stack, the_stack):
-
+    
         #Make this iterative DTP TODO
 
         found[u] = self.num_visits

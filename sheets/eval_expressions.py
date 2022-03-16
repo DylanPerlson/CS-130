@@ -315,9 +315,10 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         self.cell_signal = True
-
-        # why is this being called if it is not
-        return [self.workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
+        
+        for s in self.workbook_instance.sheets:
+            if s.sheet_name.lower() == sheet_name.lower():
+                return [s.get_cell_value(self.workbook_instance, cell),sheet_name[:], cell]
 
     #### METHODS FOR BOOLEAN STUFF:
 

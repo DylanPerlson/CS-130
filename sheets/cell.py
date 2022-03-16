@@ -139,10 +139,10 @@ class Cell():
             "Unrecognized function name", NameError)
 
             return self.evaluated_value
-        except(RuntimeError, RecursionError): # this happens if the error is either of those
-            self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
-            "Circular Reference", None)
-            return self.evaluated_value
+        # except(RuntimeError, RecursionError): # this happens if the error is either of those
+        #     self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
+        #     "Circular Reference", None)
+        #     return self.evaluated_value
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
 

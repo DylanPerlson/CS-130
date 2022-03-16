@@ -14,6 +14,9 @@ def test_long_reference_chain():
     pr = cProfile.Profile()
     pr.enable()
 
+    pr = cProfile.Profile()
+    pr.enable()
+
     for i in range(2, length+1):
         location = 'A'+str(i)
         location_prev = 'A'+str(i-1)
@@ -22,14 +25,14 @@ def test_long_reference_chain():
 
    
     wb.set_cell_contents(name, 'A1', '1')
-    #print(wb.get_cell_value(name, location))
-    pr.disable()
-    stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(15)
+    
     print(wb.get_cell_value(name, location))
 
-    assert wb.get_cell_value(name, location) == length
-
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('tottime').print_stats(3)
+    #assert wb.get_cell_value(name, location) == length
+    #only get cell value once, and only parse at the very end???
 
 def test_long_reference_chain_letters():
     wb = Workbook()

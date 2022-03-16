@@ -59,33 +59,43 @@ class Functions:
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
-        try:
-            result = sum(args)
-        except TypeError: # TODO test and add to other functions
-            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
-        return result
+        try:
+            return sum(args)
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def avg_func(self,args):
         args = self._args(args)
         args = self._flat(args)
 
-        return sum(args)/len(args)
-        #TODO DTP might need to do this in decimal
+        try:
+            return sum(args)/len(args)
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def min_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
 
-        return min(args)
+        try:
+            args = [decimal.Decimal(x) for x in args]
+            return min(args)
+        except decimal.InvalidOperation: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
+
 
     def max_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
 
-        return max(args)
+        try:
+            return max(args)
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
+
 
   #Boolean functions
 
@@ -95,14 +105,22 @@ class Functions:
 
         args = self._flat(args)
 
-        return all(args)
+        try:
+            return all(args)
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+
 
     def or_func(self, args):
         """Implements OR function.
         True if one argument is True."""
         args = self._flat(args)
 
-        return any(args)
+        try:
+            return any(args)
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+
 
     def not_func(self, args):
         """Implements NOT function.
@@ -111,25 +129,31 @@ class Functions:
 
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
-        return not args[0]
+
+        try:
+            return not args[0]
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+
 
     def xor_func(self, args):
         """Implements XOR function.
         True if odd number of arguments are True."""
         args = self._flat(args)
 
-        # for i, arg in enumerate(args):
-        #     args[i] = int(arg)
-
         odd_count = 0
-        for i, arg in enumerate(args): # TODO what is this supposed to do? len(args) is just a number
-                            # TODO tests for XOR
-            if args[i] is True:
-                odd_count = odd_count + 1
 
-        if odd_count % 2 != 0:
-            return True
-        return False
+        try:
+            for i, _ in enumerate(args):
+                                # TODO PVS tests for XOR
+                if args[i] is True:
+                    odd_count = odd_count + 1
+
+            if odd_count % 2 != 0:
+                return True
+            return False
+        except TypeError: # TODO PVS test
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
 
     #String match
     def exact_func(self, args):
@@ -326,7 +350,7 @@ class Functions:
         if sheet_instance.sheet_name.lower() != sheet_name:
             #need to change sheet instance to proper one
             for s in workbook_instance.sheets:
-                if s.sheet_name.lower() == sheet_name: # TODO catch case in which no sheet is found
+                if s.sheet_name.lower() == sheet_name: # TODO PVS catch case in which no sheet is found
                     updated_sheet_instance = s
                     break
             else:

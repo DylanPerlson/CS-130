@@ -52,7 +52,7 @@ class Workbook:
         self.cell_changed_dict = {}
 
         self.parser = lark.Lark.open('sheets/formulas.lark', start='formula')
-        
+
         self.num_visits = 0
         self.function_directory =   {
             'AND': 'and_func',
@@ -70,7 +70,9 @@ class Workbook:
             'MIN': 'min_func',
             'MAX': 'max_func',
             'SUM': 'sum_func',
-            'AVERAGE': 'avg_func'
+            'AVERAGE': 'avg_func',
+            'HLOOKUP': 'hlookup_func',
+            'VLOOKUP': 'vlookup_func'
             }
 
 
@@ -240,7 +242,7 @@ class Workbook:
 
 
                         else:
-                            
+
                             raise ValueError()
 
 
@@ -605,7 +607,7 @@ class Workbook:
                 self._tarjan()
                 # #these are the cells that will be passed onto the notification functions
                 # #needs to be reset each call
-                
+
                 self.notifying_cells = []
                 # #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
@@ -617,11 +619,11 @@ class Workbook:
                     for func in self.notification_functions:
                         func(self, self.notifying_cells)
 
-                self.get_cell_value(sheet_name,curr_cell.split('!')[1]) #not a slow down
-                
-                #what if instead of doing this we are only telling functions that they need to be updated?
-                self._update(curr_cell) #not a slow down
-                
+
+                #TODO (Dylan) DTP dont just update this cell, also update any dependencies
+                self.get_cell_value(sheet_name,curr_cell.split('!')[1])
+                self._update(curr_cell)
+
                 #return is needed so we do not raise a key error
                 return
 
@@ -641,7 +643,7 @@ class Workbook:
                     dep_split = dependent.split('!')
                     #evaluate the cell
                     if self.cell_changed_dict[dependent] == True:
- 
+
                         self.get_cell_value(dep_split[0],dep_split[1])
                         #recurse
                         base_stack.append(dependent)
@@ -696,7 +698,7 @@ class Workbook:
         whole number.  For example, this function would not return
         Decimal('1.000'); rather it would return Decimal('1').
         """
-        
+
         # sheet_location = sheet_name.lower() + '!' + location.lower()
         # #only check for valid cells if we have not evaluated already
         # if (sheet_location not in self.cell_changed_dict) or (self.cell_changed_dict[sheet_location] == True):
@@ -706,7 +708,7 @@ class Workbook:
 
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
-                
+
                 workbook_instance = self
                 return i.get_cell_value(workbook_instance,location)
 

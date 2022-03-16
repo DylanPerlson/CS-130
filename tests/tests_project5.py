@@ -10,7 +10,7 @@ class Project5(unittest.TestCase):
     def test_avg_sum(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         wb.set_cell_contents(name,'A1',"5")
         wb.set_cell_contents(name,'A2',"15")
         wb.set_cell_contents(name,'A3',"10")
@@ -21,14 +21,14 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name,'A4'),15)
         self.assertEqual(wb.get_cell_value(name,'A5'),30)
-        
+
         self.assertEqual(wb.get_cell_value(name,'A6'),7.5)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
     def test_min_max(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         wb.set_cell_contents(name,'A1',"3")
         wb.set_cell_contents(name,'A2',"2")
         wb.set_cell_contents(name,'A3',"10")
@@ -39,7 +39,7 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name,'A4'),3)
         self.assertEqual(wb.get_cell_value(name,'A5'),2)
-        
+
         self.assertEqual(wb.get_cell_value(name,'A6'),3)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
@@ -88,7 +88,7 @@ class Project5(unittest.TestCase):
         #print(wb.get_cell_value(name,'A4'))
         self.assertEqual(wb.get_cell_value(name,'A4'),True)
 
-        #what about 
+        #what about
         #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
 
 
@@ -97,7 +97,7 @@ class Project5(unittest.TestCase):
     def test_or_range(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
-        
+
         # wb.set_cell_contents(name,'A1','3')
         # wb.set_cell_contents(name,'A2','4')
         # wb.set_cell_contents(name,'A3','=A1+A2')
@@ -115,7 +115,7 @@ class Project5(unittest.TestCase):
         wb.set_cell_contents(name,'A4','=OR(A1:A3)')
         self.assertEqual(wb.get_cell_value(name,'A4'),False)
 
-    
+
     def test_mixed(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")
@@ -127,7 +127,144 @@ class Project5(unittest.TestCase):
 
         self.assertEqual(wb.get_cell_value(name, 'E1'), True)
 
+    def test_hlookup(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
 
-    
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', 'three')
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+        wb.set_cell_contents(sh,'a4', 'true')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '9')
+
+        # [[1   , 2, 'three'],
+        #  [4   , 5, 6],
+        #  [true, 8, 9]]
+
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(1, a2:c4, 1)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 1)
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(1, a2:c4, 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), True)
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(2, a2:c4, 2)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 5)
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(2, a2:c4, 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 8)
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP(three, a2:c4, 1)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 'three')
+        wb.set_cell_contents(sh, 'A1', '=HLOOKUP("three", a2:c4, 2)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 6)
+
+        # print(wb.get_cell_value(sh, 'A1'))
+
+    def test_vlookup(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', 'three')
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+        wb.set_cell_contents(sh,'a4', '=true')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '9')
+
+        # [[1   , 2, 'three'],
+        #  [4   , 5, 6],
+        #  [true, 8, 9]]
+
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, a2:c4, 1)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 1)
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, a2:c4, 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 'three')
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(4, a2:c4, 2)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 5)
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(4, a2:c4, 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 6)
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(true, a2:c4, 1)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), True)
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(true, a2:c4, 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 9)
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(false, a2:c4, 2)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1').get_type(), CellErrorType.TYPE_ERROR)
+
+    def test_if_with_ranges(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', '3')
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+        wb.set_cell_contents(sh,'a4', '7')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '9')
+
+        wb.set_cell_contents(sh,'B1', 'false')
+        wb.set_cell_contents(sh, 'A10', '=AVERAGE(IF(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 5)
+
+        wb.set_cell_contents(sh,'B1', 'true')
+        wb.set_cell_contents(sh, 'A10', '=AVERAGE(IF(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 4)
+
+        wb.set_cell_contents(sh,'B1', 'false')
+        wb.set_cell_contents(sh, 'A10', '=SUM(IF(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 15)
+
+        wb.set_cell_contents(sh,'B1', 'true')
+        wb.set_cell_contents(sh, 'A10', '=MIN(IF(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 1)
+
+        wb.set_cell_contents(sh,'B1', 'false')
+        wb.set_cell_contents(sh, 'A10', '=MAX(IF(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 8)
+
+    def test_choose_with_ranges(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet()
+
+        wb.set_cell_contents(sh,'B1', 'false')
+
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', '3')
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+        wb.set_cell_contents(sh,'a4', '7')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '9')
+
+        wb.set_cell_contents(sh,'B1', '2')
+        wb.set_cell_contents(sh, 'A10', '=AVERAGE(CHOOSE(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 5)
+
+        wb.set_cell_contents(sh,'B1', '1')
+        wb.set_cell_contents(sh, 'A10', '=AVERAGE(CHOOSE(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 4)
+
+        wb.set_cell_contents(sh,'B1', '2')
+        wb.set_cell_contents(sh, 'A10', '=SUM(CHOOSE(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 15)
+
+        wb.set_cell_contents(sh,'B1', '1')
+        wb.set_cell_contents(sh, 'A10', '=MIN(CHOOSE(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 1)
+
+        wb.set_cell_contents(sh,'B1', '2')
+        wb.set_cell_contents(sh, 'A10', '=MAX(CHOOSE(B1, A2:A4, B2:B4))')
+        self.assertEqual(wb.get_cell_value(sh, 'A10'), 8)
+
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)

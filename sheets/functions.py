@@ -18,15 +18,22 @@ class Functions:
         """This is necessary for elegant function calls."""
         return getattr(self, function)(args)
 
-    def _flat(self, args):
-        flat_list = []
-        for sublist in args:
-            if isinstance(sublist, list):
-                for item in sublist:
-                    flat_list.append(item)
-            else:
-                flat_list.append(sublist)
-        return flat_list
+    # def _flat(self, args):
+    #     flat_list = []
+    #     for sublist in args:
+    #         if isinstance(sublist, list):
+    #             for item in sublist:
+    #                 flat_list.append(self._flat(item))
+    #         else:
+    #             flat_list.append(sublist)
+    #     return flat_list
+
+    def _flat(self, list_of_lists):
+        if len(list_of_lists) == 0:
+            return list_of_lists
+        if isinstance(list_of_lists[0], list):
+            return self._flat(list_of_lists[0]) + self._flat(list_of_lists[1:])
+        return list_of_lists[:1] + self._flat(list_of_lists[1:])
 
     def _args(self,args):
         old_args = args
@@ -42,18 +49,18 @@ class Functions:
                 if len(i) > 1 and isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
                     args.append(i[0])
                     continue
-                else: 
+                else:
                      args.append(i)
             else:
                 args.append(i)
         return args
-  
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
-
         return sum(args)
+
     def avg_func(self,args):
         args = self._args(args)
         args = self._flat(args)
@@ -65,22 +72,24 @@ class Functions:
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
-        
+
         return min(args)
 
     def max_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
-        
+
         return max(args)
+
   #Boolean functions
+
     def and_func(self, args):
         """Implements AND function.
         True if all arguments are True."""
 
         args = self._flat(args)
-        
+
         return all(args)
 
     def or_func(self, args):
@@ -108,7 +117,8 @@ class Functions:
         #     args[i] = int(arg)
 
         odd_count = 0
-        for i in len(args):
+        for i in len(args): # TODO what is this supposed to do? len(args) is just a number
+                            # TODO tests for XOR
             if args[i] is True:
                 odd_count = odd_count + 1
 
@@ -189,7 +199,11 @@ class Functions:
         Select one of the arguments using first argument."""
         if len(args) <= 2:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {len(args)}")
-        choose_index = args[0]
+        try:
+            choose_index = decimal.Decimal(args[0])
+        except decimal.InvalidOperation:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid index argument: {args[0]}")
+
         choices = args[1:]
         if choose_index < 1 or choose_index > len(choices) or not _is_integer(choose_index):
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid index argument: {choose_index}")
@@ -231,36 +245,144 @@ class Functions:
         sheet_instance = args[2]
         cell_signal = args[3]
 
+        # if a cell is passed, then it will already have been evaluated
+        #   in that case: just return the input argument
         if cell_signal:
+            # print(args[0])
             return args[0]
 
-      
-        args = args[0].split('!')
+        # in case of a range
+        #   the requested cell is probably given as string
+        #   in that case: evaluate using helper function
+        elif ':' in args[0]:
+            return self._indirect_range(args)
 
-        # if using the current sheet
-        if len(args) == 1:
-            sheet_name = sheet_instance.sheet_name
-            cell = args[0]
-        # if using a different sheet
-        elif len(args) == 2:
-            # in case of quotes around sheet name
-            if args[0][0] == "'" and args[0][-1] == "'":
-                sheet_name = args[0][1:-1]
-            elif not args[0][0] == "'" and not args[0][-1] == "'":
-                sheet_name = args[0]
-            else:
-                return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
-            cell = args[1]
+        # else, the requested cell is probably given as string
+        #   in that case: evaluate
         else:
-            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+            args = args[0].split('!')
 
-        # delete the dollar sign from the cell reference
-        cell = cell.replace("$","")
-        try:
-            value = (workbook_instance.get_cell_value(sheet_name, cell))
-        except UnboundLocalError: # in case of a string
-            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+            # if using the current sheet
+            if len(args) == 1:
+                sheet_name = sheet_instance.sheet_name
+                cell = args[0]
+            # if using a different sheet
+            elif len(args) == 2:
+                # in case of quotes around sheet name
+                if args[0][0] == "'" and args[0][-1] == "'":
+                    sheet_name = args[0][1:-1]
+                elif not args[0][0] == "'" and not args[0][-1] == "'":
+                    sheet_name = args[0]
+                else:
+                    return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
+                cell = args[1]
+            else:
+                return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
-        if value is None:
-            return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
-        return value
+            # delete the dollar sign from the cell reference
+            cell = cell.replace("$","")
+            try:
+                value = (workbook_instance.get_cell_value(sheet_name, cell))
+            except UnboundLocalError: # in case of a string
+                return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+
+            if value is None:
+                return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
+            return value
+
+
+
+
+    def hlookup_func(self, args):
+        if len(args) != 3:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+
+        key = args[0]
+        matrix = args[1]
+        index = int(args[2] - 1) # 1-indexed
+
+        for count, value in enumerate(matrix[0]):
+            if key == value:
+                # print([index, count])
+
+                return matrix[index][count]
+
+        # if no match is found
+        return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
+
+    def vlookup_func(self, args):
+        if len(args) != 3:
+            return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
+
+        key = args[0]
+        matrix = args[1]
+        index = int(args[2] - 1) # 1-indexed
+
+        matrix = [list(x) for x in zip(*matrix)] # transpose matrix
+
+        for count, value in enumerate(matrix[0]):
+            if key == value and type(key) == type(value):
+                return matrix[index][count]
+
+        # if no match is found
+        return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
+
+    def _indirect_range(self, args):
+        workbook_instance = args[1]
+        sheet_instance = args[2]
+
+
+        x = args[0].split('!', 1)
+        sheet_name = x[0]
+        args = x[1].split(':', 1)
+
+        # args[0] = [workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
+        # args[1]
+
+        #check if it is in another sheet
+        if sheet_instance.sheet_name.lower() != sheet_name:
+            #need to change sheet instance to proper one
+            for s in workbook_instance.sheets:
+                if s.sheet_name.lower() == sheet_name:
+                    updated_sheet_instance = s
+
+        #otherwise treat normally
+        else:
+            updated_sheet_instance = sheet_instance
+
+        p1 = args[0]
+        p2 = args[1]
+        r1,c1 = updated_sheet_instance._get_col_and_row(p1)
+        r2,c2 = updated_sheet_instance._get_col_and_row(p2)
+
+        edge1 = (min(r1,r2),min(c1,c2))
+        edge2 = (max(r1,r2),max(c1,c2))
+
+        r1 = edge1[0]
+        c1 = edge1[1]
+        r2 = edge2[0]
+        c2 = edge2[1]
+        vals = []
+
+        # #now get every value in the range
+        # for cell in sheet_inst.cells:
+        #     cell_row, cell_col = cell[0],cell[1]
+        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
+        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
+
+        # this code returns a matrix instead of a flat list
+        for count, row in enumerate(range(r1, r2+1)):
+            vals.append([])
+            for col in range(c1, c2+1):
+                try:
+                    val = updated_sheet_instance.cells[row,col].evaluated_value
+                except KeyError:
+                    val = None
+                # print(val)
+                vals[count].append(val)
+
+        # transpose matrix
+        # because of row v col inconsistency
+        vals = [list(x) for x in zip(*vals)]
+
+        return vals

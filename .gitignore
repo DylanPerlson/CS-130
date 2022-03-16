@@ -5,6 +5,7 @@ workspace.code-workspace
 **/*launch.json
 **/*.mypy_cache
 **/settings.json
+/sheets/parsing.py
 <<<<<<< HEAD
 cycle.py
 =======

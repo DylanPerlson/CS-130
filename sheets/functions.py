@@ -131,10 +131,15 @@ class Functions:
         True if all arguments are True."""
 
         args = self._flat(args)
+        args = [self._get_value_as_bool(x) for x in args]
+
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
 
         try:
             return all(args)
-        except TypeError: # TODO PVS test
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
 
 
@@ -142,10 +147,15 @@ class Functions:
         """Implements OR function.
         True if one argument is True."""
         args = self._flat(args)
+        args = [self._get_value_as_bool(x) for x in args]
+
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
 
         try:
             return any(args)
-        except TypeError: # TODO PVS test
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
 
 
@@ -157,10 +167,11 @@ class Functions:
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
 
-        try:
-            return not args[0]
-        except TypeError: # TODO PVS test
-            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+        args = self._get_value_as_bool(args[0])
+        if isinstance(args, CellError):
+            return args
+
+        return not self._get_value_as_bool(args)
 
 
     def xor_func(self, args):
@@ -383,7 +394,7 @@ class Functions:
         if sheet_instance.sheet_name.lower() != sheet_name:
             #need to change sheet instance to proper one
             for s in workbook_instance.sheets:
-                if s.sheet_name.lower() == sheet_name: # TODO PVS test
+                if s.sheet_name.lower() == sheet_name: # TODO PVS test indirect wrong sheet
                     updated_sheet_instance = s
                     break
             else:

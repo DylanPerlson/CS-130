@@ -76,6 +76,108 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=b1 = B2 & " world"')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
+    def test_and(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A3',"=AND(true, false)")
+        wb.set_cell_contents(name,'A4',"=AND(1, true)")
+        wb.set_cell_contents(name,'A5',"=AND(false, false)")
+        wb.set_cell_contents(name,'A6',"=AND(0, true)")
+        wb.set_cell_contents(name,'A7',"=AND(false)")
+        wb.set_cell_contents(name,'A8',"=AND()")
+        wb.set_cell_contents(name,'A9',"=AND(false, 10, false)")
+        wb.set_cell_contents(name,'A10',"=AND(true, true, true, true)")
+
+        self.assertEqual(wb.get_cell_value(name, 'A3'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A5'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A6'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A7'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A9'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A10'), True)
+
+        wb.set_cell_contents(name,'A10','=AND("string")')
+        self.assertEqual(wb.get_cell_value(name, 'A10').get_type(), CellErrorType.TYPE_ERROR)
+
+
+    def test_or(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A3',"=OR(true, false)")
+        wb.set_cell_contents(name,'A4',"=OR(true, 10)")
+        wb.set_cell_contents(name,'A5',"=OR(false, false)")
+        wb.set_cell_contents(name,'A6',"=OR(0, true)")
+        wb.set_cell_contents(name,'A7',"=OR(false)")
+        wb.set_cell_contents(name,'A8',"=OR()")
+        wb.set_cell_contents(name,'A9',"=OR(false, true, false)")
+        wb.set_cell_contents(name,'A10',"=OR(true, true, true, 1)")
+
+        self.assertEqual(wb.get_cell_value(name, 'A3'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A5'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A6'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A7'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A8').get_type(), CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name, 'A9'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A10'), True)
+
+        wb.set_cell_contents(name,'A10','=OR("string", true)')
+        self.assertEqual(wb.get_cell_value(name, 'A10').get_type(), CellErrorType.TYPE_ERROR)
+
+    def test_not(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A3',"=NOT(true)")
+        self.assertEqual(wb.get_cell_value(name, 'A3'), False)
+
+        wb.set_cell_contents(name,'A4',"=NOT(false)")
+        self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+
+        wb.set_cell_contents(name,'A4','=NOT("string")')
+        self.assertEqual(wb.get_cell_value(name, 'A4').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A4',"=NOT(false)")
+        self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+
+    def test_exact(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A3','=EXACT("hello", "HELLO")')
+        wb.set_cell_contents(name,'A4','=EXACT("Hello","Hello")')
+        wb.set_cell_contents(name,'A5','=EXACT("Hello", "hElLo")')
+
+        self.assertEqual(wb.get_cell_value(name, 'A3'), False)
+        self.assertEqual(wb.get_cell_value(name, 'A4'), True)
+        self.assertEqual(wb.get_cell_value(name, 'A5'), False)
+
+    def test_error_priority(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A2','=#ERROR! * #REF!')
+        wb.set_cell_contents(name,'A3','=#REF! * #ERROR!')
+        wb.set_cell_contents(name,'A5','=#REF! + #NAME?')
+        wb.set_cell_contents(name,'A6','=#DIV/0! + #VALUE!')
+        wb.set_cell_contents(name,'A7','=#VALUE! & #ERROR!')
+
+
+        self.assertEqual(wb.get_cell_value(name,'A2').get_type(),CellErrorType.PARSE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A3').get_type(),CellErrorType.PARSE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A5').get_type(),CellErrorType.BAD_REFERENCE)
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(),CellErrorType.TYPE_ERROR)
+        self.assertEqual(wb.get_cell_value(name,'A7').get_type(),CellErrorType.PARSE_ERROR)
+
+    def test_mixed(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        wb.set_cell_contents(name,'A2','6')
+        wb.set_cell_contents(name,'B1','1')
+        wb.set_cell_contents(name,'C1','1')
+        wb.set_cell_contents(name,'D1','14')
+        wb.set_cell_contents(name, 'E1', '=OR(AND(A1 > 5, B1 < 2), AND(C1 < 6, D1 = 14))')
+
+        self.assertEqual(wb.get_cell_value(name, 'E1'), True)
+
     def test_xor(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")

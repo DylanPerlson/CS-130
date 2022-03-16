@@ -90,7 +90,7 @@ class Functions:
 
         try:
             return sum(args)
-        except TypeError: # TODO PVS test
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def avg_func(self,args):
@@ -99,7 +99,7 @@ class Functions:
 
         try:
             return sum(args)/len(args)
-        except TypeError: # TODO PVS test
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def min_func(self,args):
@@ -108,9 +108,8 @@ class Functions:
         args = self._flat(args)
 
         try:
-            args = [decimal.Decimal(x) for x in args]
-            return min(args)
-        except decimal.InvalidOperation: # TODO PVS test
+            return min([decimal.Decimal(x) for x in args]) # the list converts to decimal
+        except decimal.InvalidOperation:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
 
@@ -120,8 +119,8 @@ class Functions:
         args = self._flat(args)
 
         try:
-            return max(args)
-        except TypeError: # TODO PVS test
+            return max([decimal.Decimal(x) for x in args]) # the list converts to decimal
+        except decimal.InvalidOperation:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
 

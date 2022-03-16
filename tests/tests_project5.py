@@ -5,6 +5,7 @@ import unittest
 from sheets import version
 from sheets import cell
 
+import os; os.system('clear')
 
 class Project5(unittest.TestCase):
     def test_avg_sum(self):
@@ -25,11 +26,20 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_value(name,'A6'),7.5)
         self.assertEqual(wb.get_cell_value(name,'A7'),10)
 
+        wb.set_cell_contents(name,'A5','=SUM(1,2,3,4,5,6,7,8)')
+        self.assertEqual(wb.get_cell_value(name,'A5'), 36)
+
+        wb.set_cell_contents(name,'A5','=SUM(1,true,false)')
+        self.assertEqual(wb.get_cell_value(name,'A5'), 2)
+
         wb.set_cell_contents(name,'A5','=SUM("string")')
         self.assertEqual(wb.get_cell_value(name,'A5').get_type(), CellErrorType.TYPE_ERROR)
 
-        wb.set_cell_contents(name,'A6','=AVERAGE("string")')
+        wb.set_cell_contents(name,'A6','=AVERAGE("string", 4)')
         self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=AVERAGE(true, true, false, false)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 0.5)
 
     def test_min_max(self):
         wb = Workbook()
@@ -53,8 +63,14 @@ class Project5(unittest.TestCase):
         # print(wb.get_cell_value(name,'A5'))
         self.assertEqual(wb.get_cell_value(name,'A5').get_type(), CellErrorType.TYPE_ERROR)
 
-        # wb.set_cell_contents(name,'A6','=MAX("string")')
-        # self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+        wb.set_cell_contents(name,'A6','=MAX("string")')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=MAX(-1,-2,-3,true)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 1)
+
+        wb.set_cell_contents(name,'A6','=MIN(2,3,false)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 0)
 
     def test_cell_range_other_sheet(self):
         wb = Workbook()

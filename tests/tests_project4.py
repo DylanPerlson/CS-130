@@ -26,6 +26,9 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '=true')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
+        wb.set_cell_contents(sh, 'a1', '="5"=5')
+        self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
+
         wb.set_cell_contents(sh, 'a1', '=5=5')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 

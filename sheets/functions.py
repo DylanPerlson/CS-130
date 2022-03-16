@@ -199,7 +199,11 @@ class Functions:
         Select one of the arguments using first argument."""
         if len(args) <= 2:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {len(args)}")
-        choose_index = args[0]
+        try:
+            choose_index = decimal.Decimal(args[0])
+        except decimal.InvalidOperation:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid index argument: {args[0]}")
+
         choices = args[1:]
         if choose_index < 1 or choose_index > len(choices) or not _is_integer(choose_index):
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid index argument: {choose_index}")
@@ -244,7 +248,7 @@ class Functions:
         # if a cell is passed, then it will already have been evaluated
         #   in that case: just return the input argument
         if cell_signal:
-            print(args[0])
+            # print(args[0])
             return args[0]
 
         # in case of a range

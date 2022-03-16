@@ -414,13 +414,17 @@ class EvalExpressions(Transformer):
                 args2 = _get_value_as_bool(args2)
 
         if operation == "=" or operation == "==":
-            if isinstance(args0, str) and isinstance(args2, str):
+            if not type(args0) is type(args2): # TODO test
+                return False
+            elif isinstance(args0, str) and isinstance(args2, str):
                 return args0.lower() == args2.lower()
             else:
                 return args0 == args2
 
         elif operation == "<>" or operation == "!=":
-            if isinstance(args0, str) and isinstance(args2, str):
+            if not type(args0) is type(args2): # TODO test
+                return True
+            elif isinstance(args0, str) and isinstance(args2, str):
                 return args0.lower() != args2.lower()
             else:
                 return args0 != args2

@@ -45,7 +45,7 @@ def _is_float(element):
     except ValueError:
         return False
 
-#TODO (Dylan) DTP FIX THIS
+#TODO DTP FIX THIS
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg
@@ -121,6 +121,7 @@ class EvalExpressions(Transformer):
         self.sheet_instance = sheet_instance
         self.functions = Functions()
         self.cell_signal = False
+        self.signal = False
 
     def error(self, args):
         """If an error is encountered, the error is propagated"""
@@ -245,12 +246,6 @@ class EvalExpressions(Transformer):
         c2 = edge2[1]
         vals = []
 
-        # #now get every value in the range
-        # for cell in sheet_inst.cells:
-        #     cell_row, cell_col = cell[0],cell[1]
-        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
-
         # this code returns a matrix instead of a flat list
         for count, row in enumerate(range(r1, r2+1)):
             vals.append([])
@@ -259,7 +254,6 @@ class EvalExpressions(Transformer):
                     val = sheet_inst.cells[row,col].evaluated_value
                 except KeyError:
                     val = None
-                # print(val)
                 vals[count].append(val)
 
         # transpose matrix
@@ -290,6 +284,7 @@ class EvalExpressions(Transformer):
         if isinstance(args1, CellError):
             return args1
 
+        self.cell_signal = False
         return args0 + args1
 
     def cell(self, args):
@@ -315,7 +310,7 @@ class EvalExpressions(Transformer):
         # delete the dollar sign from the cell reference
         cell = cell.replace("$","")
         self.cell_signal = True
-        
+
         for s in self.workbook_instance.sheets:
             if s.sheet_name.lower() == sheet_name.lower():
                 return [s.get_cell_value(self.workbook_instance, cell),sheet_name[:], cell]
@@ -377,7 +372,7 @@ class EvalExpressions(Transformer):
                 args2 = _get_value_as_bool(args2)
 
         if operation == "=" or operation == "==":
-            if not type(args0) is type(args2): # TODO test
+            if not type(args0) is type(args2):
                 return False
             elif isinstance(args0, str) and isinstance(args2, str):
                 return args0.lower() == args2.lower()
@@ -385,7 +380,7 @@ class EvalExpressions(Transformer):
                 return args0 == args2
 
         elif operation == "<>" or operation == "!=":
-            if not type(args0) is type(args2): # TODO test
+            if not type(args0) is type(args2):
                 return True
             elif isinstance(args0, str) and isinstance(args2, str):
                 return args0.lower() != args2.lower()
@@ -456,7 +451,7 @@ class EvalExpressions(Transformer):
         function_val = self.workbook_instance.function_directory[function_key]
 
         if function_key == "INDIRECT":
-            args.extend([self.workbook_instance, self.sheet_instance, self.cell_signal])
+            args.extend([self.workbook_instance, self.sheet_instance, self.cell_signal, self])
             self.cell_signal = False
 
         # args is now a nice list with the entries

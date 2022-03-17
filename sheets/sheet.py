@@ -42,7 +42,7 @@ class Sheet:
 
     def set_cell_contents(self, workbook_instance, location, contents):
         """Set the contents of the specified cell on this sheet."""
-        
+
         #check if we are trying to set an out of bound cell
         row, col = self._get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL:
@@ -53,7 +53,7 @@ class Sheet:
             self.extent[0] = row
         if col > self.extent[1]:
             self.extent[1] = col
-        
+
         #update cell
         if (row,col) not in self.cells:
             self.cells[(row,col)] = Cell(contents)
@@ -62,13 +62,13 @@ class Sheet:
             self.cells[(row,col)].parse_necessary = True
 
         sheet_location = self.sheet_name.lower() + '!' + location.lower()
-       
+
         #add all of the new cells to the master cell dict
-        
+
         workbook_instance.master_cell_dict[sheet_location] = []
         for parent_cell in self._retrieve_cell_references(workbook_instance,location.lower(),row,col):
             #check for bad reference
-            
+
             parent_cell = parent_cell.lower()
 
             parent_r,parent_c = self._get_col_and_row(parent_cell.split('!')[1])
@@ -84,7 +84,7 @@ class Sheet:
             workbook_instance.children_dict[parent_cell].append(sheet_location)
             workbook_instance.master_cell_dict[sheet_location].append(parent_cell)
         #children dict needs to remove old values now though - it is not updating
-        #TODO (Dylan) DTP
+        #TODO DTP
 
 
 
@@ -112,7 +112,6 @@ class Sheet:
         """Helper function that returns the references in a cell's formula."""
         if self.cells[(row,col)].parse_necessary == False:
             return self.cells[(row,col)].references
-        else: 
+        else:
             self.get_cell_value(workbook_instance,location)
             return self.cells[(row,col)].references
-        

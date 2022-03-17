@@ -55,32 +55,74 @@ class Functions:
                 args.append(i)
         return args
 
+    def _get_value_as_string(self, curr_arg):
+        if isinstance(curr_arg, CellError) or isinstance(curr_arg, str):
+            return curr_arg
+        elif curr_arg is None:
+            return ''
+        elif isinstance(curr_arg, decimal.Decimal):
+            return str(curr_arg)
+        elif isinstance(curr_arg, bool):
+            return str(curr_arg).upper()
+
+    def _get_value_as_bool(self, curr_arg):
+        if isinstance(curr_arg, CellError) or isinstance(curr_arg, bool):
+            return curr_arg
+        elif curr_arg is None:
+            return False
+        elif isinstance(curr_arg, str):
+            if curr_arg.lower() == 'true':
+                return True
+            elif curr_arg.lower() == 'false':
+                return False
+        elif isinstance(curr_arg, decimal.Decimal):
+            if curr_arg == 0:
+                return False
+            else:
+                return True
+
+        return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
-        return sum(args)
+
+        try:
+            return sum(args)
+        except TypeError:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def avg_func(self,args):
         args = self._args(args)
         args = self._flat(args)
 
-        return sum(args)/len(args)
-        #TODO DTP might need to do this in decimal
+        try:
+            return sum(args)/len(args)
+        except TypeError:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
     def min_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
 
-        return min(args)
+        try:
+            return min([decimal.Decimal(x) for x in args]) # the list converts to decimal
+        except decimal.InvalidOperation:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
+
 
     def max_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
 
-        return max(args)
+        try:
+            return max([decimal.Decimal(x) for x in args]) # the list converts to decimal
+        except decimal.InvalidOperation:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
+
 
   #Boolean functions
 
@@ -89,15 +131,33 @@ class Functions:
         True if all arguments are True."""
 
         args = self._flat(args)
+        args = [self._get_value_as_bool(x) for x in args]
 
-        return all(args)
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        try:
+            return all(args)
+        except TypeError:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+
 
     def or_func(self, args):
         """Implements OR function.
         True if one argument is True."""
         args = self._flat(args)
+        args = [self._get_value_as_bool(x) for x in args]
 
-        return any(args)
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        try:
+            return any(args)
+        except TypeError:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
+
 
     def not_func(self, args):
         """Implements NOT function.
@@ -106,25 +166,38 @@ class Functions:
 
         if len(args) != 1:
             return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
-        return not args[0]
+
+        args = self._get_value_as_bool(args[0])
+        if isinstance(args, CellError):
+            return args
+
+        return not self._get_value_as_bool(args)
+
 
     def xor_func(self, args):
         """Implements XOR function.
         True if odd number of arguments are True."""
         args = self._flat(args)
 
-        # for i, arg in enumerate(args):
-        #     args[i] = int(arg)
-
         odd_count = 0
-        for i, arg in enumerate(args): # TODO what is this supposed to do? len(args) is just a number
-                            # TODO tests for XOR
-            if args[i] is True:
-                odd_count = odd_count + 1
 
-        if odd_count % 2 != 0:
-            return True
-        return False
+        converted_args = []
+        for i, arg in enumerate(args):
+            new_arg = self._get_value_as_bool(arg)
+            if isinstance(new_arg, CellError):
+                return new_arg
+            converted_args.append(new_arg)
+
+        try:
+            for i, _ in enumerate(converted_args):
+                if converted_args[i] is True:
+                    odd_count = odd_count + 1
+
+            if odd_count % 2 != 0:
+                return True
+            return False
+        except TypeError:
+            return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to boolean")
 
     #String match
     def exact_func(self, args):
@@ -150,7 +223,7 @@ class Functions:
         if isinstance(args1, CellError):
             return args1
 
-        return str(args[0]) == str(args[1])
+        return self._get_value_as_string(args[0]) == self._get_value_as_string(args[1])
 
     #Conditional functions
     def if_func(self, args): # previously: cond, value1, value2 = None):
@@ -237,18 +310,17 @@ class Functions:
 
     def indirect_func(self, args):
         """The cell value is returned."""
-        if len(args) != 4:
+        if len(args) != 5:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
-
 
         workbook_instance = args[1]
         sheet_instance = args[2]
         cell_signal = args[3]
+        eval_expressions = args[4]
 
         # if a cell is passed, then it will already have been evaluated
         #   in that case: just return the input argument
         if cell_signal:
-            # print(args[0])
             return args[0]
 
         # in case of a range
@@ -262,41 +334,17 @@ class Functions:
         else:
             args = args[0].split('!')
 
-            # if using the current sheet
-            if len(args) == 1:
-                sheet_name = sheet_instance.sheet_name
-                cell = args[0]
-            # if using a different sheet
-            elif len(args) == 2:
-                # in case of quotes around sheet name
-                if args[0][0] == "'" and args[0][-1] == "'":
-                    sheet_name = args[0][1:-1]
-                elif not args[0][0] == "'" and not args[0][-1] == "'":
-                    sheet_name = args[0]
-                else:
-                    return CellError(CellErrorType.BAD_REFERENCE, "200: Invalid cell reference")
-                cell = args[1]
-            else:
-                return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
-
-
-            # delete the dollar sign from the cell reference
-            cell = cell.replace("$","")
             try:
-                for s in workbook_instance.sheets:
-                    if s.sheet_name.lower() == sheet_name.lower():
-                        value = (s.get_cell_value(workbook_instance, cell))
-                        break
+                value = eval_expressions.cell(args)
             except UnboundLocalError: # in case of a string
                 return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
 
-            # delete the dollar sign from the cell reference
+            if isinstance(value, list):
+                value = value[0]
 
             if value is None:
                 return CellError(CellErrorType.BAD_REFERENCE, "201: Invalid cell reference")
             return value
-
-
 
 
     def hlookup_func(self, args):
@@ -307,11 +355,14 @@ class Functions:
         matrix = args[1]
         index = int(args[2] - 1) # 1-indexed
 
-        for count, value in enumerate(matrix[0]):
-            if key == value and type(key) is type(value):
-                # print([index, count])
+        try:
+            for count, value in enumerate(matrix[0]):
+                if key == value and type(key) is type(value):
+                    # print([index, count])
 
-                return matrix[index][count]
+                    return matrix[index][count]
+        except TypeError: # if it is not possible to process matrix
+            return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
 
         # if no match is found
         return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
@@ -322,10 +373,14 @@ class Functions:
 
         key = args[0]
         matrix = args[1]
-        # print(matrix)
         index = int(args[2] - 1) # 1-indexed
+        # matrix = [list(x) for x in zip(*matrix)] # transpose matrix
 
-        matrix = [list(x) for x in zip(*matrix)] # transpose matrix
+        # transpose matrix
+        try:
+            matrix = [[row[i] for row in matrix] for i in range(len(matrix[0]))]
+        except TypeError: # if it is not possible to process matrix
+            return CellError(CellErrorType.TYPE_ERROR, "No matching column found (error 42)")
 
         for count, value in enumerate(matrix[0]):
             if key == value and type(key) is type(value):
@@ -337,14 +392,9 @@ class Functions:
     def _indirect_range(self, args):
         workbook_instance = args[1]
         sheet_instance = args[2]
-
-
         x = args[0].split('!', 1)
         sheet_name = x[0]
         args = x[1].split(':', 1)
-
-        # args[0] = [workbook_instance.get_cell_value(sheet_name, cell),sheet_name[:], cell]
-        # args[1]
 
         #check if it is in another sheet
         if sheet_instance.sheet_name.lower() != sheet_name:
@@ -352,6 +402,9 @@ class Functions:
             for s in workbook_instance.sheets:
                 if s.sheet_name.lower() == sheet_name:
                     updated_sheet_instance = s
+                    break
+            else:
+                return CellError(CellErrorType.BAD_REFERENCE, "Bad reference: no sheet found")
 
         #otherwise treat normally
         else:
@@ -371,12 +424,6 @@ class Functions:
         c2 = edge2[1]
         vals = []
 
-        # #now get every value in the range
-        # for cell in sheet_inst.cells:
-        #     cell_row, cell_col = cell[0],cell[1]
-        #     if cell_row <= r2 and cell_row >= r1 and cell_col <= c2 and cell_col >= c1:
-        #         vals.append(sheet_inst.cells[cell_row,cell_col].evaluated_value)
-
         # this code returns a matrix instead of a flat list
         for count, row in enumerate(range(r1, r2+1)):
             vals.append([])
@@ -390,6 +437,6 @@ class Functions:
 
         # transpose matrix
         # because of row v col inconsistency
-        vals = [list(x) for x in zip(*vals)]
+        vals = [[row[i] for row in vals] for i in range(len(vals[0]))]
 
         return vals

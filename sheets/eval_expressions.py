@@ -45,7 +45,7 @@ def _is_float(element):
     except ValueError:
         return False
 
-#TODO (Dylan) DTP FIX THIS
+#TODO DTP FIX THIS
 def _get_value_as_number(curr_arg):
     if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
         return curr_arg

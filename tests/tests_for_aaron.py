@@ -16,11 +16,9 @@ class Aaron(unittest.TestCase):
     #     wb.set_cell_contents(name,'A2',"=A1")
     #     wb.set_cell_contents(name,'A1',"5")
 
-    # # TODO commented test code: print output
     # this code is used to check cell notifications
     # but when it's uncommented it gives output
     # so usually it is commented out:
-
     def test_notification_with_print_output(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")

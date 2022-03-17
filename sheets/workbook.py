@@ -235,7 +235,7 @@ class Workbook:
                                     +'$'+str(replace_r)
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
-                            #TODO (Dylan) there is a possible very nuanced error of overlapping replacements
+                            #TODO DTP there is a possible very nuanced error of overlapping replacements
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
@@ -621,10 +621,10 @@ class Workbook:
                 #already found the sheet instance i
                 workbook_instance = self
                 i.get_cell_value(workbook_instance,location)
-                
+
                 #what if instead of doing this we are only telling functions that they need to be updated?
                 self._update(curr_cell) #not a slow down
-                
+
                 #return is needed so we do not raise a key error
                 return
 
@@ -779,7 +779,7 @@ class Workbook:
                 valid_sheet = True
         if not valid_sheet:
             raise KeyError()
-        
+
         #Check if sort_cols parameter is valid
         if len(sort_cols) == 0:
             raise ValueError()
@@ -787,7 +787,7 @@ class Workbook:
             if abs(sort_cols[i]) in specified_columns or sort_cols[i] == 0:
                 raise ValueError()
             specified_columns.append(abs(sort_cols[i]))
-        
+
 
     def _check_valid_cell(self, location):
         """Check if the cell location is valid """
@@ -1031,7 +1031,7 @@ class Workbook:
 
         #need to update sheetname in cell dependencies
 
-        #TODO (Dylan) DTP
+        #TODO DTP
         #create a list of keys to change bc cannot change during
         change_keys = []
         for key, value in self.master_cell_dict.items():
@@ -1186,7 +1186,7 @@ class Workbook:
             yield remainder
 
     def _tarjan_helper(self, u, low, found, in_stack, the_stack):
-    
+
         #Make this iterative DTP TODO
 
         found[u] = self.num_visits

@@ -30,7 +30,7 @@ def test_long_reference_chain():
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(3)
+    stats.sort_stats('tottime').print_stats(20)
     #assert wb.get_cell_value(name, location) == length
     #only get cell value once, and only parse at the very end???
 
@@ -116,10 +116,11 @@ def test_fibonacci():
 
     (_,sheet) = wb.new_sheet()
 
+    #moving and copy formulas not renaming it properly
+    #not setting every circ ref cell to be a circ ref
+    length = 150
 
-    length = 100
-
-    for i in range(3, length):
+    for i in range(3, length+1):
         location = 'A'+str(i)
         location_prev1 = 'A'+str(i-1)
         location_prev2 = 'A'+str(i-2)
@@ -132,7 +133,7 @@ def test_fibonacci():
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(5)
+    stats.sort_stats('cumtime').print_stats(3)
 
     cell_value = wb.get_cell_value(sheet, location)
     print(location)
@@ -255,12 +256,12 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    test_long_reference_chain()
+    #test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    #test_fibonacci()
+    test_fibonacci()
     # test_cell_cycle()
 
     #test_load_wkbk()

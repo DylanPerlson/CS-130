@@ -74,7 +74,7 @@ class Sheet:
             parent_r,parent_c = self._get_col_and_row(parent_cell.split('!')[1])
             #if we are referenceing an out of bounds
             if parent_r > MAX_ROW or parent_c > MAX_COL:
-                self.cells[(row,col)].evaluated_value = Cell(CellError(CellErrorType, 'Out of bounds reference'))
+                self.cells[(row,col)].evaluated_value = Cell(CellError(CellErrorType.BAD_REFERENCE, 'Out of bounds reference'))
                 self.cells[(row,col)].parse_neccesary = False
                 workbook_instance.cell_changed_dict[parent_cell] = False
                 return

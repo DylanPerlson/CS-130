@@ -355,11 +355,14 @@ class Functions:
         matrix = args[1]
         index = int(args[2] - 1) # 1-indexed
 
-        for count, value in enumerate(matrix[0]):
-            if key == value and type(key) is type(value):
-                # print([index, count])
+        try:
+            for count, value in enumerate(matrix[0]):
+                if key == value and type(key) is type(value):
+                    # print([index, count])
 
-                return matrix[index][count]
+                    return matrix[index][count]
+        except TypeError: # if it is not possible to process matrix
+            return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
 
         # if no match is found
         return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
@@ -370,10 +373,14 @@ class Functions:
 
         key = args[0]
         matrix = args[1]
-        # print(matrix)
         index = int(args[2] - 1) # 1-indexed
+        # matrix = [list(x) for x in zip(*matrix)] # transpose matrix
 
-        matrix = [list(x) for x in zip(*matrix)] # transpose matrix
+        # transpose matrix
+        try:
+            matrix = [[row[i] for row in matrix] for i in range(len(matrix[0]))]
+        except TypeError: # if it is not possible to process matrix
+            return CellError(CellErrorType.TYPE_ERROR, "No matching column found (error 42)")
 
         for count, value in enumerate(matrix[0]):
             if key == value and type(key) is type(value):
@@ -385,7 +392,6 @@ class Functions:
     def _indirect_range(self, args):
         workbook_instance = args[1]
         sheet_instance = args[2]
-
         x = args[0].split('!', 1)
         sheet_name = x[0]
         args = x[1].split(':', 1)
@@ -394,7 +400,7 @@ class Functions:
         if sheet_instance.sheet_name.lower() != sheet_name:
             #need to change sheet instance to proper one
             for s in workbook_instance.sheets:
-                if s.sheet_name.lower() == sheet_name: # TODO PVS test indirect wrong sheet
+                if s.sheet_name.lower() == sheet_name:
                     updated_sheet_instance = s
                     break
             else:
@@ -431,6 +437,6 @@ class Functions:
 
         # transpose matrix
         # because of row v col inconsistency
-        vals = [list(x) for x in zip(*vals)]
+        vals = [[row[i] for row in vals] for i in range(len(vals[0]))]
 
         return vals

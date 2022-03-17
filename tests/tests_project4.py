@@ -36,7 +36,10 @@ class Project4(unittest.TestCase):
         wb.set_cell_contents(sh, 'a1', '="e" = "e"')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
-        wb.set_cell_contents(sh, 'a1', '="e" = "E"')
+        wb.set_cell_contents(sh, 'a1', '="e" == "E"')
+        self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
+
+        wb.set_cell_contents(sh, 'a1', '=False <> "False"')
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
         wb.set_cell_contents(sh, 'a1', '=false < true')
@@ -49,6 +52,9 @@ class Project4(unittest.TestCase):
         self.assertEqual(True, wb.get_cell_value(sh, 'a1'))
 
         # stuff that should be False
+
+        wb.set_cell_contents(sh, 'a1', '=true = "True"')
+        self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
 
         wb.set_cell_contents(sh, 'a1', '=(5 = 4)')
         self.assertEqual(False, wb.get_cell_value(sh, 'a1'))
@@ -435,6 +441,29 @@ class Project4(unittest.TestCase):
 
         wb.set_cell_contents(sh, 'A1', '=EXACT(#REF!,#ERROR!)')
         self.assertEqual(CellErrorType.PARSE_ERROR, wb.get_cell_value(sh, 'A1').get_type())
+
+    def test_indirect_func2(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet('sheet')
+        (_,sh2) = wb.new_sheet()
+
+        wb.set_cell_contents(sh, 'B1', '=3')
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("sheet!B1")')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), wb.get_cell_value(sh, 'B1'))
+
+        wb.set_cell_contents(sh, 'A1', '=INDIRECT("B2")')
+        self.assertEqual(CellErrorType.BAD_REFERENCE, wb.get_cell_value(sh, 'A1').get_type())
+
+    def test_exact2(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+
+        wb.set_cell_contents(name, 'B1', '=EXACT(FALSE, "FALSE")')
+        self.assertEqual(wb.get_cell_value(name, 'B1'), True)
+
+        wb.set_cell_contents(name, 'B1', "'")
+        wb.set_cell_contents(name, 'C1', '=EXACT(A1, B1)')
+        self.assertEqual(wb.get_cell_value(name, 'C1'), True)
 
 
 if __name__ == '__main__':

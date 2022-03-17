@@ -293,6 +293,46 @@ class Project5(unittest.TestCase):
         wb.set_cell_contents(sh, 'A10', '=MAX(CHOOSE(B1, A2:A4, B2:B4))')
         self.assertEqual(wb.get_cell_value(sh, 'A10'), 8)
 
+    def test_indirect_with_ranges(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet('sheet')
+
+        wb.set_cell_contents(sh, 'B1', sh)
+
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', '3')
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '#REF!')
+        wb.set_cell_contents(sh,'c3', '6')
+        wb.set_cell_contents(sh,'a4', '7')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '9')
+
+        wb.set_cell_contents(sh, 'A1', '=IFERROR(VLOOKUP(4, INDIRECT(B1 & "!A2:c4"), 2), "")')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), '')
+
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(7, INDIRECT("' + sh + '" & "!A2:c4"), 3)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 9)
+
+        wb.set_cell_contents(sh, 'A1', '=VLOOKUP(1, INDIRECT(B1 & "!A2:c4"), 2)')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 2)
+
+        wb.set_cell_contents(sh,'B3', '5')
+        wb.set_cell_contents(sh, 'A1', '=SUM(INDIRECT(B1 & "!A2:c4"))')
+        self.assertEqual(wb.get_cell_value(sh, 'A1'), 45)
+
+        (_,sh2) = wb.new_sheet('second_sheet')
+        wb.set_cell_contents(sh2,'B1', sh)
+
+        wb.set_cell_contents(sh2, 'A1', '=IFERROR(VLOOKUP(4, INDIRECT(B1 & "!A2:c4"), 2), "")')
+        self.assertEqual(wb.get_cell_value(sh2, 'A1'), 5)
+
+        wb.set_cell_contents(sh2, 'A1', '=IFERROR(VLOOKUP(4, INDIRECT(B2 & "!A2:c4"), 2), "TEST")')
+        self.assertEqual(wb.get_cell_value(sh2, 'A1'), 'TEST')
+
+        wb.set_cell_contents(sh2, 'A1', '=INDIRECT("non_existing_sheet" & "!A2:c4")')
+        self.assertEqual(wb.get_cell_value(sh2, 'A1').get_type(), CellErrorType.BAD_REFERENCE)
 
 
 if __name__ == '__main__':

@@ -173,9 +173,12 @@ class Cell():
                 return decimal.Decimal(d)
             #case of decimal
             else:
-                d_split[1] = d_split[1].rstrip('0')
-                d = d_split[0] + '.' + d_split[1]
-                return decimal.Decimal(d)
+                if ('E' not in d):
+                    d_split[1] = d_split[1].rstrip('0')
+                    d = d_split[0] + '.' + d_split[1]
+                    return decimal.Decimal(d)
+                else:
+                    return decimal.Decimal(d)
         else:
             return d
 

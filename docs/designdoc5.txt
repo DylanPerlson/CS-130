@@ -16,13 +16,15 @@ Logistics (7 points)
 --------------------
 
 L1.  [2pts] Enumerate all teammates here.
-
+Aaron Tran, Dylan Perlson, Pieter Van Santvliet
 
 L2.  [2pts] What did each teammate focus on during this project?
-
+Aaron - sorting, linting, references
+Pieter - cell ranges, functions, debugging proj4, design doc
+Dylan - performance, tarjan, cell ranges
 
 L3.  [3pts] Approximately how many hours did each teammate spend on the project?
-
+Everyone spent approximately 25 hours on this project
 
 Spreadsheet Engine Design (27 points)
 -------------------------------------
@@ -30,37 +32,44 @@ Spreadsheet Engine Design (27 points)
 D1.  [4pts] Briefly describe the changes you made to the Lark parser grammar to
      support cell-range references.  Can they appear anywhere in expressions, or
      does your grammar constrain them to appear only in particluar contexts?
-
+Cell-ranges only appear in functions. They, as well as expressions, are the inputs
+to the functions. Adding them to other parts of the grammar seemed to us to be
+risky because they could be wrongly parsed.
 
 D2.  [4pts] How easy or hard was it to incorporate cell-range references into
      formula evaluation?  Elaborate on your answer.
-
+It was medium hard. The cell-range made it necessary to add the cell location to the
+output of the cell evaluation (in the transformer). This caused some changes that
+had to be implemented in older functions, ie making sure that there would be an
+appropriate amount of inputs. This was tedious to implement, but not necessarily
+very difficult.
 
 D3.  [4pts] How did you incorporate cell-range references into the cycle-
      detection functionality of your project?  Explain why you chose this design
      over other possible designs; for example, what benefits were you hoping to
      achieve, or what issues were you trying to avoid?
-
+# TODO
 
 D4.  [4pts] Give an overview of the structural aspects (modules, classes, etc.)
      of how you implemented sorting.  Do you sort the rows directly?  Do you
      use proxy objects instead?  Some other technique?
-
+# TODO
 
 D5.  [4pts] Give an overview of the behavioral aspects of how you implemented
      sorting.  At a high level, enumerate the steps that your engine goes
      through to sort a region of a spreadsheet.
-
+# TODO
 
 D6.  [4pts] How does your implementation solve the problem of supporting the
      user-specified row ordering based on both the columns and the ordering to
      sort by?  Did you create any classes or functions to help specifically with
      this task?
-
+# TODO
 
 D7.  [3pts] Briefly describe the changes you made to your spreadsheet engine to
      satisfy the stricter cell-change notification behaviors.  Did you find this
      to be largely straightforward to change?  Why or why not?
+# TODO
 
 
 Performance Improvement (16 pts)
@@ -76,21 +85,22 @@ this setup, and address performance issues in your code.
 P1.  [6pts] Give a brief overview of 2-3 of the worst hot-spots you identified
      in your performance testing and analysis.  For each one, describe how your
      team was able to resolve it.
-
+# TODO
 
 P2.  [4pts] Did your team try anything to address performance issues and find
      that it didn't improve things at all?  If so, were you able to identify why
      the intended fix didn't produce the desired benefit?
-
+# TODO
 
 P3.  [3pts] How do you feel that your performance updates affected your code's
      readability and maintainability?  Elaborate on your answer.
-
+# TODO
 
 P4.  [3pts] Did your performance updates cause any regressions in functionality?
      If so, briefly describe any issues that emerged.  How were these issues
      identified (e.g. automated test failures, manual testing, etc.)?  How
      quickly were issues identified?
+# TODO
 
 
 Section F:  CS130 Project 4 Feedback [OPTIONAL]
@@ -103,16 +113,18 @@ we can improve future versions of the course.
 
 F1.  What parts of the assignment did you find highly enjoyable?  Conversely,
      what parts of the assignment did you find unenjoyable?
-
+The new functions were interesting to implement.
 
 F2.  What parts of the assignment helped you learn more about software
      engineering best-practices, or other useful development skills?
      What parts were not helpful in learning these skills?
-
+At this point, debugging starts being less about learning skills and more
+being a chore.
 
 F3.  Were there any parts of the assignment that seemed _unnecessarily_ tedious?
      (Some parts of software development are always tedious, of course.)
-
+Most stuff was tedious, but not unnecessarily so :)
 
 F4.  Do you have any feedback and/or constructive criticism about how this
      project can be made better in future iterations of CS130?
+It would be nice if the deadline were not on the last day of the term.

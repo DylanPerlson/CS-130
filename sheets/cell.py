@@ -45,13 +45,12 @@ class Cell():
 
 
 
-        
         # check that the cell is either a string or None
         if not isinstance(self.contents, str) and self.contents is not None:
             raise TypeError('Content is not a string.')
 
         # Determine Cell Type
-        elif str(self.contents) == "" or str(self.contents).isspace():
+        elif str(self.contents) == "" or str(self.contents).isspace() or self.contents is None:
             self.type = "NONE"
             self.evaluated_value = None
             self.references = []
@@ -95,12 +94,12 @@ class Cell():
         #would have returned by this point if it was not a formula
         if self.parse_necessary:
             # trying to parse
-            
+
             try:
-                
+
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
-                
+
                 ref = RetrieveReferences(sheet_instance)
                 ref.visit(self.parsed_contents)
                 self.references = ref.references
@@ -193,7 +192,7 @@ class RetrieveReferences(Visitor):
     def cell(self, args):
         """this get the cell references"""
         args = args.children
-        
+
         # getting the appropriate sheet name and cell location
         if len(args) == 1:      # if using the current sheet
             sheet_name = self.sheet_instance.sheet_name

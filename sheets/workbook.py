@@ -123,7 +123,7 @@ class Workbook:
         #check for invalid cells or sheets
 
         cur_sheet = None
-        to_sheet = None
+        to_sheet = None # TODO PVS why is this here
         start_row, start_col = self._get_col_and_row(start_location)
         end_row, end_col = self._get_col_and_row(end_location)
 
@@ -209,8 +209,6 @@ class Workbook:
                             loc_row, loc_col = self._get_col_and_row(loc)
 
 
-
-
                             replace_r = loc_row
                             replace_c = loc_col
 
@@ -240,17 +238,14 @@ class Workbook:
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
 
-
                         else:
 
                             raise ValueError()
 
 
-
-
                 #delete the value after copying values - only if the move function was called
                 if do_not_delete is False:
-                    cur_sheet.set_cell_contents(self,cell, '')
+                    cur_sheet.set_cell_contents(self,cell, None)
 
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):

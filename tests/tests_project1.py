@@ -312,7 +312,7 @@ class Project1(unittest.TestCase):
         self.assertEqual(content1, 'Lots of space in the back')
         self.assertEqual(content2, '=54')
         self.assertEqual(content3, None)
-        # self.assertEqual(value3, None) # TODO empty cells issue; is 'None' instead of None
+        self.assertEqual(value3, None)
         self.assertEqual(content4, None)
 
     def test_simple_formula_with_decimal(self):

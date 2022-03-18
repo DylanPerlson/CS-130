@@ -66,7 +66,7 @@ class Sheet:
         for parent_cell in\
             self.retrieve_cell_references(workbook_instance,location.lower(),row,col):
             #check for bad reference
-            print(parent_cell)
+            # print(parent_cell)
             parent_cell = parent_cell.lower()
 
             parent_r,parent_c = self.get_col_and_row(parent_cell.split('!')[1])

@@ -93,15 +93,14 @@ class Cell():
         #would have returned by this point if it was not a formula
         if self.parse_necessary:
             # trying to parse
-
             try:
 
                 self.parsed_contents = workbook_instance.parser.parse(self.contents)
                 self.parse_necessary = False
 
-                ref = RetrieveReferences(sheet_instance)
+                ref = RetrieveReferences(sheet_instance, workbook_instance)
                 ref.visit(self.parsed_contents)
-                self.references = ref.references 
+                self.references = ref.references
                 #eturn ref.reference
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
@@ -137,7 +136,7 @@ class Cell():
             "Unrecognized function name", NameError)
 
             return self.evaluated_value
-      
+
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
 
@@ -177,15 +176,17 @@ class RetrieveReferences(Visitor):
     It acts as a visitor on a lark object.
     """
 
-    def __init__(self, sheet_instance):
+    def __init__(self, sheet_instance, workbook_instance):
         """Initializes class."""
         self.references = []
         self.sheet_instance = sheet_instance
+        self.workbook_instance = workbook_instance
         self.error_occurred = False
 
     def cell(self, args):
         """this get the cell references"""
         args = args.children
+
 
         # getting the appropriate sheet name and cell location
         if len(args) == 1:      # if using the current sheet
@@ -207,3 +208,59 @@ class RetrieveReferences(Visitor):
             cell_location = ''
 
         self.references.append(str(sheet_name) + '!' + str(cell_location))
+
+    def cell_range(self, args):
+        """this get the cell range references"""
+
+        iterator = iter(args.iter_subtrees())
+
+        first_cell_tree = next(iterator).children
+        second_cell_tree = next(iterator).children
+
+        if len(first_cell_tree) == 2:
+            sheet_name = first_cell_tree[0]
+            first_cell = first_cell_tree[1]
+        else:
+            assert len(first_cell_tree) == 1
+            sheet_name = self.sheet_instance.sheet_name
+            first_cell = first_cell_tree[0]
+
+        assert len(second_cell_tree) == 1
+        second_cell = second_cell_tree[0]
+
+        #check if it is in another sheet
+        if self.sheet_instance.sheet_name.lower() != sheet_name.lower():
+            #need to change sheet instance to proper one
+            for s in self.workbook_instance.sheets:
+                if s.sheet_name.lower() == sheet_name.lower():
+                    sheet_inst = s
+                    break
+            else:
+                raise KeyError('sheet name not found')
+
+        #otherwise treat normally
+        else:
+            sheet_inst = self.sheet_instance
+
+        p1 = first_cell
+        p2 = second_cell
+        r1,c1 = sheet_inst.get_col_and_row(p1)
+        r2,c2 = sheet_inst.get_col_and_row(p2)
+
+        edge1 = (min(r1,r2),min(c1,c2))
+        edge2 = (max(r1,r2),max(c1,c2))
+
+        r1 = edge1[0]
+        c1 = edge1[1]
+        r2 = edge2[0]
+        c2 = edge2[1]
+
+        # this code returns a matrix instead of a flat list
+        for row in range(r1, r2+1):
+            # vals.append([])
+            for col in range(c1, c2+1):
+                cell_location = self.workbook_instance._base_10_to_alphabet(row) + str(col)
+                cell_location = str(sheet_name) + '!' + str(cell_location)
+
+                if cell_location not in self.references:
+                    self.references.append(cell_location)

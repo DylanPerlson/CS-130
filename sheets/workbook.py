@@ -123,7 +123,6 @@ class Workbook:
         #check for invalid cells or sheets
 
         cur_sheet = None
-        to_sheet = None
         start_row, start_col = self._get_col_and_row(start_location)
         end_row, end_col = self._get_col_and_row(end_location)
 
@@ -250,7 +249,7 @@ class Workbook:
 
                 #delete the value after copying values - only if the move function was called
                 if do_not_delete is False:
-                    cur_sheet.set_cell_contents(self,cell, '')
+                    cur_sheet.set_cell_contents(self,cell, None)
 
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):
@@ -270,9 +269,13 @@ class Workbook:
         for r in range(start_row+delta_row, end_row+delta_row+1):
             for c in range(start_col+delta_col, end_col+delta_col+1):
                 if to_sheet is None:
-                    to_sheet = sheet_name
+                    to_sheet_name = sheet_name
+                else:
+                    #we set it to the sheet instead above
+                    to_sheet_name = to_sheet.sheet_name
+                    
                 location = self._base_10_to_alphabet(r) + str(c)
-                sheet_location = to_sheet + '!' + location
+                sheet_location = to_sheet_name.lower() + '!' + location.lower()
                 self.cell_changed_dict[sheet_location.lower()] = True
 
 
@@ -799,7 +802,7 @@ class Workbook:
 
         #this is reverse but is still be good
         row, col = self._get_col_and_row(location)
-        if row > MAX_ROW or col > MAX_COL:
+        if row > MAX_ROW or col > MAX_COL or row <= 0 or col <= 0:
             raise ValueError()
 
         digits = False

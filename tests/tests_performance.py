@@ -116,8 +116,6 @@ def test_fibonacci():
 
     (_,sheet) = wb.new_sheet()
 
-    #moving and copy formulas not renaming it properly
-    #not setting every circ ref cell to be a circ ref
     length = 150
 
     for i in range(3, length+1):

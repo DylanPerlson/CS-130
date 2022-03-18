@@ -349,6 +349,9 @@ class Project1(unittest.TestCase):
             wb.set_cell_contents(name1, 'ZZZZ10000', 'too many columns')
         with self.assertRaises(ValueError):
             wb.set_cell_contents(name1, 'AAAAA9999', 'too many rows')
+        with self.assertRaises(ValueError):
+            wb.set_cell_contents(name1, 'A0', 'error')
+        
 
     # TODO DTP
     # def test_bad_reference(self):

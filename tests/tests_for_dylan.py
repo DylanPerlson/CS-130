@@ -66,12 +66,6 @@ class Dylan(unittest.TestCase):
         wb.rename_sheet('S1','new_name')
 
 
-
-
-
-
-
-
         # (_, name) = wb.new_sheet("s1")
         # def on_cells_changed(workbook, changed_cells):
         #     print(f'Cell(s) changed:  {changed_cells}')
@@ -86,9 +80,28 @@ class Dylan(unittest.TestCase):
         # wb.set_cell_contents(name,'A1', '5')
         # print('3 above')
 
-   
+   #moving and copy formulas not renaming it properly
+    #not setting every circ ref cell to be a circ ref
+
+    def test_copy_rename(self):
+        length = 20
+        wb = Workbook()
+        (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
+        
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            contents = '=b'+str(i+1)
+            wb.set_cell_contents(name1,loc,contents)
+
+        wb.move_cells(name1,'A1','B100','E3',name2)
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            self.assertEqual(wb.get_cell_contents(name1,loc),None)
+            loc = 'E'+str(i+3)
+            val = '=F'+str(i+3)
+            self.assertEqual(wb.get_cell_contents(name2,loc),val)
 
 if __name__ == '__main__':
-    print('Dylan--------')
     unittest.main(verbosity=1)
     

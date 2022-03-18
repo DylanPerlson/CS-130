@@ -24,7 +24,8 @@ Pieter - cell ranges, functions, debugging proj4, design doc
 Dylan - performance, tarjan, cell ranges
 
 L3.  [3pts] Approximately how many hours did each teammate spend on the project?
-Everyone spent approximately 25 hours on this project
+Pieter and Dylan spent approximately 30 hours on this project
+Aaron spent approximately 24 hours on this project due to travel 
 
 Spreadsheet Engine Design (27 points)
 -------------------------------------

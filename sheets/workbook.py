@@ -839,8 +839,10 @@ class Workbook:
                 cell_col_list.append(sort_sheet.cells)
         
         #Perform sorting operation
-        sort_row = start_row
-        for sort_col in sort_cols:
+        for i in range(len(sort_cols)):
+            sort_row = start_row
+            original_sort_col = sort_cols[i]
+            sort_col = abs(original_sort_col)
             for curr_col in cell_col_list:
                 for curr_cell in curr_col:
                     curr_loc = str(sort_row) + str(sort_col)
@@ -848,11 +850,17 @@ class Workbook:
                     if sort_row + 1 != end_row + 1:
                         next_loc = str(sort_row + 1) + str(sort_col)
                         next_value = self.get_cell_value(sort_sheet,next_loc)
-                        if curr_value > next_value:
+                        if curr_value > next_value and original_sort_col > 0: #sort col is positive
                             curr_cell_contents = self.get_cell_contents(sort_sheet, curr_loc)
                             next_cell_contents = self.get_cell_contents(sort_sheet, next_loc)
                             self.set_cell_contents(sort_sheet,curr_loc, next_cell_contents)
                             self.set_cell_contents(sort_sheet,next_loc, curr_cell_contents)
+                        elif curr_value < next_value and original_sort_col < 0: #sort_col is negative
+                            curr_cell_contents = self.get_cell_contents(sort_sheet, curr_loc)
+                            next_cell_contents = self.get_cell_contents(sort_sheet, next_loc)
+                            self.set_cell_contents(sort_sheet,curr_loc, next_cell_contents)
+                            self.set_cell_contents(sort_sheet,next_loc, curr_cell_contents)
+                    sort_row = sort_row + 1
 
 
     def _check_valid_cell(self, location):

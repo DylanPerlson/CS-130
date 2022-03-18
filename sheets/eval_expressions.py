@@ -146,10 +146,11 @@ class EvalExpressions(Transformer):
         return args[0][1:-1] # the '[1:-1]' is to remove the double quotes
 
     def unary_op(self, args):
+        """Unitary operator is applied when encountered in parsed formula."""
+
         #get the old arg values
         args = self._args(args)
 
-        """Unitary operator is applied when encountered in parsed formula."""
         if isinstance(args[1], CellError):
             return args[1]
         if args[0] == '+':
@@ -219,6 +220,7 @@ class EvalExpressions(Transformer):
             raise Exception(f'Unexpected multiplication operator {args[1]}')
 
     def cell_range(self, args):
+        """This returns the values of all cells in this range."""
 
         #check if it is in another sheet
         if self.sheet_instance.sheet_name.lower() != args[0][1].lower():
@@ -233,8 +235,8 @@ class EvalExpressions(Transformer):
 
         p1 = args[0][2]
         p2 = args[1][2]
-        r1,c1 = sheet_inst._get_col_and_row(p1)
-        r2,c2 = sheet_inst._get_col_and_row(p2)
+        r1,c1 = sheet_inst.get_col_and_row(p1)
+        r2,c2 = sheet_inst.get_col_and_row(p2)
 
         edge1 = (min(r1,r2),min(c1,c2))
         edge2 = (max(r1,r2),max(c1,c2))
@@ -264,6 +266,7 @@ class EvalExpressions(Transformer):
 
     def concat_expr(self, args):
         """Concatenation operation is applied on parsed formula."""
+
         #get the old arg values
         args = self._args(args)
 
@@ -412,7 +415,7 @@ class EvalExpressions(Transformer):
                 return decimal.Decimal(d)
             #case of decimal
             else:
-                if ('E' not in d):
+                if 'E' not in d:
                     d_split[1] = d_split[1].rstrip('0')
                     d = d_split[0] + '.' + d_split[1]
                     return decimal.Decimal(d)
@@ -422,12 +425,11 @@ class EvalExpressions(Transformer):
             return d
 
     def bool_func(self, args):
+        """Performs boolean functions: AND, OR, etc."""
+
         #get the old arg values
         args = self._args(args)
 
-
-
-        """Performs boolean functions: AND, OR, etc."""
         # pseudocode:
         #     import some new module
         #     pass args to module
@@ -469,7 +471,7 @@ class EvalExpressions(Transformer):
                     args.append(i[0])
                     continue
                 else:
-                     args.append(i)
+                    args.append(i)
             else:
                 args.append(i)
         return args

@@ -171,7 +171,7 @@ class Cell():
                 return decimal.Decimal(d)
             #case of decimal
             else:
-                if ('E' not in d):
+                if 'E' not in d:
                     d_split[1] = d_split[1].rstrip('0')
                     d = d_split[0] + '.' + d_split[1]
                     return decimal.Decimal(d)
@@ -215,4 +215,3 @@ class RetrieveReferences(Visitor):
             cell_location = ''
 
         self.references.append(str(sheet_name) + '!' + str(cell_location))
-

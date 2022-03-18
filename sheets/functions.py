@@ -46,11 +46,12 @@ class Functions:
                     args.append(i)
                     continue
                 #get rid of not for this case
-                if len(i) > 1 and isinstance(i[0],decimal.Decimal) and not isinstance(i[-1],decimal.Decimal) :
+                if len(i) > 1 and isinstance(i[0],decimal.Decimal) and\
+                not isinstance(i[-1],decimal.Decimal):
                     args.append(i[0])
                     continue
                 else:
-                     args.append(i)
+                    args.append(i)
             else:
                 args.append(i)
         return args
@@ -109,6 +110,8 @@ class Functions:
 
     #new range functions
     def sum_func(self,args):
+        """This function calculates the sum of its inputs."""
+
         args = self._args(args)
         args = self._flat(args)
 
@@ -137,6 +140,8 @@ class Functions:
 
 
     def avg_func(self,args):
+        """This function calculates the average of its inputs."""
+
         args = self._args(args)
         args = self._flat(args)
 
@@ -163,6 +168,8 @@ class Functions:
 
 
     def min_func(self,args):
+        """This function calculates the minimum of its inputs."""
+
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
@@ -190,6 +197,8 @@ class Functions:
 
 
     def max_func(self,args):
+        """This function calculates the sum of its inputs."""
+
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
@@ -405,8 +414,8 @@ class Functions:
         if len(args) != 5:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
 
-        workbook_instance = args[1]
-        sheet_instance = args[2]
+        # workbook_instance = args[1]
+        # sheet_instance = args[2]
         cell_signal = args[3]
         eval_expressions = args[4]
 
@@ -440,6 +449,13 @@ class Functions:
 
 
     def hlookup_func(self, args):
+        """HLOOKUP(key, range, index) searches horizontally through a range of cells.
+        The function searches through the first (i.e. topmost) row in range, looking
+        for the first column that contains key in the search row (exact match, both
+        type and value). If such a column is found, the cell in the index-th row of the
+        found column. The index is 1-based; an index of 1 refers to the search row.
+        If no column is found, the function returns a TYPE_ERROR."""
+
         if len(args) != 3:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
 
@@ -460,6 +476,13 @@ class Functions:
         return CellError(CellErrorType.TYPE_ERROR, "No matching column found")
 
     def vlookup_func(self, args):
+        """VLOOKUP(key, range, index) searches vertically through a range of cells.
+        The function searches through the first (i.e. leftmost) column in range, looking
+        for the first row that contains key in the search column (exact match, both type
+        and value). If such a column is found, the cell in the index-th column of the
+        found row. The index is 1-based; an index of 1 refers to the search column.
+        If no row is found, the function returns a TYPE_ERROR."""
+
         if len(args) != 3:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid number of arguments")
 
@@ -504,8 +527,8 @@ class Functions:
 
         p1 = args[0]
         p2 = args[1]
-        r1,c1 = updated_sheet_instance._get_col_and_row(p1)
-        r2,c2 = updated_sheet_instance._get_col_and_row(p2)
+        r1,c1 = updated_sheet_instance.get_col_and_row(p1)
+        r2,c2 = updated_sheet_instance.get_col_and_row(p2)
 
         edge1 = (min(r1,r2),min(c1,c2))
         edge2 = (max(r1,r2),max(c1,c2))

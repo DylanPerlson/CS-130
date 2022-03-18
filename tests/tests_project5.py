@@ -98,17 +98,27 @@ class Project5(unittest.TestCase):
         self.assertEqual(wb.get_cell_contents(name1,'C3'),'=s2!A1')
         self.assertEqual(wb.get_cell_contents(name1,'C4'),'=SUM(C1:C3)')
         self.assertEqual(wb.get_cell_contents(name1,'C5'),'=SUM(s2!A1:A3)')
+    
 
     def test_rename_multi(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
+        (_, _) = wb.new_sheet("s2")
         wb.set_cell_contents(name1,'A1',"=AND(A2:A3)")
         wb.set_cell_contents(name1,'A2','=AND(A2,A3)')
+        wb.set_cell_contents(name1,'A3','=s2!A1')
+        wb.set_cell_contents(name1,'A4','=SUM(A1:A3)')
+        wb.set_cell_contents(name1,'A5','=SUM(s2!A1:A3)')
+        
         name2 = 'skdbkhsd'
+
         wb.rename_sheet(name1,name2)
         self.assertEqual(wb.get_cell_contents(name2,'A1'),"=AND(A2:A3)")
         self.assertEqual(wb.get_cell_contents(name2,'A2'),"=AND(A2,A3)")
-
+        self.assertEqual(wb.get_cell_contents(name2,'A3'),'=s2!A1')
+        self.assertEqual(wb.get_cell_contents(name2,'A4'),'=SUM(A1:A3)')
+        self.assertEqual(wb.get_cell_contents(name2,'A5'),'=SUM(s2!A1:A3)')
+        
     def test_and_range(self):
         wb = Workbook()
         (_, name) = wb.new_sheet("s1")

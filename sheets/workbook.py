@@ -1,6 +1,7 @@
 """Defines the workbook class for the spreadsheet API."""
 import copy
 import json
+from os import access
 
 import lark
 
@@ -830,13 +831,21 @@ class Workbook:
             end_row = temp  
         
         #Get individual columns based on user_cols
+        #TODO This is probably where it breaks first, I added some stuff in here
         col_counter = 1
         cell_col_list = []
         col_range = end_col - start_col
         for i in range(col_range):
             if col_counter in sort_cols or -1 * col_counter in sort_cols:
+                add_column = []
+                row_range = end_row - start_row
+                for j in range(row_range):
                 #Need some way to get location of cell but that's not a property of the cell?
-                cell_col_list.append(sort_sheet.cells)
+                #Add cells to column object one at a time, then add whole column to array
+                    access_loc = sort_sheet + "!" + str(j) + str(i)
+                    add_cell = self.master_cell_dict(access_loc)
+                    add_column.append(add_cell)    
+                cell_col_list.append(add_column)
         
         #Perform sorting operation
         for i in range(len(sort_cols)):

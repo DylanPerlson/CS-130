@@ -122,10 +122,10 @@ class Workbook:
 
         #check for invalid cells or sheets
 
-        # TODO DTP/PVS to_sheet needs to be addressed here below
+        # TODO DTP to_sheet needs to be addressed here below
         cur_sheet = None
-        start_row, start_col = self._get_col_and_row(start_location)
-        end_row, end_col = self._get_col_and_row(end_location)
+        start_row, start_col = self.get_col_and_row(start_location)
+        end_row, end_col = self.get_col_and_row(end_location)
 
 
         if not self._check_valid_cell(start_location) or not self._check_valid_cell(end_location):
@@ -161,7 +161,7 @@ class Workbook:
 
         copy_dict = {}
         #how much the rows and cols move
-        move_row, move_col = self._get_col_and_row(to_location)
+        move_row, move_col = self.get_col_and_row(to_location)
         delta_row = move_row - start_row
         delta_col = move_col - start_col
 
@@ -176,7 +176,7 @@ class Workbook:
                     cell_list = []
                     for e,i in enumerate(self.sheets):
                         if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e]._retrieve_cell_references(self,cell,r,c)
+                            cell_list = self.sheets[e].retrieve_cell_references(self,cell,r,c)
 
                     for i in cell_list:
 
@@ -206,7 +206,7 @@ class Workbook:
 
                             #update rows  and cols
 
-                            loc_row, loc_col = self._get_col_and_row(loc)
+                            loc_row, loc_col = self.get_col_and_row(loc)
 
 
                             replace_r = loc_row
@@ -233,7 +233,8 @@ class Workbook:
                                     +'$'+str(replace_r)
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
-                            #TODO DTP there is a possible very nuanced error of overlapping replacements
+                            #TODO DTP there is a possible very nuanced error of
+                            # overlapping replacements
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
@@ -529,7 +530,7 @@ class Workbook:
         #if sheet name not found, raise key Error()
         raise KeyError()
 
-    def _get_col_and_row(self,location):
+    def get_col_and_row(self,location):
         """Helper function to get absolute row/col of inputted location (AD42)."""
         # be aware we did this backwards
 
@@ -607,7 +608,7 @@ class Workbook:
                 # #and add the current cell
                 self.notifying_cells.append((sheet_name, curr_cell.split('!')[1]))
                 #get the list of changed cells
-                self._notify_helper(sheet_name, curr_cell) #not a slow down
+                self._notify_helper(curr_cell) #not a slow down
 
                 if len(self.notification_functions) > 0:
                 #now we notify all of the functions of the cells that were changed
@@ -621,7 +622,8 @@ class Workbook:
                 workbook_instance = self
                 i.get_cell_value(workbook_instance,location)
 
-                #what if instead of doing this we are only telling functions that they need to be updated?
+                #what if instead of doing this we are only telling functions that
+                # they need to be updated?
                 self._update(curr_cell) #not a slow down
 
                 #return is needed so we do not raise a key error
@@ -642,7 +644,7 @@ class Workbook:
                 for dependent in dependents_list:
                     dep_split = dependent.split('!')
                     #evaluate the cell
-                    if self.cell_changed_dict[dependent] == True:
+                    if self.cell_changed_dict[dependent] is True:
                         for s in self.sheets:
                             if s.sheet_name.lower() == dep_split[0].lower():
                                 workbook_instance = self
@@ -704,11 +706,13 @@ class Workbook:
 
         # sheet_location = sheet_name.lower() + '!' + location.lower()
         # #only check for valid cells if we have not evaluated already
-        # if (sheet_location not in self.cell_changed_dict) or (self.cell_changed_dict[sheet_location] == True):
+        # if (sheet_location not in self.cell_changed_dict) or
+        # (self.cell_changed_dict[sheet_location] == True):
         if not self._check_valid_cell(location):
             raise ValueError()
 
-        #tarjan doesnt need to be run over and over, just at the end, so should move this to get_cell_valkue
+        #tarjan doesnt need to be run over and over, just at the end,
+        # so should move this to get_cell_valkue
                 #reset list of circ refs
         self.circ_refs = []
         self._tarjan()
@@ -723,50 +727,51 @@ class Workbook:
         raise KeyError()
 
     def sort_region(self, sheet_name: str, start_location: str, end_location: str, sort_cols):
-        # Sort the specified region of a spreadsheet with a stable sort, using
-        # the specified columns for the comparison.
-        #
-        # The sheet name match is case-insensitive; the text must match but the
-        # case does not have to.
-        #
-        # The start_location and end_location specify the corners of an area of
-        # cells in the sheet to be sorted.  Both corners are included in the
-        # area being sorted; for example, sorting the region including cells B3
-        # to J12 would be done by specifying start_location="B3" and
-        # end_location="J12".
-        #
-        # The start_location value does not necessarily have to be the top left
-        # corner of the area to sort, nor does the end_location value have to be
-        # the bottom right corner of the area; they are simply two corners of
-        # the area to sort.
-        #
-        # The sort_cols argument specifies one or more columns to sort on.  Each
-        # element in the list is the one-based index of a column in the region,
-        # with 1 being the leftmost column in the region.  A column's index in
-        # this list may be positive to sort in ascending order, or negative to
-        # sort in descending order.  For example, to sort the region B3..J12 on
-        # the first two columns, but with the second column in descending order,
-        # one would specify sort_cols=[1, -2].
-        #
-        # The sorting implementation is a stable sort:  if two rows compare as
-        # "equal" based on the sorting columns, then they will appear in the
-        # final result in the same order as they are at the start.
-        #
-        # If multiple columns are specified, the behavior is as one would
-        # expect:  the rows are ordered on the first column indicated in
-        # sort_cols; when multiple rows have the same value for the first
-        # column, they are then ordered on the second column indicated in
-        # sort_cols; and so forth.
-        #
-        # No column may be specified twice in sort_cols; e.g. [1, 2, 1] or
-        # [2, -2] are both invalid specifications.
-        #
-        # The sort_cols list may not be empty.  No index may be 0, or refer
-        # beyond the right side of the region to be sorted.
-        #
-        # If the specified sheet name is not found, a KeyError is raised.
-        # If any cell location is invalid, a ValueError is raised.
-        # If the sort_cols list is invalid in any way, a ValueError is raised.
+        """Sort the specified region of a spreadsheet with a stable sort, using
+        the specified columns for the comparison.
+
+        The sheet name match is case-insensitive; the text must match but the
+        case does not have to.
+
+        The start_location and end_location specify the corners of an area of
+        cells in the sheet to be sorted.  Both corners are included in the
+        area being sorted; for example, sorting the region including cells B3
+        to J12 would be done by specifying start_location="B3" and
+        end_location="J12".
+
+        The start_location value does not necessarily have to be the top left
+        corner of the area to sort, nor does the end_location value have to be
+        the bottom right corner of the area; they are simply two corners of
+        the area to sort.
+
+        The sort_cols argument specifies one or more columns to sort on.  Each
+        element in the list is the one-based index of a column in the region,
+        with 1 being the leftmost column in the region.  A column's index in
+        this list may be positive to sort in ascending order, or negative to
+        sort in descending order.  For example, to sort the region B3..J12 on
+        the first two columns, but with the second column in descending order,
+        one would specify sort_cols=[1, -2].
+
+        The sorting implementation is a stable sort:  if two rows compare as
+        "equal" based on the sorting columns, then they will appear in the
+        final result in the same order as they are at the start.
+
+        If multiple columns are specified, the behavior is as one would
+        expect:  the rows are ordered on the first column indicated in
+        sort_cols; when multiple rows have the same value for the first
+        column, they are then ordered on the second column indicated in
+        sort_cols; and so forth.
+
+        No column may be specified twice in sort_cols; e.g. [1, 2, 1] or
+        [2, -2] are both invalid specifications.
+
+        The sort_cols list may not be empty.  No index may be 0, or refer
+        beyond the right side of the region to be sorted.
+
+        If the specified sheet name is not found, a KeyError is raised.
+        If any cell location is invalid, a ValueError is raised.
+        If the sort_cols list is invalid in any way, a ValueError is raised."""
+
         valid_sheet = False
         specified_columns = []
 
@@ -782,10 +787,10 @@ class Workbook:
         #Check if sort_cols parameter is valid
         if len(sort_cols) == 0:
             raise ValueError()
-        for i in range(len(sort_cols)):
-            if abs(sort_cols[i]) in specified_columns or sort_cols[i] == 0:
+        for i, col in enumerate(sort_cols):
+            if abs(col) in specified_columns or col == 0:
                 raise ValueError()
-            specified_columns.append(abs(sort_cols[i]))
+            specified_columns.append(abs(col))
 
 
     def _check_valid_cell(self, location):
@@ -797,7 +802,7 @@ class Workbook:
             return False
 
         #this is reverse but is still be good
-        row, col = self._get_col_and_row(location)
+        row, col = self.get_col_and_row(location)
         if row > MAX_ROW or col > MAX_COL or row <= 0 or col <= 0:
             raise ValueError()
 
@@ -1100,8 +1105,6 @@ class Workbook:
             self.cell_changed_dict.pop(key)
 
 
-
-
     #helper fuction to determine if a value is a float
     def _is_float(self, element):
         """helper fuction to determine if a value is a float"""
@@ -1112,28 +1115,28 @@ class Workbook:
         except ValueError:
             return False
 
-    def _get_col_and_row(self,location):
-        """Helper function to get absolute row/col of inputted location"""
+    # def get_col_and_row(self,location):
+    #     """Helper function to get absolute row/col of inputted location"""
 
-        for e,i in enumerate(location):
-            if i.isdigit():
-                row = location[:e]
-                #convert row letters to its row number
-                temp = 0
-                for j in range(1, len(row)+1):
-                    temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
+    #     for e,i in enumerate(location):
+    #         if i.isdigit():
+    #             row = location[:e]
+    #             #convert row letters to its row number
+    #             temp = 0
+    #             for j in range(1, len(row)+1):
+    #                 temp += (ord(row[-j].lower()) - 96)*(26**(j-1))
 
-                row = temp
-                col = int(location[e:])
-                break
+    #             row = temp
+    #             col = int(location[e:])
+    #             break
 
-        return row, col
+    #     return row, col
 
     def notify_cells_changed(self, new_func):
         """This function adds notifications to a class variable"""
         self.notification_functions.append(new_func)
 
-    def _notify_helper(self, sheet_name, curr_cell, call_origin = None):
+    def _notify_helper(self, curr_cell):
         """add all of our cells to the evaluate again list if it
         is not in it already
 
@@ -1237,7 +1240,7 @@ class Workbook:
                     split_name = i[0].split('!')
                     for s in self.sheets:
                         if s.sheet_name.lower() == split_name[0]:
-                            row,col = self._get_col_and_row(split_name[1])
+                            row,col = self.get_col_and_row(split_name[1])
                             s.cells[(row,col)].evaluated_value = CellError(
                                 CellErrorType.CIRCULAR_REFERENCE,"Circular Reference", None)
                             self.circ_refs.append(i[0])

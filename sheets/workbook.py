@@ -122,7 +122,6 @@ class Workbook:
 
         #check for invalid cells or sheets
 
-        # TODO DTP to_sheet needs to be addressed here below
         cur_sheet = None
         start_row, start_col = self.get_col_and_row(start_location)
         end_row, end_col = self.get_col_and_row(end_location)
@@ -176,12 +175,7 @@ class Workbook:
                     cell_list = []
                     
                     cell_list = cur_sheet.retrieve_cell_references(self,cell,r,c)
-                    change = False
-                    # for i in cell_list:
-                    #     if change:
-                    #         i
-                    #     if i+':' in copy_dict[(r,c)]:
-                    #         change = True
+                    
                     continue_again = False
                     for i in cell_list:
                         #skip updating the second cell range
@@ -248,8 +242,7 @@ class Workbook:
                                     +'$'+str(replace_r)
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
-                            #TODO DTP there is a possible very nuanced error of
-                            # overlapping replacements
+                            
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
@@ -258,8 +251,8 @@ class Workbook:
 
 
                 #delete the value after copying values - only if the move function was called
-                if do_not_delete is False:
-                    cur_sheet.set_cell_contents(self,cell, None)
+                if do_not_delete is False and copy_dict[(r,c)] is not None:
+                    self.set_cell_contents(cur_sheet.sheet_name,cell, None)
 
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):

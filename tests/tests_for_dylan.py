@@ -96,10 +96,9 @@ class Dylan(unittest.TestCase):
         wb.move_cells(name1,'A1','B100','E3',name2)
         for i in range(length):
             loc = 'A'+str(i+1)
-            #self.assertEqual(wb.get_cell_contents(name1,loc),None)
+            self.assertEqual(wb.get_cell_contents(name1,loc),None)
             loc = 'E'+str(i+3)
             val = '=F'+str(i+3)
-            #print(wb.get_cell_contents(name2,loc))
             self.assertEqual(wb.get_cell_contents(name2,loc),val)
 
     def test_circ_ref_for_ever_cell(self):
@@ -156,6 +155,8 @@ class Dylan(unittest.TestCase):
         #test each function for appropriate notifications
         print('.')
         #wb.copy_sheet(name)
+        #wb.move_cells(name,'A1','A5','A10')
+        #wb.copy_cells(name,'A1','A5','A10')
         #wb.move_cells(name,'A1','A5','A10')
         #wb.del_sheet(name)
         

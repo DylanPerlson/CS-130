@@ -2,8 +2,10 @@
 import copy
 import json
 from os import access
+from unicodedata import decimal
 
 import lark
+import decimal
 
 from sheets.cell_error import CellError, CellErrorType
 
@@ -834,43 +836,61 @@ class Workbook:
         #TODO This is probably where it breaks first, I added some stuff in here
         col_counter = 1
         cell_col_list = []
-        col_range = end_col - start_col
-        for i in range(col_range):
+        #col_range = end_col - start_col
+        for i in range(start_col,end_col+1):
             if col_counter in sort_cols or -1 * col_counter in sort_cols:
                 add_column = []
-                row_range = end_row - start_row
-                for j in range(row_range):
+                #row_range = end_row - start_row
+                for j in range(start_row, end_row+1):
                 #Need some way to get location of cell but that's not a property of the cell?
                 #Add cells to column object one at a time, then add whole column to array
-                    access_loc = sort_sheet + "!" + str(j) + str(i)
-                    add_cell = self.master_cell_dict(access_loc)
-                    add_column.append(add_cell)    
+                    access_loc = sort_sheet + "!" + self._base_10_to_alphabet(j) + str(i)
+                    #add_cell = self.master_cell_dict[access_loc]
+                    add_column.append(access_loc)    
                 cell_col_list.append(add_column)
-        
-        #Perform sorting operation
-        for i in range(len(sort_cols)):
-            sort_row = start_row
-            original_sort_col = sort_cols[i]
-            sort_col = abs(original_sort_col)
-            for curr_col in cell_col_list:
-                for curr_cell in curr_col:
-                    curr_loc = str(sort_row) + str(sort_col)
-                    curr_value = self.get_cell_value(sort_sheet, curr_loc)
-                    if sort_row + 1 != end_row + 1:
-                        next_loc = str(sort_row + 1) + str(sort_col)
-                        next_value = self.get_cell_value(sort_sheet,next_loc)
-                        if curr_value > next_value and original_sort_col > 0: #sort col is positive
-                            curr_cell_contents = self.get_cell_contents(sort_sheet, curr_loc)
-                            next_cell_contents = self.get_cell_contents(sort_sheet, next_loc)
-                            self.set_cell_contents(sort_sheet,curr_loc, next_cell_contents)
-                            self.set_cell_contents(sort_sheet,next_loc, curr_cell_contents)
-                        elif curr_value < next_value and original_sort_col < 0: #sort_col is negative
-                            curr_cell_contents = self.get_cell_contents(sort_sheet, curr_loc)
-                            next_cell_contents = self.get_cell_contents(sort_sheet, next_loc)
-                            self.set_cell_contents(sort_sheet,curr_loc, next_cell_contents)
-                            self.set_cell_contents(sort_sheet,next_loc, curr_cell_contents)
-                    sort_row = sort_row + 1
 
+
+    #SORTING IS HERE
+        rever = False
+        if sort_cols[0] < 0:
+            rever = True
+        orig_unaltered = cell_col_list[sort_cols[0]-1]
+        orig_list = enumerate(orig_unaltered)
+        sorted_list = (sorted(orig_list, key=self.get_relative_val,reverse=rever))
+        idx = []
+        #the_sort = []
+        for i in sorted_list:
+            idx.append(i[0])
+            #the_sort.append(i[1])
+
+
+        #NOW WE ASSIGN THE VALUES
+        for orig_unaltered in cell_col_list:
+            val_list = []
+            for i in range(len(orig_unaltered)):
+                orig_split = orig_unaltered[i].split('!')
+                new_split = orig_unaltered[idx[i]].split('!')
+                #get the value
+                for s in self.sheets:
+                    if s.sheet_name.lower() == new_split[0].lower():
+                        val_list.append(s.get_cell_value(self,new_split[1]))
+                        break
+                #set the cell
+            for i in range(len(orig_unaltered)):
+                orig_split = orig_unaltered[i].split('!')
+                val = val_list[i]
+                self.set_cell_contents(orig_split[0],orig_split[1],str(val))
+
+    def get_relative_val(self,cell):
+        cell = cell[1]
+        cell_split = cell.split('!')
+        
+        for s in self.sheets:
+            if s.sheet_name.lower() == cell_split[0].lower():
+                val = s.get_cell_value(self,cell_split[1])
+                return val
+
+        raise KeyError()
 
     def _check_valid_cell(self, location):
         """Check if the cell location is valid """

@@ -1,0 +1,84 @@
+Performance Log
+================
+
+
+Lark redundancy
+---------------
+
+**Hypothesis**
+We expected that there were an unnecessarily high amount of lark function calls. Obviously lark is an important part of the system, so many function calls can be expected. But we thought there were more than necessary for a good operation. More specifically, we realized that the contents of a cell are parsed with each call to that cell, even if the cell-contents did not change. This is of course useless, because if the contents don't change, the result of parsing it will stay the same (the evaluation of those parsed contents might be different though).
+
+**Checking Hypothesis with Measurements**
+As you can see in project3-perf_lark-before.png, there are indeed a lot of function calls to lark, but we don't know which ones are redundant. So we implemented code that saves the parsed contents of a cell and tracks whether contents changed. Then, if there were no cell-content changes, the old parsed contents could still be used. Indeed, new tests (in project3-perf_lark-after.png) show that the amount of function calls to lark went down significantly.
+
+Commit Hash of the improved code:
+c93af7693585b76ad9c30733695f005c86ea7456
+
+**Result**
+Comparing the execution of our performance tests before and after the lark changes, we can conclude that our improvements work (well). The table below shows the comparison and the improvements that are obtained:
+
+| Metric                   | Before implementation | After implementation | Improvement |
+|--------------------------|-----------------------|----------------------|-------------|
+| Function calls to parser | 68.5K                 | 51.2K                | 25%         |
+| Parser execution time    | 1.25s                 | 0.92s                | 26%         |
+| Total function calls     | 13.3M                 | 10.0M                | 25%         |
+| Total execution time     | 11.4s                 | 8.9s                 | 22%         |
+
+
+Getting the Cell Value
+----------------------
+
+**Hypothesis**
+One of the major slow downs was getting the value of a cell. We believe that this is being slowed down because
+the cell contents is being evaluated everytime get_cell_value is called. We thought that we would be able to drastically
+improve the speed of get_cell_value by only evaluating once and then saving the value for future references.
+
+**Rationale**
+Prior to our changes, our get_cell_value test was taking an unnecessarily long amount of time to simply 
+get a cell value. As we see below, our function is getting stuck inside of the get_cell_value function inside
+of cell.py, which is where the evaluation occurs
+
+Ordered by: cumulative time
+   List reduced from 401 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.001    0.000    2.916    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:298(get_cell_value)
+      100    0.004    0.000    2.914    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:120(get_cell_value)
+      100    0.001    0.000    2.910    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\cell.py:51(get_cell_value)      
+      100    0.005    0.000    2.710    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:524(open)       
+      100    0.005    0.000    2.682    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:252(__init__)   
+
+**Result**
+When comparing the results from before and after the implementation of our performance fixes, it is clear
+that not having to evaulate a cell value over and over again was able to drastically improve performance.
+However, when your previous implementation is incredibly redundant, it is not hard to see drastic improvements
+
+| Metric                   | Before implementation | After implementation | Improvement |
+|--------------------------|-----------------------|----------------------|-------------|
+| Primitive Function calls | 6603805               | 9301                 | 99.8%       |
+| Total function calls     | 6812109               | 9901                 | 99.8%       |
+| Total execution time     | 2.915s                | 0.005s               | 99.8%       |
+
+
+Checking Validity of Cells
+--------------------------
+
+**Hypothesis**
+We believed that our check_valid_cell function was running inefficiently or with many redundancies due to
+how long/ the number of times it would be run for simple cell evaluations.
+
+**Rationale**
+The reason that we thought that the check_valid_cell was an issue was due to the high number of calls that it was receiving
+as well as the the amount of time it took in comparison with the simplicity of the tests being performed.
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   10000    0.032    0.000    0.043    0.000 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:330(check_valid_cell)
+
+**Result**
+While we were able to reduce the number of calls and time that the function was running, we realized that the reason
+that the function was being executed so many times was due to us evaluating the cell unnecesarilly. Thus, 
+the cehck_valid_cell function did not actually need to be made more efficient, it just needed to be called less.
+And this was achieved by simply not evaluating cell values as often. Thus, it is not quite possible to evaluate how much faster
+the program is with just less calls to check_valid_cell because the speed up happened simultaneously with other optimizations.
+
+

@@ -132,40 +132,30 @@ class Pieter(unittest.TestCase):
         val = wb.get_cell_value(sh, 'C2')
         self.assertEqual(val, 6, f'instead it is: {val}') # excel #7
 
-    # def test_sorting_errors(self):
-    #     wb = Workbook()
-    #     (_,sh) = wb.new_sheet('sheet')
+    def test_sorting_errors(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet('sheet')
 
-    #     wb.set_cell_contents(sh, 'B1', sh)
+        wb.set_cell_contents(sh, 'B1', sh)
 
-    #     wb.set_cell_contents(sh,'a2', '10')
-    #     wb.set_cell_contents(sh,'b2', '2')
-    #     wb.set_cell_contents(sh,'c2', '3')
-    #     wb.set_cell_contents(sh,'a3', '4')
-    #     wb.set_cell_contents(sh,'b3', '5')
-    #     wb.set_cell_contents(sh,'c3', '6')
-    #     wb.set_cell_contents(sh,'a4', '7')
-    #     wb.set_cell_contents(sh,'b4', '8')
-    #     wb.set_cell_contents(sh,'c4', '9')
+        wb.set_cell_contents(sh,'a2', '10')
+        wb.set_cell_contents(sh,'c2', '4')
 
-    #     wb.sort_region(sh, 'A2', 'C4', [1])
-    #     val = wb.get_cell_value(sh, 'B2')
-    #     self.assertEqual(val, 5, f'instead it is: {val}') # TODO PVS
+        wb.set_cell_contents(sh,'a3', '#DIV/0!')
+        wb.set_cell_contents(sh,'c3', '3')
 
-    #     wb.set_cell_contents(sh,'a2', '2')
-    #     wb.set_cell_contents(sh,'b2', '2')
-    #     wb.set_cell_contents(sh,'c2', '4')
-    #     wb.set_cell_contents(sh,'a3', '1')
-    #     wb.set_cell_contents(sh,'b3', '3')
-    #     wb.set_cell_contents(sh,'c3', '5')
-    #     wb.set_cell_contents(sh,'a4', '2')
-    #     wb.set_cell_contents(sh,'b4', '1')
-    #     wb.set_cell_contents(sh,'c4', '6')
+        wb.set_cell_contents(sh,'a4', '#REF!')
+        wb.set_cell_contents(sh,'c4', '2')
 
-    #     wb.sort_region(sh, 'A2', 'C4', [1,2])
-    #     val = wb.get_cell_value(sh, 'C2')
-    #     self.assertEqual(val, 6, f'instead it is: {val}') # TODO PVS
+        wb.set_cell_contents(sh,'A5', '')
+        wb.set_cell_contents(sh,'C5', '1')
 
+        wb.sort_region(sh, 'A2', 'C5', [1])
+
+        self.assertEqual(wb.get_cell_value(sh, 'C2'), 1)
+        self.assertEqual(wb.get_cell_value(sh, 'C3'), 2)
+        self.assertEqual(wb.get_cell_value(sh, 'C4'), 3)
+        self.assertEqual(wb.get_cell_value(sh, 'C5'), 4)
 
     def test_sorting_validity(self):
         """If the specified sheet name is not found, a KeyError is raised.

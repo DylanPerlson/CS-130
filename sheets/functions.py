@@ -134,7 +134,8 @@ class Functions:
         # [self._get_value_as_number(x) for x in args]
 
         try:
-            return sum(args)
+            decimal.Decimal
+            return decimal.Decimal(sum(args))
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
@@ -162,7 +163,7 @@ class Functions:
             return CellError(CellErrorType.DIVIDE_BY_ZERO, f"Invalid number of arguments: {args}")
 
         try:
-            return sum(args)/len(args)
+            return decimal.Decimal(str(sum(args)))/decimal.Decimal(str(len(args)))
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 

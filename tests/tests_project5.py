@@ -117,11 +117,22 @@ class Project5(unittest.TestCase):
         #print(wb.get_cell_value(name,'A4'))
         self.assertEqual(wb.get_cell_value(name,'A4'),True)
 
-        #what about
-        #wb.set_cell_contents(name,'A4','=AND(A1,A2:A3)')
+        (_, name2) = wb.new_sheet("s2")
+        wb.set_cell_contents(name2,'A1','True')
+        wb.set_cell_contents(name2,'A2','FaLse')
+        wb.set_cell_contents(name2,'A3','true')
+        wb.set_cell_contents(name,'A5','=AND(s2!A1:A3)')
+        self.assertEqual(wb.get_cell_value(name,'A5'),False)
 
 
-        #TODO DTP need to also include other sheets
+        wb.set_cell_contents(name2,'A1','5')
+        wb.set_cell_contents(name2,'A2','2')
+        wb.set_cell_contents(name2,'A3','6')
+        wb.set_cell_contents(name,'A5','=MIN(s2!A1:A3)')
+        wb.set_cell_contents(name,'A6','=MAX(s2!A1:A3)')
+        self.assertEqual(wb.get_cell_value(name,'A5'),2)
+        self.assertEqual(wb.get_cell_value(name,'A6'),6)
+
 
     def test_or_range(self):
         wb = Workbook()

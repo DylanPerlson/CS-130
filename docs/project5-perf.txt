@@ -44,6 +44,37 @@ After we made changes to the tarjan function, we can see a massive increase in o
 4997/3000    0.021    0.000    5.080    0.002 
 
 
-Getting the Cell Value
+Getting Cell References
 ----------------------
 
+**Theory**
+Previously When trying to improve our performance tests, we had noticed that using lark was consistantly one of the slowest functions to run. As such we thought that if we could remove unneccesary lark parsing, we might be able to get a large performance increase on large cell operations. As such, we noticed that when trying to get the cells that are called in a formula, we are parsing the cell contents to find the cell references. We suspect that the parsing of the cells could be done only once, and we can then store the cell references inside of the cell to be accessed at later times when needed.
+
+**Rationale**
+As we can see in the below cProfiler data, when doing our move_cells operation, the lark parser function is taking up the most of the time. Because we did not write the lark parsing funciton, we are not able to speed up the function call itself, so the only way that we would be able to increase lark parsing performance would be too call it less. Thus, the best thing that we can do to reduce our move_cell operation, is to remove any unnecesary lark calls.
+
+ 13791744 function calls (13749954 primitive calls) in 5.248 seconds
+
+   Ordered by: cumulative time
+   List reduced from 119 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.015    0.015    5.248    5.248 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:73(move_cells)     2498    0.007    0.000    5.186    0.002 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:113(_retrieve_cell_references)
+     1996    0.002    0.000    5.155    0.003 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:599(parse)      
+     1996    0.010    0.000    5.152    0.003 C:\Users\Dylan\anaconda3\lib\site-packages\lark\parser_frontends.py:95(parse)
+     1996    0.017    0.000    5.141    0.003 C:\Users\Dylan\anaconda3\lib\site-packages\lark\parsers\earley.py:249(parse)
+
+
+**Outcome**
+After we made changes to the retrieve_cell_reference() function, we were able to get a speed increase from 5.2 seconds to 2.6 seconds, a roughly 2x speed increase. This was because we were able to dramatically decrease our calls to the lark parser as can be seen in the cProfiler data below. The lark processer is no longer in the top 5 cummulative time cases.
+
+7007102 function calls (6981237 primitive calls) in 2.652 seconds
+
+   Ordered by: cumulative time
+   List reduced from 135 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.010    0.010    2.652    2.652 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:79(move_cells)     20oooo00    0.009    0.000    2.624    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:43(set_cell_contents)
+     2498    0.002    0.000    2.605    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:111(_retrieve_cell_references)
+2995/2001    0.005    0.000    2.603    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:99(get_cell_value)
+2995/2001    0.010    0.000    2.595    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\cell.py:27(get_cell_value)

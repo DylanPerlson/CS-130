@@ -899,6 +899,8 @@ class Workbook:
                 val = s.get_cell_value(self,cell_split[1])
                 if val == 'None' or val is None:
                     return decimal.Decimal('-Infinity')
+                if isinstance(val,CellError):
+                    val = decimal.Decimal('-1E+50') / val.get_type().value
                 return val
 
         raise KeyError()

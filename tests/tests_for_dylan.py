@@ -183,20 +183,14 @@ class Dylan(unittest.TestCase):
         (_,sh) = wb.new_sheet('sheet')
 
         wb.set_cell_contents(sh,'a2', '3')
-        wb.set_cell_contents(sh,'b2', 'None')
-        wb.set_cell_contents(sh,'c2', '1')
+        wb.set_cell_contents(sh,'b2', '#DIV/0!')
+        wb.set_cell_contents(sh,'c2', '#REF!')
         
         wb.set_cell_contents(sh,'a3', '10')
         wb.set_cell_contents(sh,'b3', '20')
         wb.set_cell_contents(sh,'c3', '30')
-        # wb.set_cell_contents(sh,'b2', '2')
-        # wb.set_cell_contents(sh,'c2', '4')
-        # wb.set_cell_contents(sh,'a3', '1')
-        # wb.set_cell_contents(sh,'b3', '3')
-        # wb.set_cell_contents(sh,'c3', '5')
-        # wb.set_cell_contents(sh,'a4', '2')
-        # wb.set_cell_contents(sh,'b4', '1')
-        # wb.set_cell_contents(sh,'c4', '6')
+
+       
 
         #2 1 2 for a - swap first and second
         

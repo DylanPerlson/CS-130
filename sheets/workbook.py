@@ -801,6 +801,10 @@ class Workbook:
         sort_sheet = None
         specified_columns = []
 
+        if len(sort_cols) == 0:
+            raise ValueError()
+        if 0 in sort_cols:
+            raise ValueError()
         #Check if start, end columns and sheet name are valid
         if not self._check_valid_cell(start_location) or not self._check_valid_cell(end_location):
             raise ValueError()
@@ -831,7 +835,12 @@ class Workbook:
             temp = start_row 
             start_row = end_row
             end_row = temp  
-        
+        col_range = end_col - start_col + 1
+
+        for i in sort_cols:
+            if abs(i) > col_range:
+                raise ValueError()
+
         #Get individual columns based on user_cols
         #TODO This is probably where it breaks first, I added some stuff in here
         col_counter = 1

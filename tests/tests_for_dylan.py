@@ -156,6 +156,8 @@ class Dylan(unittest.TestCase):
         print('.')
         #wb.copy_sheet(name)
         #wb.move_cells(name,'A1','A5','A10')
+        #wb.copy_cells(name,'A1','A5','A10')
+        #wb.move_cells(name,'A1','A5','A10')
         #wb.del_sheet(name)
         
 
@@ -163,8 +165,11 @@ class Dylan(unittest.TestCase):
         #cell notifications? change name
         #cell notifications fixed
 
+
+        #cell changes and notificatiosn for cell range
         #comment out all prints
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)
+    
     

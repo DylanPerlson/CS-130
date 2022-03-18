@@ -122,7 +122,6 @@ class Workbook:
 
         #check for invalid cells or sheets
 
-        # TODO DTP to_sheet needs to be addressed here below
         cur_sheet = None
         start_row, start_col = self.get_col_and_row(start_location)
         end_row, end_col = self.get_col_and_row(end_location)
@@ -174,20 +173,30 @@ class Workbook:
                 #check if we need to update the formula
                 if str(copy_dict[(r,c)])[0] == '=':
                     cell_list = []
-                    for e,i in enumerate(self.sheets):
-                        if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e].retrieve_cell_references(self,cell,r,c)
-
+                    
+                    cell_list = cur_sheet.retrieve_cell_references(self,cell,r,c)
+                    
+                    continue_again = False
                     for i in cell_list:
+                        #skip updating the second cell range
+                        if continue_again:
+                            continue_again = False
+                            continue
 
                         [name, loc] = i.split('!',1)
                         old_loc = loc
                         #not in the sheet so do not need to update
-                        if name.lower() != sheet_name.lower():
+                        if i+':' in copy_dict[(r,c)]:
+                            continue_again = True
                             continue
-
+                        if to_sheet is None:
+                            to_sheet = cur_sheet
+                            to_exists = False
                         #is in sheet so need to update
-                        elif name.lower() == sheet_name.lower():
+
+                        if not to_exists and name.lower() != cur_sheet.sheet_name.lower():
+                            continue
+                        if True:
                             abs_row = False
                             abs_col = False
 
@@ -233,20 +242,17 @@ class Workbook:
                                     +'$'+str(replace_r)
                             else:
                                 new_loc = str(self._base_10_to_alphabet(replace_c))+str(replace_r)
-                            #TODO DTP there is a possible very nuanced error of
-                            # overlapping replacements
+                            
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
-
-                        else:
-
-                            raise ValueError()
+                        
+                      
 
 
                 #delete the value after copying values - only if the move function was called
-                if do_not_delete is False:
-                    cur_sheet.set_cell_contents(self,cell, None)
+                if do_not_delete is False and copy_dict[(r,c)] is not None:
+                    self.set_cell_contents(cur_sheet.sheet_name,cell, None)
 
         #move to the new location - do this in two steps so dont overwrite before copying some
         for r in range(start_row, end_row+1):
@@ -789,6 +795,7 @@ class Workbook:
         If the sort_cols list is invalid in any way, a ValueError is raised."""
 
         valid_sheet = False
+        sort_sheet = None
         specified_columns = []
 
         #Check if start, end columns and sheet name are valid
@@ -797,6 +804,7 @@ class Workbook:
         for i in self.sheets:
             if i.sheet_name.lower() == sheet_name.lower():
                 valid_sheet = True
+                sort_sheet = i.sheet_name.lower()
         if not valid_sheet:
             raise KeyError()
 
@@ -807,6 +815,44 @@ class Workbook:
             if abs(col) in specified_columns or col == 0:
                 raise ValueError()
             specified_columns.append(abs(col))
+        
+        #Generate sorting region based on starting and ending columns
+        start_row, start_col = self.get_col_and_row(start_location)
+        end_row, end_col = self.get_col_and_row(end_location)
+        #Swap if "start" corner is further right/down than "end" corner
+        if start_col > end_col:
+            temp = start_col 
+            start_col = end_col
+            end_col = temp
+        if start_row > end_row:
+            temp = start_row 
+            start_row = end_row
+            end_row = temp  
+        
+        #Get individual columns based on user_cols
+        col_counter = 1
+        cell_col_list = []
+        col_range = end_col - start_col
+        for i in range(col_range):
+            if col_counter in sort_cols or -1 * col_counter in sort_cols:
+                #Need some way to get location of cell but that's not a property of the cell?
+                cell_col_list.append(sort_sheet.cells)
+        
+        #Perform sorting operation
+        sort_row = start_row
+        for sort_col in sort_cols:
+            for curr_col in cell_col_list:
+                for curr_cell in curr_col:
+                    curr_loc = str(sort_row) + str(sort_col)
+                    curr_value = self.get_cell_value(sort_sheet, curr_loc)
+                    if sort_row + 1 != end_row + 1:
+                        next_loc = str(sort_row + 1) + str(sort_col)
+                        next_value = self.get_cell_value(sort_sheet,next_loc)
+                        if curr_value > next_value:
+                            curr_cell_contents = self.get_cell_contents(sort_sheet, curr_loc)
+                            next_cell_contents = self.get_cell_contents(sort_sheet, next_loc)
+                            self.set_cell_contents(sort_sheet,curr_loc, next_cell_contents)
+                            self.set_cell_contents(sort_sheet,next_loc, curr_cell_contents)
 
 
     def _check_valid_cell(self, location):

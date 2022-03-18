@@ -49,27 +49,51 @@ D3.  [4pts] How did you incorporate cell-range references into the cycle-
      over other possible designs; for example, what benefits were you hoping to
      achieve, or what issues were you trying to avoid?
 
+We decided to implement this by evaluating the cells as normal, getting all the required cell values 
+before doing the cell range operation like sum or average. The way the program works is that it evaluates a
+formula the moment it detects it, and as a result if the evaluated value detects that the original argument 
+is attempting to perform an operation on a cell that points to that operation, a circular reference is thrown for both 
+the cell with the operation call as well as the cell itself.
+
 
 D4.  [4pts] Give an overview of the structural aspects (modules, classes, etc.)
      of how you implemented sorting.  Do you sort the rows directly?  Do you
      use proxy objects instead?  Some other technique?
 
+We opted to sort rows directly as our current implementation utilized a helper function 
+that would directly translate the sort region's start and end columns and rows in appropriate 
+integers, thus making it possible to access the cells of interest directly. No additional modules 
+or classes were created.
+
 
 D5.  [4pts] Give an overview of the behavioral aspects of how you implemented
      sorting.  At a high level, enumerate the steps that your engine goes
      through to sort a region of a spreadsheet.
+First the program verifies that all the parameters inputted are valid and throws the appropriate
+error if any of them fail to meet the required values. Afterwards, the program goes through and figures out 
+the region to sort by translating the start_loc and end_loc into integer rows and columns; if the start location
+was further right/down than the end location, the two were swapped before the program proceeds as normal.
+From there, the program extracts the columns to be sorted based on sort_cols. Using the cells extracted, their 
+individual values are gotten indivudually and a bubble sort is utilized to swap two cells if one of them is "less" or "greater"
+than the other. This process proceeds for all cells and all columns left to be sorted before the function concludes.
 
 
 D6.  [4pts] How does your implementation solve the problem of supporting the
      user-specified row ordering based on both the columns and the ordering to
      sort by?  Did you create any classes or functions to help specifically with
      this task?
-
+After we ensured there were no duplicate columns in sort_cols, whilst we still used the absolute values of 
+the columns to get the values themselves, we then double check if the argument was originall negative. If so,
+we compare using less than to ensure the smallest values are the farthest down after sorting. Similarly, if there is 
+no negative sign, "greater than" is used for the comparator to make sure the rows are sorted smallest to largest.
+Once again, no additional classes were created to aid with this process.
 
 D7.  [3pts] Briefly describe the changes you made to your spreadsheet engine to
      satisfy the stricter cell-change notification behaviors.  Did you find this
      to be largely straightforward to change?  Why or why not?
-
+Our prior implementation already appeared to satisfy the "notify once" aspect due to 
+how we implemented it in previous projects, and as a result no major revisions were required.
+This helped us to focus on other more pertinent aspects ofproject 5.
 
 
 Performance Improvement (16 pts)

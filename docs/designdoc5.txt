@@ -24,7 +24,8 @@ Pieter - cell ranges, functions, debugging proj4, design doc
 Dylan - performance, tarjan, cell ranges
 
 L3.  [3pts] Approximately how many hours did each teammate spend on the project?
-Everyone spent approximately 25 hours on this project
+Pieter and Dylan spent approximately 30 hours on this project
+Aaron spent approximately 24 hours on this project due to travel 
 
 Spreadsheet Engine Design (27 points)
 -------------------------------------
@@ -32,12 +33,15 @@ Spreadsheet Engine Design (27 points)
 D1.  [4pts] Briefly describe the changes you made to the Lark parser grammar to
      support cell-range references.  Can they appear anywhere in expressions, or
      does your grammar constrain them to appear only in particluar contexts?
+
 Cell-ranges only appear in functions. They, as well as expressions, are the inputs
 to the functions. Adding them to other parts of the grammar seemed to us to be
-risky because they could be wrongly parsed.
+risky because they could be wrongly parsed. So currently our lark parser grammar does not 
+support cell-ranges outside of functions.
 
 D2.  [4pts] How easy or hard was it to incorporate cell-range references into
      formula evaluation?  Elaborate on your answer.
+
 It was medium hard. The cell-range made it necessary to add the cell location to the
 output of the cell evaluation (in the transformer). This caused some changes that
 had to be implemented in older functions, ie making sure that there would be an
@@ -52,8 +56,9 @@ D3.  [4pts] How did you incorporate cell-range references into the cycle-
 We decided to implement this by evaluating the cells as normal, getting all the required cell values 
 before doing the cell range operation like sum or average. The way the program works is that it evaluates a
 formula the moment it detects it, and as a result if the evaluated value detects that the original argument 
-is attempting to perform an operation on a cell that points to that operation, a circular reference is thrown for both 
-the cell with the operation call as well as the cell itself.
+is attempting to perform an operation on a cell that points back to itself, a circular reference is thrown for both 
+the cell with the operation call as well as the cell itself. So a function with (A1:A3) treats it the
+same as a function call with (A1,A2,A3) and finds circular references the same way.
 
 
 D4.  [4pts] Give an overview of the structural aspects (modules, classes, etc.)
@@ -63,12 +68,14 @@ D4.  [4pts] Give an overview of the structural aspects (modules, classes, etc.)
 We opted to sort rows directly as our current implementation utilized a helper function 
 that would directly translate the sort region's start and end columns and rows in appropriate 
 integers, thus making it possible to access the cells of interest directly. No additional modules 
-or classes were created.
+or classes were created. To us this seemed the most optimal way forward without adding unnecesarry additional
+overhead.
 
 
 D5.  [4pts] Give an overview of the behavioral aspects of how you implemented
      sorting.  At a high level, enumerate the steps that your engine goes
      through to sort a region of a spreadsheet.
+
 First the program verifies that all the parameters inputted are valid and throws the appropriate
 error if any of them fail to meet the required values. Afterwards, the program goes through and figures out 
 the region to sort by translating the start_loc and end_loc into integer rows and columns; if the start location
@@ -82,8 +89,9 @@ D6.  [4pts] How does your implementation solve the problem of supporting the
      user-specified row ordering based on both the columns and the ordering to
      sort by?  Did you create any classes or functions to help specifically with
      this task?
+
 After we ensured there were no duplicate columns in sort_cols, whilst we still used the absolute values of 
-the columns to get the values themselves, we then double check if the argument was originall negative. If so,
+the columns to get the values themselves, we then double check if the argument was originally negative. If so,
 we compare using less than to ensure the smallest values are the farthest down after sorting. Similarly, if there is 
 no negative sign, "greater than" is used for the comparator to make sure the rows are sorted smallest to largest.
 Once again, no additional classes were created to aid with this process.
@@ -91,6 +99,7 @@ Once again, no additional classes were created to aid with this process.
 D7.  [3pts] Briefly describe the changes you made to your spreadsheet engine to
      satisfy the stricter cell-change notification behaviors.  Did you find this
      to be largely straightforward to change?  Why or why not?
+
 Our prior implementation already appeared to satisfy the "notify once" aspect due to 
 how we implemented it in previous projects, and as a result no major revisions were required.
 This helped us to focus on other more pertinent aspects ofproject 5.
@@ -110,20 +119,57 @@ P1.  [6pts] Give a brief overview of 2-3 of the worst hot-spots you identified
      in your performance testing and analysis.  For each one, describe how your
      team was able to resolve it.
 
+     Our worst hot spot was that we called the tarjan algorithm every time a cell was set. 
+     Originally, we wanted to immediately know if we had circular references, but this led to having 
+     to call a very time consuming operation every time a single cell was changed. Thus, if we were to move a 
+     large amount of cells using move_cell(), it would call tarjan for every single cell that is moved. We found 
+     it much faster by removing redundancies and moving the tarjan algorithm to the get_cell_value() function.
+
+     Another hot spot was our helper function to retrieve cell references. This is because any time we needed to 
+     get a cell reference, we would reparse the formula of a cell. Parsing text is one of the slowest operations in 
+     our program, so not having to parse over and over would save our program alot of time. We were able to resolve 
+     this issue by saving parsed cell contents so we did not have to reparse it if the cell contents did not change.
+
+     A majority of our slow downs was simply because we had unecessary redundancies that could be removed by saving 
+     the result of a function or moving the function elsewhere. We did not notice them earlier because they only became
+     an issue when we had to operate on large amounts of cells.
+
+     A last hot spot was reaching a maximum recursion limit. Again this was only noticed when we had to move very large
+     amounts of cells. This was because we used recursion to notify cells and to update cell dependencies. We changed
+     those functions to be iterative instead of recursive. This did not speed up the program, but it did help our program
+     to run larger amounts of cell updates without hitting a maximum recursion limit.
+
 
 P2.  [4pts] Did your team try anything to address performance issues and find
      that it didn't improve things at all?  If so, were you able to identify why
      the intended fix didn't produce the desired benefit?
 
+When trying to fix the issue of parsing cell contents too slowly, I originally thought it be better to have a 
+different parser that only looked for cell references and ignored functions and other characters that were 
+not cells. This ended up actually slowing the program down even more because even though it was a "faster parser",
+it made our program create two different parse algorithms which created more parses needed. We realized that the 
+best solution was not to try and make a different parser that was faster, but to simply reduce the amount of times that 
+we had to call the parse function.
 
 P3.  [3pts] How do you feel that your performance updates affected your code's
      readability and maintainability?  Elaborate on your answer.
+
+     Generally, our performance updates made our code more readable and maintainable. This is because
+     often times when making our code run faster, we also made our code shorter and more concise because
+     we were removing redundancies. Thus, it is easier to read and maintain code that is shorter and more concise
+     simply because there are less logic threads and code to have to consider and think about.
 
 
 P4.  [3pts] Did your performance updates cause any regressions in functionality?
      If so, briefly describe any issues that emerged.  How were these issues
      identified (e.g. automated test failures, manual testing, etc.)?  How
      quickly were issues identified?
+
+     We got lucky with this because we did not get any regressions in functionality when
+     making performance fixes. This makes sense though because our performance fixes were mostly 
+     removing redundancies. This didnt change the logic or functionality of the code, it simply
+     skipped code that didnt need to be run again or moved code to an area where it would not be run
+     so many times.
 
 
 

@@ -2,17 +2,21 @@ Performance Log
 ================
 
 
-Lark redundancy
+IGNORE ALL THE STUFF BELOW, THAT IS FROM P3
+
+-- tarjan was slow bc running it 
+-- get cell reference was alot slower
+-- doing things recursively, not a speed increase but it did stop python from breaking, so scaling performance increase
+
+
+Tarjan redundancy
 ---------------
 
 **Hypothesis**
-We expected that there were an unnecessarily high amount of lark function calls. Obviously lark is an important part of the system, so many function calls can be expected. But we thought there were more than necessary for a good operation. More specifically, we realized that the contents of a cell are parsed with each call to that cell, even if the cell-contents did not change. This is of course useless, because if the contents don't change, the result of parsing it will stay the same (the evaluation of those parsed contents might be different though).
+We expect that there was an uneccesarrily high amount of Tarjan algorithm calls to find circular references. Because the tarjan algorithm iterates through every single cell in the workbook, it is a very time intensive algorithm. Before implementing any changes, we would call the tarjan algorithm every single time we called set_cell_contents(). So if we wanted to get the value of a single cell after a chain of 1000 cells, we would have to call tarjan 1000 times. We suspect if we move the tarjan algorithm to get_cell_value() instead, we would see massive speed increases because it would be called significantly less.
 
 **Checking Hypothesis with Measurements**
-As you can see in project3-perf_lark-before.png, there are indeed a lot of function calls to lark, but we don't know which ones are redundant. So we implemented code that saves the parsed contents of a cell and tracks whether contents changed. Then, if there were no cell-content changes, the old parsed contents could still be used. Indeed, new tests (in project3-perf_lark-after.png) show that the amount of function calls to lark went down significantly.
 
-Commit Hash of the improved code:
-c93af7693585b76ad9c30733695f005c86ea7456
 
 **Result**
 Comparing the execution of our performance tests before and after the lark changes, we can conclude that our improvements work (well). The table below shows the comparison and the improvements that are obtained:
@@ -27,6 +31,7 @@ Comparing the execution of our performance tests before and after the lark chang
 
 Getting the Cell Value
 ----------------------
+
 
 **Hypothesis**
 One of the major slow downs was getting the value of a cell. We believe that this is being slowed down because

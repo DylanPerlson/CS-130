@@ -30,7 +30,7 @@ def test_long_reference_chain():
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('tottime').print_stats(20)
+    stats.sort_stats('cumtime').print_stats(10)
     #assert wb.get_cell_value(name, location) == length
     #only get cell value once, and only parse at the very end???
 
@@ -254,12 +254,12 @@ if __name__ == '__main__':
     # pr = cProfile.Profile()
     # pr.enable()
 
-    #test_long_reference_chain()
+    test_long_reference_chain()
     #test_long_reference_chain_letters()
     #test_very_connected_ref_chain()
     #test_cell_with_many_deps()
     #test_significant_cell_change() #I think that this test might be wrong
-    test_fibonacci()
+    #test_fibonacci()
     # test_cell_cycle()
 
     #test_load_wkbk()

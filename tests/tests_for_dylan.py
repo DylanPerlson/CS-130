@@ -217,6 +217,18 @@ class Dylan(unittest.TestCase):
         val = wb.get_cell_value(sh, 'B2')
         self.assertEqual(val, 10, f'instead it is: {val}') # excel #2
 
+    def test_sum_cycle(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet('sheet')
+
+        wb.set_cell_contents(sh,'a1', '=SUM(A2:A4)')
+        wb.set_cell_contents(sh,'a2', '1')
+        wb.set_cell_contents(sh,'a3', '=A1')
+        wb.set_cell_contents(sh,'a4', '1')
+
+        #print(wb.get_cell_value(sh,'A1'))
+        #test does work
+
     def test_sorting_stable_dylan(self):
         wb = Workbook()
         (_,sh) = wb.new_sheet('sheet')

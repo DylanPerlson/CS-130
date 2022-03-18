@@ -58,7 +58,8 @@ before doing the cell range operation like sum or average. The way the program w
 formula the moment it detects it, and as a result if the evaluated value detects that the original argument 
 is attempting to perform an operation on a cell that points back to itself, a circular reference is thrown for both 
 the cell with the operation call as well as the cell itself. So a function with (A1:A3) treats it the
-same as a function call with (A1,A2,A3) and finds circular references the same way.
+same as a function call with (A1,A2,A3) and finds circular references the same way. We did this because 
+we thought it would be easiest if we could have our current infrastructure handle the new requirement.
 
 
 D4.  [4pts] Give an overview of the structural aspects (modules, classes, etc.)
@@ -69,7 +70,7 @@ We opted to sort rows directly as our current implementation utilized a helper f
 that would directly translate the sort region's start and end columns and rows in appropriate 
 integers, thus making it possible to access the cells of interest directly. No additional modules 
 or classes were created. To us this seemed the most optimal way forward without adding unnecesarry additional
-overhead.
+overhead, because we were able to implement our sorting algorithm using the built in python sorted() function.
 
 
 D5.  [4pts] Give an overview of the behavioral aspects of how you implemented
@@ -80,10 +81,9 @@ First the program verifies that all the parameters inputted are valid and throws
 error if any of them fail to meet the required values. Afterwards, the program goes through and figures out 
 the region to sort by translating the start_loc and end_loc into integer rows and columns; if the start location
 was further right/down than the end location, the two were swapped before the program proceeds as normal.
-From there, the program extracts the columns to be sorted based on sort_cols. Using the cells extracted, their 
-individual values are gotten indivudually and a bubble sort is utilized to swap two cells if one of them is "less" or "greater"
-than the other. This process proceeds for all cells and all columns left to be sorted before the function concludes.
-
+From there, the program extracts the columns to be sorted based on sort_cols. Using the cells extracted, their
+values are then compared using the python sorted() algorithm. From there we get the indexes of the values to change and 
+change the corresponding cells as needed. 
 
 D6.  [4pts] How does your implementation solve the problem of supporting the
      user-specified row ordering based on both the columns and the ordering to
@@ -92,9 +92,9 @@ D6.  [4pts] How does your implementation solve the problem of supporting the
 
 After we ensured there were no duplicate columns in sort_cols, whilst we still used the absolute values of 
 the columns to get the values themselves, we then double check if the argument was originally negative. If so,
-we compare using less than to ensure the smallest values are the farthest down after sorting. Similarly, if there is 
-no negative sign, "greater than" is used for the comparator to make sure the rows are sorted smallest to largest.
-Once again, no additional classes were created to aid with this process.
+we set the reverse parameter in the sorted() python function to True. When this is set to true, the function 
+will handle sorting in the reverse order for us. So no additional functions or classes were needed to be created 
+since the sorted() function handles it for us.
 
 D7.  [3pts] Briefly describe the changes you made to your spreadsheet engine to
      satisfy the stricter cell-change notification behaviors.  Did you find this

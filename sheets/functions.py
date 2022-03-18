@@ -1,6 +1,6 @@
 """Implements boolean functions."""
-from sheets.cell_error import CellError, CellErrorType
 import decimal
+from sheets.cell_error import CellError, CellErrorType
 
 def _is_integer(d):
     """Checks whether input d is an integer.
@@ -40,7 +40,7 @@ class Functions:
         args = []
         for i in old_args:
             if i is None:
-                continue
+                args.append(i)
             if isinstance(i,list):
                 if len(i) > 1 and isinstance(i[1],bool):
                     args.append(i)
@@ -83,33 +83,109 @@ class Functions:
 
         return CellError(CellErrorType.TYPE_ERROR, "Argument is not a boolean")
 
+    def _get_value_as_number(self, curr_arg):
+        if isinstance(curr_arg, CellError) or isinstance(curr_arg, decimal.Decimal):
+            return curr_arg
+        elif curr_arg is None:
+            return decimal.Decimal('0')
+        elif isinstance(curr_arg, str):
+            if self._is_float(curr_arg):
+                return decimal.Decimal(curr_arg)
+            else:
+                return CellError(CellErrorType.TYPE_ERROR, "String cannot be parsed into a number")
+        elif isinstance(curr_arg, bool):
+            return int(curr_arg)
+
+        return CellError(CellErrorType.TYPE_ERROR, f"Invalid operation with argument: {curr_arg}")
+
+    def _is_float(self, element):
+        """ helper fuction to determine if a value is a float """
+        element = str(element)
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
+
     #new range functions
     def sum_func(self,args):
         args = self._args(args)
         args = self._flat(args)
+
+        if len(args) == 0:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
+
+        # filter out None values and convert to number
+        args = [x for x in args if x is not None]
+        args = [self._get_value_as_number(x) for x in args]
+
+        # check for errors in args and return the error
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        # if there are no arguments; return 0
+        if args == []:
+            return 0
+
+        # [self._get_value_as_number(x) for x in args]
 
         try:
             return sum(args)
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
+
     def avg_func(self,args):
         args = self._args(args)
         args = self._flat(args)
+
+        if len(args) == 0:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
+
+        # filter out None values and convert to number
+        args = [x for x in args if x is not None]
+        args = [self._get_value_as_number(x) for x in args]
+
+        # check for errors in args and return the error
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        # if there are no arguments; return 0
+        if args == []:
+            return CellError(CellErrorType.DIVIDE_BY_ZERO, f"Invalid number of arguments: {args}")
 
         try:
             return sum(args)/len(args)
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
+
     def min_func(self,args):
         #call _args again for case of it not being a cell range
         args = self._args(args)
         args = self._flat(args)
 
+        if len(args) == 0:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
+
+        # filter out None values and convert to number
+        args = [x for x in args if x is not None]
+        args = [self._get_value_as_number(x) for x in args]
+
+        # check for errors in args and return the error
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        # if there are no arguments; return 0
+        if args == []:
+            return 0
+
         try:
-            return min([decimal.Decimal(x) for x in args]) # the list converts to decimal
-        except decimal.InvalidOperation:
+            return min(args) # the list converts to decimal
+        except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
 
@@ -118,8 +194,24 @@ class Functions:
         args = self._args(args)
         args = self._flat(args)
 
+        if len(args) == 0:
+            return CellError(CellErrorType.TYPE_ERROR, f"Invalid number of arguments: {args}")
+
+        # filter out None values and convert to number
+        args = [x for x in args if x is not None]
+        args = [self._get_value_as_number(x) for x in args]
+
+        # check for errors in args and return the error
+        for arg in args:
+            if isinstance(arg, CellError):
+                return arg
+
+        # if there are no arguments; return 0
+        if args == []:
+            return 0
+
         try:
-            return max([decimal.Decimal(x) for x in args]) # the list converts to decimal
+            return max(args) # the list converts to decimal
         except decimal.InvalidOperation:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 

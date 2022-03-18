@@ -122,8 +122,9 @@ class Workbook:
 
         #check for invalid cells or sheets
 
+        # TODO DTP/PVS to_sheet needs to be addressed here below
         cur_sheet = None
-        to_sheet = None # TODO PVS why is this here
+        to_sheet = None
         start_row, start_col = self._get_col_and_row(start_location)
         end_row, end_col = self._get_col_and_row(end_location)
 

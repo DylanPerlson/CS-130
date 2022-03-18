@@ -466,7 +466,6 @@ class Functions:
         try:
             for count, value in enumerate(matrix[0]):
                 if key == value and type(key) is type(value):
-                    # print([index, count])
 
                     return matrix[index][count]
         except TypeError: # if it is not possible to process matrix
@@ -547,7 +546,6 @@ class Functions:
                     val = updated_sheet_instance.cells[row,col].evaluated_value
                 except KeyError:
                     val = None
-                # print(val)
                 vals[count].append(val)
 
         # transpose matrix

@@ -142,6 +142,13 @@ class Dylan(unittest.TestCase):
             contents = '=nEw!A'+str(i+2)+'+4'
             self.assertEqual(wb.get_cell_contents('OtHER_S',loc),contents)
 
+
+        #go through all of the p5 req. 
+        #cell notifications? change name
+        #cell notifications fixed
+
+        #comment out all prints
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)
     

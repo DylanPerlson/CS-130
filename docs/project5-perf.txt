@@ -2,13 +2,6 @@ Performance Log
 ================
 
 
-IGNORE ALL THE STUFF BELOW, THAT IS FROM P3
-
--- tarjan was slow bc running it 
--- get cell reference was alot slower
--- doing things recursively, not a speed increase but it did stop python from breaking, so scaling performance increase
-
-
 Tarjan redundancy
 ---------------
 
@@ -78,3 +71,15 @@ After we made changes to the retrieve_cell_reference() function, we were able to
      2498    0.002    0.000    2.605    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:111(_retrieve_cell_references)
 2995/2001    0.005    0.000    2.603    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:99(get_cell_value)
 2995/2001    0.010    0.000    2.595    0.001 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\cell.py:27(get_cell_value)
+
+Updating Cell Dependencies
+----------------------
+
+**Theory**
+Another issue that we were having was reaching the maximum python recursion depth very quickly when doing large cell movements. We believed that this was due to how we were notifying cells that they needed to be updated because a dependency of theirs was changed. Instead of updating the cells iteratively, we were updating the cells recursively.
+
+**Rationale**
+To test if this were the case, we stopped notifying cells that they needed to have their value updated. When we did this, we were able to run our program successfully without any maximum recursion depth issues. Thus, we knew that this was definitely the issue causing a maximum recursion depth failure.
+
+**Outcome**
+When we changed to cell update dependencies function to be iteratively, we were able to run our program normally for large cell movements without reaching any recursion depth limits. This did not speed up our code at all, so this was not a speed performance increase, but it did increase our ability to handle large areas of cells without failing. So it was instead a large usability performance increase because it increased the amount of cells that our program was able to handle without breaking.

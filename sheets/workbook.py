@@ -208,8 +208,6 @@ class Workbook:
                             loc_row, loc_col = self._get_col_and_row(loc)
 
 
-
-
                             replace_r = loc_row
                             replace_c = loc_col
 
@@ -239,12 +237,9 @@ class Workbook:
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
 
-
                         else:
 
                             raise ValueError()
-
-
 
 
                 #delete the value after copying values - only if the move function was called

@@ -398,7 +398,11 @@ class Workbook:
                 if new_sheet_name not in self.sheets:
                     (_,_) = self.new_sheet(new_sheet_name)
                     old_sheet = self.sheets[copy_index]
-                    self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
+                    #this will set the cell values, but not actually do the appropriate stuff 
+                    #self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
+                    for cell in old_sheet.cells:
+                        loc = self._base_10_to_alphabet(cell[0])+str(cell[1])
+                        self.set_cell_contents(new_sheet_name,loc,old_sheet.cells[cell].contents)
 
                     self.number_sheets = self.number_sheets + 1
                     return
@@ -613,7 +617,10 @@ class Workbook:
                 if len(self.notification_functions) > 0:
                 #now we notify all of the functions of the cells that were changed
                     for func in self.notification_functions:
-                        func(self, self.notifying_cells)
+                        try:
+                            func(self, self.notifying_cells)
+                        except:
+                            continue
 
                 #DYLAN HERE SET
 

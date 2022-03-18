@@ -142,6 +142,19 @@ class Dylan(unittest.TestCase):
             contents = '=nEw!A'+str(i+2)+'+4'
             self.assertEqual(wb.get_cell_contents('OtHER_S',loc),contents)
 
+    def test_notification_dylan(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        def on_cells_changed(workbook, changed_cells):
+            print(f'Cell(s) changed:  {changed_cells}')
+        
+        
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2','1')
+        wb.notify_cells_changed(on_cells_changed)
+        wb.copy_sheet(name)
+        
+        
 
         #go through all of the p5 req. 
         #cell notifications? change name

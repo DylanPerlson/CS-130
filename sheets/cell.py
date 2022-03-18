@@ -101,7 +101,7 @@ class Cell():
 
                 ref = RetrieveReferences(sheet_instance)
                 ref.visit(self.parsed_contents)
-                self.references = ref.references
+                self.references = ref.references 
                 #eturn ref.reference
             except lark.exceptions.LarkError:
                 self.evaluated_value = CellError(CellErrorType.PARSE_ERROR,
@@ -137,17 +137,9 @@ class Cell():
             "Unrecognized function name", NameError)
 
             return self.evaluated_value
-        # except(RuntimeError, RecursionError): # this happens if the error is either of those
-        #     self.evaluated_value =  CellError(CellErrorType.CIRCULAR_REFERENCE,
-        #     "Circular Reference", None)
-        #     return self.evaluated_value
+      
 
         self.evaluated_value = self.remove_trailing_zeros(evaluation)
-
-        # why was this code here?? (Pieter)
-        # if self.evaluated_value is None and self.type == 'NONE': #this will always be none
-        #     self.evaluated_value = 0
-        #     return self.evaluated_value
 
         return self.evaluated_value
 

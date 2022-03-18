@@ -1096,9 +1096,6 @@ class Workbook:
                 updated_cells.append((new_name, s.cells[key]))
 
         #need to update sheetname in cell dependencies
-
-        #TODO DTP
-        #create a list of keys to change bc cannot change during
         change_keys = []
         for key, value in self.master_cell_dict.items():
             #check if one of the master cells has it as a value

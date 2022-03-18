@@ -86,11 +86,18 @@ class Project5(unittest.TestCase):
     def test_moving_multi(self):
         wb = Workbook()
         (_, name1) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("s2")
         wb.set_cell_contents(name1,'A1',"=AND(A2:A3)")
         wb.set_cell_contents(name1,'A2','=AND(A2,A3)')
-        wb.move_cells(name1,'A1','B4','C1')
+        wb.set_cell_contents(name1,'A3','=s2!A1')
+        wb.set_cell_contents(name1,'A4','=SUM(A1:A3)')
+        wb.set_cell_contents(name1,'A5','=SUM(s2!A1:A3)')
+        wb.move_cells(name1,'A1','B10','C1')
         self.assertEqual(wb.get_cell_contents(name1,'C1'),"=AND(C2:C3)")
         self.assertEqual(wb.get_cell_contents(name1,'C2'),"=AND(C2,C3)")
+        self.assertEqual(wb.get_cell_contents(name1,'C3'),'=s2!A1')
+        self.assertEqual(wb.get_cell_contents(name1,'C4'),'=SUM(C1:C3)')
+        self.assertEqual(wb.get_cell_contents(name1,'C5'),'=SUM(s2!A1:A3)')
 
     def test_rename_multi(self):
         wb = Workbook()

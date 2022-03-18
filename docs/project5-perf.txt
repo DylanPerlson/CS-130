@@ -12,78 +12,38 @@ IGNORE ALL THE STUFF BELOW, THAT IS FROM P3
 Tarjan redundancy
 ---------------
 
-**Hypothesis**
-We expect that there was an uneccesarrily high amount of Tarjan algorithm calls to find circular references. Because the tarjan algorithm iterates through every single cell in the workbook, it is a very time intensive algorithm. Before implementing any changes, we would call the tarjan algorithm every single time we called set_cell_contents(). So if we wanted to get the value of a single cell after a chain of 1000 cells, we would have to call tarjan 1000 times. We suspect if we move the tarjan algorithm to get_cell_value() instead, we would see massive speed increases because it would be called significantly less.
+**Theory**
+We expect that there was an uneccesarrily high amount of Tarjan algorithm calls to find circular references. Because the tarjan algorithm iterates through every single cell in the workbook, it is a very time intensive algorithm. Before implementing any changes, we would call the tarjan algorithm every single time we called set_cell_contents(). So if we wanted to get the value of a single cell after moving 1000 cells, we would have to call tarjan 1000 times. We suspect if we move the tarjan algorithm to get_cell_value() instead, we would see massive speed increases because it would be called significantly less when setting large amounts of cells.
 
-**Checking Hypothesis with Measurements**
+**Rationale**
+As we can see in the below cProfiler data, the helper function for our tarjan algorithm is taking up a vast majority of the time for our performance test. This supports our hypothesis that the tarjan function is taking up a significant amount of time due to redundancies.
 
+17738176 function calls (17700214 primitive calls) in 14.297 seconds
 
-**Result**
-Comparing the execution of our performance tests before and after the lark changes, we can conclude that our improvements work (well). The table below shows the comparison and the improvements that are obtained:
+   Ordered by: internal time
+   List reduced from 113 to 5 due to restriction <5>
 
-| Metric                   | Before implementation | After implementation | Improvement |
-|--------------------------|-----------------------|----------------------|-------------|
-| Function calls to parser | 68.5K                 | 51.2K                | 25%         |
-| Parser execution time    | 1.25s                 | 0.92s                | 26%         |
-| Total function calls     | 13.3M                 | 10.0M                | 25%         |
-| Total execution time     | 11.4s                 | 8.9s                 | 22%         |
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   499500    6.112    0.000    8.486    0.000 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:1092(_tarjan_helper)
+   498501    1.997    0.000    1.997    0.000 {method 'index' of 'list' objects}
+     7884    1.286    0.000    3.831    0.000 C:\Users\Dylan\anaconda3\lib\site-packages\lark\parsers\earley.py:65(predict_and_complete)
+      999    0.902    0.001    9.389    0.009 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:1153(_tarjan) 
+   938061    0.768    0.000    1.161    0.000 
+
+**Outcome**
+After we made changes to the tarjan function, we can see a massive increase in our performance test speed. Our previous test took 14.3 seconds to complete, and now it takes 5.2 seconds to compelte. This is an almost 3x speed improvement. Additionally, we can see from the cProfiler data below, that the Tarjan algorithm functions are no longer taking the majority of the time because they are being called significantly less.
+
+13507542 function calls (13453596 primitive calls) in 5.187 seconds
+
+   Ordered by: cumulative time
+   List reduced from 135 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1000    0.009    0.000    5.160    0.005 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:549(set_cell_contents)
+4998/3000    0.008    0.000    5.093    0.002 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:99(get_cell_value)
+4997/3000    0.021    0.000    5.080    0.002 
 
 
 Getting the Cell Value
 ----------------------
-
-
-**Hypothesis**
-One of the major slow downs was getting the value of a cell. We believe that this is being slowed down because
-the cell contents is being evaluated everytime get_cell_value is called. We thought that we would be able to drastically
-improve the speed of get_cell_value by only evaluating once and then saving the value for future references.
-
-**Rationale**
-Prior to our changes, our get_cell_value test was taking an unnecessarily long amount of time to simply 
-get a cell value. As we see below, our function is getting stuck inside of the get_cell_value function inside
-of cell.py, which is where the evaluation occurs
-
-Ordered by: cumulative time
-   List reduced from 401 to 5 due to restriction <5>
-
-   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-      100    0.001    0.000    2.916    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:298(get_cell_value)
-      100    0.004    0.000    2.914    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\sheet.py:120(get_cell_value)
-      100    0.001    0.000    2.910    0.029 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\cell.py:51(get_cell_value)      
-      100    0.005    0.000    2.710    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:524(open)       
-      100    0.005    0.000    2.682    0.027 C:\Users\Dylan\anaconda3\lib\site-packages\lark\lark.py:252(__init__)   
-
-**Result**
-When comparing the results from before and after the implementation of our performance fixes, it is clear
-that not having to evaulate a cell value over and over again was able to drastically improve performance.
-However, when your previous implementation is incredibly redundant, it is not hard to see drastic improvements
-
-| Metric                   | Before implementation | After implementation | Improvement |
-|--------------------------|-----------------------|----------------------|-------------|
-| Primitive Function calls | 6603805               | 9301                 | 99.8%       |
-| Total function calls     | 6812109               | 9901                 | 99.8%       |
-| Total execution time     | 2.915s                | 0.005s               | 99.8%       |
-
-
-Checking Validity of Cells
---------------------------
-
-**Hypothesis**
-We believed that our check_valid_cell function was running inefficiently or with many redundancies due to
-how long/ the number of times it would be run for simple cell evaluations.
-
-**Rationale**
-The reason that we thought that the check_valid_cell was an issue was due to the high number of calls that it was receiving
-as well as the the amount of time it took in comparison with the simplicity of the tests being performed.
-
-   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-   10000    0.032    0.000    0.043    0.000 c:\Users\Dylan\Documents\GitHub\CS-130\sheets\workbook.py:330(check_valid_cell)
-
-**Result**
-While we were able to reduce the number of calls and time that the function was running, we realized that the reason
-that the function was being executed so many times was due to us evaluating the cell unnecesarilly. Thus, 
-the cehck_valid_cell function did not actually need to be made more efficient, it just needed to be called less.
-And this was achieved by simply not evaluating cell values as often. Thus, it is not quite possible to evaluate how much faster
-the program is with just less calls to check_valid_cell because the speed up happened simultaneously with other optimizations.
-
 

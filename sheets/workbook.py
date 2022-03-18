@@ -505,13 +505,19 @@ class Workbook:
             #remove the sheet with sheet_name
             curr_sheet = sheet
             if curr_sheet.sheet_name.lower() == sheet_name.lower():
+                #before we remove the sheet, set the cell as None so we get a notification
+                for cell in curr_sheet.cells:
+                    loc = self._base_10_to_alphabet(cell[0])+str(cell[1])
+                    self.set_cell_contents(sheet_name,loc,None)
+
+                #now remove the sheets
+
                 self.sheets.remove(curr_sheet)
                 self.number_sheets -= 1
                 # Need to update cells here to have bad references since
                 # sheet doesn't exist anymore right?
                 return
-        # except KeyError as e:
-        #     raise
+        
 
     def get_sheet_extent(self, sheet_name: str):
         """Return a tuple (num-cols, num-rows) indicating the current extent of

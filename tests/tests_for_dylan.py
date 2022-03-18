@@ -156,7 +156,7 @@ class Dylan(unittest.TestCase):
         print('.')
         #wb.copy_sheet(name)
         #wb.move_cells(name,'A1','A5','A10')
-        
+        #wb.del_sheet(name)
         
 
         #go through all of the p5 req. 

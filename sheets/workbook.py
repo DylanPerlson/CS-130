@@ -888,6 +888,8 @@ class Workbook:
         for s in self.sheets:
             if s.sheet_name.lower() == cell_split[0].lower():
                 val = s.get_cell_value(self,cell_split[1])
+                if val == 'None' or val is None:
+                    return decimal.Decimal('-Infinity')
                 return val
 
         raise KeyError()

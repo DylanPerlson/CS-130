@@ -183,7 +183,7 @@ class Dylan(unittest.TestCase):
         (_,sh) = wb.new_sheet('sheet')
 
         wb.set_cell_contents(sh,'a2', '3')
-        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'b2', 'None')
         wb.set_cell_contents(sh,'c2', '1')
         
         wb.set_cell_contents(sh,'a3', '10')
@@ -202,7 +202,8 @@ class Dylan(unittest.TestCase):
         
         wb.sort_region(sh, 'A2', 'C4', [1])
         print(wb.get_cell_value(sh, 'A2'))
-        print(wb.get_cell_value(sh, 'A3'))
+        print(wb.get_cell_value(sh, 'B2'))
+        print(wb.get_cell_value(sh, 'C2'))
         #self.assertEqual(val, 4, f'instead it is: {val}') # excel #4
 
 if __name__ == '__main__':

@@ -80,7 +80,6 @@ class Dylan(unittest.TestCase):
         # wb.set_cell_contents(name,'A1', '5')
         # print('3 above')
 
-   #moving and copy formulas not renaming it properly
     #not setting every circ ref cell to be a circ ref
 
     def test_copy_rename(self):
@@ -102,6 +101,24 @@ class Dylan(unittest.TestCase):
             val = '=F'+str(i+3)
             self.assertEqual(wb.get_cell_contents(name2,loc),val)
 
+    def test_circ_ref_for_ever_cell(self):
+        length = 20
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        
+        
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            contents = '=A'+str(i+2)+'+4'
+            wb.set_cell_contents(name,loc,contents)
+
+        loc = 'A'+str(length+1)
+        wb.set_cell_contents(name,loc,'=A1+3')
+
+        for i in range(length+1):
+            loc = 'A'+str(i+1)
+            self.assertEqual(wb.get_cell_value(name,loc).get_type(),CellErrorType.CIRCULAR_REFERENCE)
+          
 if __name__ == '__main__':
     unittest.main(verbosity=1)
     

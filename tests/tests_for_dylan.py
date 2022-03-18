@@ -147,7 +147,7 @@ class Dylan(unittest.TestCase):
         wb.set_cell_contents(name,'A1','1')
         wb.set_cell_contents(name,'A2','1')
         wb.set_cell_contents(name,'A3','1')
-        wb.set_cell_contents(name,'A4','SUM(A1:A3)')
+        wb.set_cell_contents(name,'A4','=SUM(A1:A3)')
         wb.set_cell_contents(name,'A4','=A1+A3+A2')
         #cell chaned dict must have 's1!a4': ['s1!a1', 's1!a2', a3]}
         #children dict need a1 to a3 to have a4

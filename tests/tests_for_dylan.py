@@ -118,7 +118,30 @@ class Dylan(unittest.TestCase):
         for i in range(length+1):
             loc = 'A'+str(i+1)
             self.assertEqual(wb.get_cell_value(name,loc).get_type(),CellErrorType.CIRCULAR_REFERENCE)
-          
+
+    def test_more_rename(self):
+        length = 20
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        (_, name2) = wb.new_sheet("Old")
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            contents = '=Old!A'+str(i+2)+'+4'
+            wb.set_cell_contents(name,loc,contents)
+        
+        wb.rename_sheet(name2,'nEw')
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            contents = '=nEw!A'+str(i+2)+'+4'
+            self.assertEqual(wb.get_cell_contents(name,loc),contents)
+
+        wb.rename_sheet('s1','other_s')
+
+        for i in range(length):
+            loc = 'A'+str(i+1)
+            contents = '=nEw!A'+str(i+2)+'+4'
+            self.assertEqual(wb.get_cell_contents('OtHER_S',loc),contents)
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)
     

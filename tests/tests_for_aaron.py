@@ -38,6 +38,21 @@ class Aaron(unittest.TestCase):
         wb.set_cell_contents(name,'A1','1')
         print('4 above')
 
+    def test_notification_with_print_output(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+        def on_cells_changed(workbook, changed_cells):
+            print(f'Cell(s) changed:  {changed_cells}')
+        
+        print('.')
+        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A2',"=A1 + 5") #6
+        wb.set_cell_contents(name,'A3',"=A1 + A2") #7
+        self.assertEqual(wb.get_cell_value(name,'A3'),7)
+        wb.notify_cells_changed(on_cells_changed)
+        wb.set_cell_contents(name,'A1', '2')
+        print('Only 3')
+        
 
     def test_circular_references(self):
         wb = Workbook()

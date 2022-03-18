@@ -106,7 +106,6 @@ class Pieter(unittest.TestCase):
 
         wb.set_cell_contents(sh,'a2', '10')
         wb.set_cell_contents(sh,'b2', '2')
-        # wb.set_cell_contents(sh,'c2', '3')
         wb.set_cell_contents(sh,'a3', '4')
         wb.set_cell_contents(sh,'b3', '5')
         wb.set_cell_contents(sh,'c3', '6')
@@ -121,7 +120,6 @@ class Pieter(unittest.TestCase):
         wb.set_cell_contents(sh,'a2', '10')
         wb.set_cell_contents(sh,'b2', '2')
         wb.set_cell_contents(sh,'c2', '3')
-        # wb.set_cell_contents(sh,'a3', '4')
         wb.set_cell_contents(sh,'b3', '5')
         wb.set_cell_contents(sh,'c3', '6')
         wb.set_cell_contents(sh,'a4', '7')
@@ -152,10 +150,10 @@ class Pieter(unittest.TestCase):
 
         wb.sort_region(sh, 'A2', 'C5', [1])
 
-        self.assertEqual(wb.get_cell_value(sh, 'C2'), 1)
-        self.assertEqual(wb.get_cell_value(sh, 'C3'), 2)
-        self.assertEqual(wb.get_cell_value(sh, 'C4'), 3)
-        self.assertEqual(wb.get_cell_value(sh, 'C5'), 4)
+        self.assertEqual(wb.get_cell_value(sh, 'C2'), 1) # excel #8
+        self.assertEqual(wb.get_cell_value(sh, 'C3'), 2) # excel #8
+        self.assertEqual(wb.get_cell_value(sh, 'C4'), 3) # excel #8
+        self.assertEqual(wb.get_cell_value(sh, 'C5'), 4) # excel #8
 
     def test_sorting_validity(self):
         """If the specified sheet name is not found, a KeyError is raised.

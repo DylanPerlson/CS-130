@@ -174,20 +174,35 @@ class Workbook:
                 #check if we need to update the formula
                 if str(copy_dict[(r,c)])[0] == '=':
                     cell_list = []
-                    for e,i in enumerate(self.sheets):
-                        if i.sheet_name.lower() == sheet_name.lower():
-                            cell_list = self.sheets[e].retrieve_cell_references(self,cell,r,c)
-
+                    
+                    cell_list = cur_sheet.retrieve_cell_references(self,cell,r,c)
+                    change = False
+                    # for i in cell_list:
+                    #     if change:
+                    #         i
+                    #     if i+':' in copy_dict[(r,c)]:
+                    #         change = True
+                    continue_again = False
                     for i in cell_list:
+                        #skip updating the second cell range
+                        if continue_again:
+                            continue_again = False
+                            continue
 
                         [name, loc] = i.split('!',1)
                         old_loc = loc
                         #not in the sheet so do not need to update
-                        if name.lower() != sheet_name.lower():
+                        if i+':' in copy_dict[(r,c)]:
+                            continue_again = True
                             continue
-
+                        if to_sheet is None:
+                            to_sheet = cur_sheet
+                            to_exists = False
                         #is in sheet so need to update
-                        elif name.lower() == sheet_name.lower():
+
+                        if not to_exists and name.lower() != cur_sheet.sheet_name.lower():
+                            continue
+                        if True:
                             abs_row = False
                             abs_col = False
 
@@ -238,10 +253,8 @@ class Workbook:
 
                             copy_dict[(r,c)] = copy_dict[(r,c)].replace(old_loc,new_loc)
 
-
-                        else:
-
-                            raise ValueError()
+                        
+                      
 
 
                 #delete the value after copying values - only if the move function was called

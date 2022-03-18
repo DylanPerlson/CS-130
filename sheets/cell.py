@@ -29,7 +29,6 @@ class Cell():
 
         sheet_location = sheet_instance.sheet_name + '!' + location
 
-        #DTP check here
         if sheet_location.lower() in workbook_instance.cell_changed_dict:
             if workbook_instance.cell_changed_dict[sheet_location.lower()]\
                 is False and self.contents is not None:
@@ -41,7 +40,7 @@ class Cell():
         workbook_instance.cell_changed_dict[sheet_location.lower()] = False
 
 
-        ## move the determination of type to get cll _val
+        ## move the determination of type to get cell_val
 
 
 

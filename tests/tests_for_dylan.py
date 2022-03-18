@@ -149,10 +149,13 @@ class Dylan(unittest.TestCase):
             print(f'Cell(s) changed:  {changed_cells}')
         
         
-        wb.set_cell_contents(name,'A1','1')
+        wb.set_cell_contents(name,'A1','hi')
         wb.set_cell_contents(name,'A2','1')
         wb.notify_cells_changed(on_cells_changed)
-        wb.copy_sheet(name)
+        #test each function for appropriate notifications
+        print('.')
+        #wb.copy_sheet(name)
+        #wb.move_cells(name,'A1','A5','A10')
         
         
 

@@ -252,11 +252,14 @@ class Workbook:
         for r in range(start_row, end_row+1):
             for c in range(start_col, end_col+1):
                 cell = str(self._base_10_to_alphabet(r+delta_row))+str(c+delta_col)
-
-                if to_sheet is None:
-                    cur_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
-                else:
-                    to_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                if copy_dict[(r,c)] is not None:
+                    if to_sheet is None:
+                        #cur_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                        #dont call the sheet setcell, call wb set cell
+                        self.set_cell_contents(cur_sheet.sheet_name,cell,copy_dict[(r,c)])
+                    else:
+                        #to_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                        self.set_cell_contents(to_sheet.sheet_name,cell,copy_dict[(r,c)])
 
 
         #!!!THIS MUST BE AT THE VERY END BECAUSE IT CHANGES THE to_sheet VALUE!!!

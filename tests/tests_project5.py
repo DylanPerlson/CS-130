@@ -334,6 +334,66 @@ class Project5(unittest.TestCase):
         wb.set_cell_contents(sh2, 'A1', '=INDIRECT("non_existing_sheet" & "!A2:c4")')
         self.assertEqual(wb.get_cell_value(sh2, 'A1').get_type(), CellErrorType.BAD_REFERENCE)
 
+    def test_type_conv(self):
+        wb = Workbook()
+        (_, name) = wb.new_sheet("s1")
+
+        ######## new MIN:
+
+        wb.set_cell_contents(name,'A6','=MIN(AA1,2,3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 2)
+
+        wb.set_cell_contents(name,'A6','=MIN(AA1,AA2,AA3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 0)
+
+        wb.set_cell_contents(name,'A6','=MIN()')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=MIN(#REF!,2,3,4,5)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.BAD_REFERENCE)
+
+        ######## new MAX:
+
+        wb.set_cell_contents(name,'A6','=MAX(AA1,2,3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 3)
+
+        wb.set_cell_contents(name,'A6','=MAX(AA1,AA2,AA3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 0)
+
+        wb.set_cell_contents(name,'A6','=MMAXIN()')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=MAX(#REF!,2,3,4,5)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.BAD_REFERENCE)
+
+        ######## new AVERAGE:
+
+        wb.set_cell_contents(name,'A6','=AVERAGE(AA1,2,3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 2.5)
+
+        wb.set_cell_contents(name,'A6','=AVERAGE(AA1,AA2,AA3)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.DIVIDE_BY_ZERO)
+
+        wb.set_cell_contents(name,'A6','=AVERAGE()')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=AVERAGE(#REF!,2,3,4,5)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.BAD_REFERENCE)
+
+        ######## new SUM:
+
+        wb.set_cell_contents(name,'A6','=SUM(AA1,2,3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 5)
+
+        wb.set_cell_contents(name,'A6','=SUM(AA1,AA2,AA3)')
+        self.assertEqual(wb.get_cell_value(name,'A6'), 0)
+
+        wb.set_cell_contents(name,'A6','=SUM()')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.TYPE_ERROR)
+
+        wb.set_cell_contents(name,'A6','=SUM(#REF!,2,3,4,5)')
+        self.assertEqual(wb.get_cell_value(name,'A6').get_type(), CellErrorType.BAD_REFERENCE)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

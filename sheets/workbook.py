@@ -122,6 +122,7 @@ class Workbook:
 
         #check for invalid cells or sheets
 
+        # TODO DTP/PVS to_sheet needs to be addressed here below
         cur_sheet = None
         start_row, start_col = self._get_col_and_row(start_location)
         end_row, end_col = self._get_col_and_row(end_location)
@@ -268,7 +269,7 @@ class Workbook:
                 else:
                     #we set it to the sheet instead above
                     to_sheet_name = to_sheet.sheet_name
-                    
+
                 location = self._base_10_to_alphabet(r) + str(c)
                 sheet_location = to_sheet_name.lower() + '!' + location.lower()
                 self.cell_changed_dict[sheet_location.lower()] = True

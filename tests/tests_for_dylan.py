@@ -178,7 +178,46 @@ class Dylan(unittest.TestCase):
 
     #     #cell changes and notificatiosn for cell range
     #     #comment out all prints
-    def test_sorting_stable(self):
+
+
+
+    def test_sorting_simple(self):
+        wb = Workbook()
+        (_,sh) = wb.new_sheet('sheet')
+
+        wb.set_cell_contents(sh,'a2', '10')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', '3')
+
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+
+        wb.set_cell_contents(sh,'a4', '7')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '1')
+
+        wb.sort_region(sh, 'A2', 'C4', [1])
+        val = wb.get_cell_value(sh, 'B3')
+        self.assertEqual(val, 6, f'instead it is: {val}') # excel #1
+
+        wb.set_cell_contents(sh,'a2', '10')
+        wb.set_cell_contents(sh,'b2', '2')
+        wb.set_cell_contents(sh,'c2', '3')
+
+        wb.set_cell_contents(sh,'a3', '4')
+        wb.set_cell_contents(sh,'b3', '5')
+        wb.set_cell_contents(sh,'c3', '6')
+
+        wb.set_cell_contents(sh,'a4', '7')
+        wb.set_cell_contents(sh,'b4', '8')
+        wb.set_cell_contents(sh,'c4', '1')
+
+        wb.sort_region(sh, 'A2', 'C4', [3])
+        val = wb.get_cell_value(sh, 'B2')
+        self.assertEqual(val, 10, f'instead it is: {val}') # excel #2
+
+    def test_sorting_stable_dylan(self):
         wb = Workbook()
         (_,sh) = wb.new_sheet('sheet')
 
@@ -195,10 +234,14 @@ class Dylan(unittest.TestCase):
         #2 1 2 for a - swap first and second
         
         wb.sort_region(sh, 'A2', 'C4', [1])
-        print(wb.get_cell_value(sh, 'A2'))
-        print(wb.get_cell_value(sh, 'B2'))
-        print(wb.get_cell_value(sh, 'C2'))
-        #self.assertEqual(val, 4, f'instead it is: {val}') # excel #4
+        # print(wb.get_cell_value(sh, 'A2'))
+        # print(wb.get_cell_value(sh, 'B2'))
+        # print(wb.get_cell_value(sh, 'C2'))
+        
+        # print(wb.get_cell_value(sh, 'A3'))
+        # print(wb.get_cell_value(sh, 'B3'))
+        # print(wb.get_cell_value(sh, 'C3'))
+        # the above is working
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)

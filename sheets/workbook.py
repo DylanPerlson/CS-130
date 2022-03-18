@@ -843,27 +843,26 @@ class Workbook:
 
         #Get individual columns based on user_cols
         #TODO This is probably where it breaks first, I added some stuff in here
-        col_counter = 1
+        #col_counter = 1
         cell_col_list = []
-        #col_range = end_col - start_col
         for i in range(start_col,end_col+1):
-            if col_counter in sort_cols or -1 * col_counter in sort_cols:
-                add_column = []
-                #row_range = end_row - start_row
-                for j in range(start_row, end_row+1):
-                #Need some way to get location of cell but that's not a property of the cell?
-                #Add cells to column object one at a time, then add whole column to array
-                    access_loc = sort_sheet + "!" + self._base_10_to_alphabet(j) + str(i)
-                    #add_cell = self.master_cell_dict[access_loc]
-                    add_column.append(access_loc)    
-                cell_col_list.append(add_column)
+            add_column = []
+            for j in range(start_row, end_row+1):
+            #Need some way to get location of cell but that's not a property of the cell?
+            #Add cells to column object one at a time, then add whole column to array
+                access_loc = sort_sheet + "!" + self._base_10_to_alphabet(j) + str(i)
+                #add_cell = self.master_cell_dict[access_loc]
+                add_column.append(access_loc)    
+            cell_col_list.append(add_column)
 
 
     #SORTING IS HERE
         rever = False
         if sort_cols[0] < 0:
             rever = True
-        orig_unaltered = cell_col_list[sort_cols[0]-1]
+
+        orig_unaltered = cell_col_list[abs(sort_cols[0])-1]
+        
         orig_list = enumerate(orig_unaltered)
         sorted_list = (sorted(orig_list, key=self.get_relative_val,reverse=rever))
         idx = []

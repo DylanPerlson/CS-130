@@ -252,11 +252,14 @@ class Workbook:
         for r in range(start_row, end_row+1):
             for c in range(start_col, end_col+1):
                 cell = str(self._base_10_to_alphabet(r+delta_row))+str(c+delta_col)
-
-                if to_sheet is None:
-                    cur_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
-                else:
-                    to_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                if copy_dict[(r,c)] is not None:
+                    if to_sheet is None:
+                        #cur_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                        #dont call the sheet setcell, call wb set cell
+                        self.set_cell_contents(cur_sheet.sheet_name,cell,copy_dict[(r,c)])
+                    else:
+                        #to_sheet.set_cell_contents(self,cell,copy_dict[(r,c)])
+                        self.set_cell_contents(to_sheet.sheet_name,cell,copy_dict[(r,c)])
 
 
         #!!!THIS MUST BE AT THE VERY END BECAUSE IT CHANGES THE to_sheet VALUE!!!
@@ -398,7 +401,11 @@ class Workbook:
                 if new_sheet_name not in self.sheets:
                     (_,_) = self.new_sheet(new_sheet_name)
                     old_sheet = self.sheets[copy_index]
-                    self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
+                    #this will set the cell values, but not actually do the appropriate stuff 
+                    #self.sheets[-1].cells = copy.deepcopy(old_sheet.cells)
+                    for cell in old_sheet.cells:
+                        loc = self._base_10_to_alphabet(cell[0])+str(cell[1])
+                        self.set_cell_contents(new_sheet_name,loc,old_sheet.cells[cell].contents)
 
                     self.number_sheets = self.number_sheets + 1
                     return
@@ -498,13 +505,19 @@ class Workbook:
             #remove the sheet with sheet_name
             curr_sheet = sheet
             if curr_sheet.sheet_name.lower() == sheet_name.lower():
+                #before we remove the sheet, set the cell as None so we get a notification
+                for cell in curr_sheet.cells:
+                    loc = self._base_10_to_alphabet(cell[0])+str(cell[1])
+                    self.set_cell_contents(sheet_name,loc,None)
+
+                #now remove the sheets
+
                 self.sheets.remove(curr_sheet)
                 self.number_sheets -= 1
                 # Need to update cells here to have bad references since
                 # sheet doesn't exist anymore right?
                 return
-        # except KeyError as e:
-        #     raise
+        
 
     def get_sheet_extent(self, sheet_name: str):
         """Return a tuple (num-cols, num-rows) indicating the current extent of
@@ -613,7 +626,10 @@ class Workbook:
                 if len(self.notification_functions) > 0:
                 #now we notify all of the functions of the cells that were changed
                     for func in self.notification_functions:
-                        func(self, self.notifying_cells)
+                        try:
+                            func(self, self.notifying_cells)
+                        except:
+                            continue
 
                 #DYLAN HERE SET
 

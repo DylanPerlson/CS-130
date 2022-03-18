@@ -134,7 +134,8 @@ class Functions:
         # [self._get_value_as_number(x) for x in args]
 
         try:
-            return sum(args)
+            decimal.Decimal
+            return decimal.Decimal(sum(args))
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
@@ -162,7 +163,7 @@ class Functions:
             return CellError(CellErrorType.DIVIDE_BY_ZERO, f"Invalid number of arguments: {args}")
 
         try:
-            return sum(args)/len(args)
+            return decimal.Decimal(str(sum(args)))/decimal.Decimal(str(len(args)))
         except TypeError:
             return CellError(CellErrorType.TYPE_ERROR, "Input cannot be converted to number")
 
@@ -407,7 +408,7 @@ class Functions:
         Returns version number."""
         if len(args) != 0:
             return CellError(CellErrorType.TYPE_ERROR, "Invalid arguments")
-        return '1.3' #sheet.version
+        return '1.4' #sheet.version
 
     def indirect_func(self, args):
         """The cell value is returned."""
@@ -466,7 +467,6 @@ class Functions:
         try:
             for count, value in enumerate(matrix[0]):
                 if key == value and type(key) is type(value):
-                    # print([index, count])
 
                     return matrix[index][count]
         except TypeError: # if it is not possible to process matrix
@@ -547,7 +547,6 @@ class Functions:
                     val = updated_sheet_instance.cells[row,col].evaluated_value
                 except KeyError:
                     val = None
-                # print(val)
                 vals[count].append(val)
 
         # transpose matrix

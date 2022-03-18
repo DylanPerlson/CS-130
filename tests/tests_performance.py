@@ -231,7 +231,7 @@ def test_move_cells():
     wb.set_cell_contents(name1, 'AA57', 'words')
     wb.set_cell_contents(name1, 'AAA3', '=12+4')
     wb.set_cell_contents(name1, 'JNE41', 'more words')
-    for i in range(2, 100):
+    for i in range(2, 500):
         location = 'A'+str(i)
         location_prev1 = 'A'+str(i-1)
         location_prev2 = 'A'+str(i-2)
@@ -241,12 +241,12 @@ def test_move_cells():
     pr = cProfile.Profile()
     pr.enable()
 
-    wb.move_cells(name1,'A1','B100','C200')
+    wb.move_cells(name1,'A1','B500','C200')
 
     pr.disable()
     stats = Stats(pr)
     stats.sort_stats('cumtime').print_stats(5)
-
+    
 if __name__ == '__main__':
     import cProfile
     from pstats import Stats

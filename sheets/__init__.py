@@ -5,4 +5,4 @@ from .cell_error import *
 
 __all__ = ['Workbook', 'CellError', 'CellErrorType']
 
-version = '1.3'
+version = '1.4'
